@@ -18,3 +18,5 @@ It also acts as a moderator bot, as it contains a list of banned word in the cha
 Example of keys.py:
 
 ![4 lines, each of them having a key masked by white drawing.](keys.png)
+
+## ALSO YOU NEED OBS TO BE OPEN FOR THE BOT TO WORK BECAUSE IT CONNECTS TO OBS THROUGH WEBSOCKETS!
