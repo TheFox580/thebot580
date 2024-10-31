@@ -6,7 +6,7 @@ It also acts as a moderator bot, as it contains a list of banned word in the cha
 
 ## IT IS MORE THAN ADVISED TO KNOW PYTHON (otherwise you can't understand what this code does and this is kinda dumb...)
 
-### BEFORE STARTING THE CODE, PLEASE READ elevel_labs.py, websockerts_auth.py AND twitch_bot.py
+### BEFORE STARTING THE CODE, PLEASE READ (and modify, if you want) eleven_labs.py, websockerts_auth.py AND twitch_bot.py
 ---
 ### CREATE A keys.py WITH 4 VARIABLES NAMED:
 - ELEVEN_LABS_KEY_1
