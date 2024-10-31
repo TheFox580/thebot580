@@ -9,6 +9,7 @@ import twitchio
 from twitchio.ext import commands
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime
+import keys
 
 ELEVENLABS_VOICE = "Charlie" # Replace this with the name of whatever voice you have created on Elevenlabs
 
@@ -81,14 +82,21 @@ while True
 class Bot(commands.Bot):
 
     def __init__(self):
-        super().__init__(token='6jnds00b10ogcorup6lgh23xredutl', prefix='!', initial_channels=['thefox580', 'thealt580', 'lerenard580'])
-        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on"]
-        self.token = '6jnds00b10ogcorup6lgh23xredutl'
+
+        #REPLACE THE CHANNELS IN initial_channels BY THE CHANNELS YOU WANT YOUR BOT TO BE IN
+
+        super().__init__(token='6jnds00b10ogcorup6lgh23xredutl', prefix='!', initial_channels=['thefox580', 'thealt580', 'lerenard580', 'theevents580'])
+        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com"]
+        
+        #REPLACE keys.getTwitchToken() WITH YOUR OWN TWITCH TOKEN FOR IT TO WORK
+        self.token = keys.getTwitchToken()
 
     async def event_ready(self):
         print(f"Logged in as | {self.nick}")
         print(f"User id is | {self.user_id}")
         print(f"Logged in | {self.connected_channels}")
+
+        #YOU CAN UNCOMMENT THE NEXT 2 LINES IF YOU WANT TO KNOW WITH AN AUDIO WHEN YOUR PROGRAM IS CONNECTED TO THE TWITCH CHATS
 
         #elevenlabs_output = elevenlabs_manager.text_to_audio("Twitch Chat is now conected", ELEVENLABS_VOICE, False)
         #audio_manager.play_audio(elevenlabs_output, True, True, True)
@@ -99,6 +107,9 @@ class Bot(commands.Bot):
 
         TTS = True
         #TTS = False
+        #TTS_EVENT = True
+        TTS_EVENT = False
+        PLAY_AUDIO = False
         
         bannedMessage = False
         commandMessage = False
@@ -123,6 +134,15 @@ class Bot(commands.Bot):
         for word in self.banned_words:
             if word.lower() in message.content.lower():
                 bannedMessage = True
+
+
+        if TTS:
+            if TTS_EVENT:
+                if message.author.is_subscriber or message.author.is_vip or message.author.is_mod:
+                    if not message.author.is_broadcaster:
+                        PLAY_AUDIO = True
+            else:
+                PLAY_AUDIO = True
         
         if message.author.name == "fossabot" or message.author.name == "thebot580" or message.author.name == "thefox580" or message.author.name == "thealt580":
             commandMessage = True
@@ -158,88 +178,98 @@ class Bot(commands.Bot):
 
                 if message.channel.name == "lerenard580":
 
-                    # Play the mp3 file
-                    audio_manager.play_audio(elevenlabs_output, True, True, True)
+                    if PLAY_AUDIO:
+                        # Play the mp3 file
+                        audio_manager.play_audio(elevenlabs_output, True, True, True)
 
                 if message.channel.name == "thefox580":
 
-                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", True)
+                    if PLAY_AUDIO:
 
-                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", False)
+                        #THE NEXT LINES MAKES A PNG MOVE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility & get_source_transform is the scene, the second one is the source)
 
-                    rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", True)
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation + 3.5}
-                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
+                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", False)
+
                         rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation - 3.5}
-                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
-                        rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation + 3.5}
+                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                    # Play the mp3 file
-                    audio_manager.play_audio(elevenlabs_output, True, True, True)
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation - 3.5}
+                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation + 3.5}
-                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
-                        rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                        # Play the mp3 file
+                        audio_manager.play_audio(elevenlabs_output, True, True, True)
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation - 3.5}
-                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
-                        rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation + 3.5}
+                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", True)
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation - 3.5}
+                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", False)
+                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", True)
+
+                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", False)
                 
                 elif message.channel.name == "thealt580":
 
-                    obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Talk", True)
+                    if PLAY_AUDIO:
 
-                    obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Paused", False)
+                        #THE NEXT LINES MAKES A PNG MOVE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility & get_source_transform is the scene, the second one is the source)
 
-                    rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Talk", True)
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation + 3.5}
-                        obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
+                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Paused", False)
+
                         rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation - 3.5}
-                        obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
-                        rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation + 3.5}
+                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
 
-                    # Play the mp3 file
-                    audio_manager.play_audio(elevenlabs_output, True, True, True)
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation - 3.5}
+                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                            
+                        # Play the mp3 file
+                        audio_manager.play_audio(elevenlabs_output, True, True, True)
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation + 3.5}
-                        obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
-                        rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation + 3.5}
+                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
 
-                    for _ in range(5):
-                        new_transform = {"rotation": rotation - 3.5}
-                        obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                        time.sleep(0.01)
-                        rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                        for _ in range(5):
+                            new_transform = {"rotation": rotation - 3.5}
+                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
+                            time.sleep(0.01)
+                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
 
-                    obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Paused", True)
+                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Paused", True)
 
-                    obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Talk", False)
+                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Talk", False)
         
         if bannedMessage:
+            # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE TIMED OUT FOR 10 SECONDS, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN BAN THEM IF YOU WANT.
             banMessage = f"BANNED MESSAGE DETECTED : BANNING THE SENDER FOR 10 SECONDS"
             print(banMessage)
             elevenlabs_output = elevenlabs_manager.text_to_audio(banMessage, ELEVENLABS_VOICE, False)
@@ -248,6 +278,8 @@ class Bot(commands.Bot):
             await mod.timeout_user(self.token, self.user_id, message.author.id, 10 ,"INVALID MESSAGE")
 
         await self.handle_commands(message)
+
+    #HERE ARE SOME COMMANDS I HAVE SETUP FOR MY CHAT, THE NAME OF THE FUNCTION IS THE NAME OF THE COMMAND IN CHAT (example: def emotes() = !emotes in chat.)
 
     @commands.command()
     async def emotes(self, ctx: commands.Context):
@@ -275,12 +307,20 @@ class Bot(commands.Bot):
     #    await ctx.send(f"Fox is working on a Portal 2 Coop video with JoeyFish1000 & Redye")
 
     #@commands.command()
-    #async def donate(self, ctx: commands.Context):
-    #    await ctx.send(f"You can donate to SpecialEffect here: https://tiltify.com/@cubedcon/cubed-2024")
+    #async def tts(self, ctx: commands.Context):
+    #    await ctx.send(f"If you want your message to be sait out loud, you need to either be a mod, a VIP or a subscriber on 'thefox580', 'thealt580' or 'theevents580'. If you are one of them, you can type in their chat and the TTS will work, otherwise you'll have to !donate")
 
     #@commands.command()
-    #async def charity(self, ctx: commands.Context):
-    #    await ctx.send(f"You can donate to SpecialEffect here: https://tiltify.com/@cubedcon/cubed-2024")
+    #async def donate(self, ctx: commands.Context):
+    #    await ctx.send(f"Donate for TTS at https://streamelements.com/thealt580/tip")
+
+    @commands.command()
+    async def donate(self, ctx: commands.Context):
+        await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+
+    @commands.command()
+    async def charity(self, ctx: commands.Context):
+        await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
 
     #@commands.command()
     #async def sarcoma(self, ctx: commands.Context):
@@ -310,9 +350,21 @@ class Bot(commands.Bot):
     #async def panel(self, ctx: commands.Context):
     #    await ctx.send(f"SideQuest is hosting a panel on Sunday at 2PM EST / 7PM BST / 8PM CEST at CubedCon over at twitch.tv/spixkokiri!")
 
+    #@commands.command()
+    #async def join(self, ctx: commands.Context):
+    #    await ctx.send(f"I'm playing in random lobbies, except if I'm in VC with friends, good luck finding me!")
+
     @commands.command()
-    async def join(self, ctx: commands.Context):
-        await ctx.send(f"I'm playing in random lobbies, except if I'm in VC with friends, good luck finding me!")
+    async def vanilla(self, ctx: commands.Context):
+        await ctx.send(f"Vanilla SMP is part of the Heart of a Hero campaign raising money to support the Teenage Cancer Trust who support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+    
+    @commands.command()
+    async def heart(self, ctx: commands.Context):
+        await ctx.send(f"Heart of a Hero is a year long fundraiser that is raising money to support in the fight against cancer and support those battling it!")
+
+    @commands.command()
+    async def heartc(self, ctx: commands.Context):
+        await ctx.send(f"Check out the Heart of a Hero Twitter: https://x.com/HeartOfAHer0_")
 
 bot = Bot()
 bot.run()

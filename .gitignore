@@ -2,3 +2,4 @@
 /.vscode
 __pycache__
 ChatHistoryBackup.txt
+keys.py
