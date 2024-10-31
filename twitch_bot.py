@@ -9,7 +9,7 @@ import twitchio
 from twitchio.ext import commands
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime
-import keys
+from keys import TWITCH_BOT_TOKEN
 
 ELEVENLABS_VOICE = "Charlie" # Replace this with the name of whatever voice you have created on Elevenlabs
 
@@ -88,8 +88,7 @@ class Bot(commands.Bot):
         super().__init__(token='6jnds00b10ogcorup6lgh23xredutl', prefix='!', initial_channels=['thefox580', 'thealt580', 'lerenard580', 'theevents580'])
         self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com"]
         
-        #REPLACE keys.getTwitchToken() WITH YOUR OWN TWITCH TOKEN FOR IT TO WORK
-        self.token = keys.getTwitchToken()
+        self.token = TWITCH_BOT_TOKEN
 
     async def event_ready(self):
         print(f"Logged in as | {self.nick}")

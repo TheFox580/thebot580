@@ -3,3 +3,14 @@ This is a fork of [Babagaboosh](https://www.github.com/DougDougGithub/Babagaboos
 
 This code uses the TwitchIO Libraty, ElevenLabs' Text-To-Speech fonctionnality and PyGame's Audio Library.
 It also acts as a moderator bot, as it contains a list of banned word in the chat, that will ban bots automatically.
+
+## IT IS MORE THAN ADVISED TO KNOW PYTHON (otherwise you can't understand what this code does and this is kinda dumb...)
+
+### BEFORE STARTING THE CODE, PLEASE READ elevel_labs.py, websockerts_auth.py AND twitch_bot.py
+---
+### CREATE A keys.py WITH 4 VARIABLES NAMED:
+- ELEVEN_LABS_KEY_1
+- ELEVEN_LABS_KEY_2
+- ELEVEN_LABS_KEY_3
+- TWITCH_BOT_TOKEN
+### THESE 4 KEYS MUST EXIST WITHIN keys.py. IF THE 3 'ELEVEN_LABS_KEY' HAVE THE SAME VALUE, IT'S FINE, BUT THE MORE KEYS YOU HAVE, THE BETTER IT WILL BE

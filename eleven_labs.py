@@ -2,17 +2,19 @@ from elevenlabs import stream, voices, play, save
 from elevenlabs.client import ElevenLabs
 import time
 import os
-import keys
+from keys import ELEVEN_LABS_KEY_1, ELEVEN_LABS_KEY_2, ELEVEN_LABS_KEY_3
+
+# I HAVE 3 ELEVEN LABS API KEYS INSTEAD ONE OF THEM RUN OUT OF CHARACTERS (1 key = 10.000 characters)
 
 try:
   # API KEY NB 1
-  client = ElevenLabs(api_key=keys.getElevenLabsKey(1))
+  client = ElevenLabs(api_key=ELEVEN_LABS_KEY_1)
   
   # API KEY NB 2 IN CASE THE 1ST ONE IS OUT OF CHARACTERS
-  client = ElevenLabs(api_key=keys.getElevenLabsKey(2))
+  client = ElevenLabs(api_key=ELEVEN_LABS_KEY_2)
   
   # API KEY NB 3 IN CASE THE 1ST AND 2ND ONES ARE OUT OF CHARACTERS
-  client = ElevenLabs(api_key=keys.getElevenLabsKey(3))
+  client = ElevenLabs(api_key=ELEVEN_LABS_KEY_3)
 except TypeError:
   exit("Ooops! You forgot to set ELEVENLABS_API_KEY in your environment!")
 
