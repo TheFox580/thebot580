@@ -14,3 +14,6 @@ It also acts as a moderator bot, as it contains a list of banned word in the cha
 - ELEVEN_LABS_KEY_3
 - TWITCH_BOT_TOKEN
 ### THESE 4 KEYS MUST EXIST WITHIN keys.py. IF THE 3 'ELEVEN_LABS_KEY' HAVE THE SAME VALUE, IT'S FINE, BUT THE MORE KEYS YOU HAVE, THE BETTER IT WILL BE
+
+Example of keys.py:
+![4 lines, each of them having a key masked by white drawing.](keys.png)
