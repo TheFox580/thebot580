@@ -10,6 +10,8 @@ from twitchio.ext import commands
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime
 from keys import TWITCH_BOT_TOKEN
+from random import randint
+#import pyautogui
 
 ELEVENLABS_VOICE = "Charlie" # Replace this with the name of whatever voice you have created on Elevenlabs
 
@@ -85,10 +87,13 @@ class Bot(commands.Bot):
 
         #REPLACE THE CHANNELS IN initial_channels BY THE CHANNELS YOU WANT YOUR BOT TO BE IN
 
-        super().__init__(token='6jnds00b10ogcorup6lgh23xredutl', prefix='!', initial_channels=['thefox580', 'thealt580', 'lerenard580', 'theevents580'])
-        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com"]
+        super().__init__(token=TWITCH_BOT_TOKEN, prefix='!', initial_channels=['thefox580', 'thealt580', 'lerenard580', 'theevents580'])
+        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:"]
         
         self.token = TWITCH_BOT_TOKEN
+        
+        self.kills = 0
+        self.deaths = 0
 
     async def event_ready(self):
         print(f"Logged in as | {self.nick}")
@@ -134,7 +139,6 @@ class Bot(commands.Bot):
             if word.lower() in message.content.lower():
                 bannedMessage = True
 
-
         if TTS:
             if TTS_EVENT:
                 if message.author.is_subscriber or message.author.is_vip or message.author.is_mod:
@@ -143,7 +147,7 @@ class Bot(commands.Bot):
             else:
                 PLAY_AUDIO = True
         
-        if message.author.name == "fossabot" or message.author.name == "thebot580" or message.author.name == "thefox580" or message.author.name == "thealt580":
+        if message.author.name.lower == "fossabot" or message.author.name.lower == "thebot580" or message.author.name.lower == "thefox580" or message.author.name.lower == "thealt580":
             commandMessage = True
         
         if message.content[0] == "!" or message.content[0] == '-':
@@ -170,111 +174,113 @@ class Bot(commands.Bot):
             
             twitchChatMessage = twitchChatMessage[:-1]
 
-            if TTS:
+            if PLAY_AUDIO:
 
                 # Send Twitch message to 11Labs to turn into cool audio
                 elevenlabs_output = elevenlabs_manager.text_to_audio(twitchChatMessage, ELEVENLABS_VOICE, False)
 
                 if message.channel.name == "lerenard580":
-
-                    if PLAY_AUDIO:
-                        # Play the mp3 file
-                        audio_manager.play_audio(elevenlabs_output, True, True, True)
+                    # Play the mp3 file
+                    audio_manager.play_audio(elevenlabs_output, True, True, True)
 
                 if message.channel.name == "thefox580":
 
-                    if PLAY_AUDIO:
+                    #THE NEXT LINES MAKES A PNG MOVE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility & get_source_transform is the scene, the second one is the source)
 
-                        #THE NEXT LINES MAKES A PNG MOVE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility & get_source_transform is the scene, the second one is the source)
+                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", True)
 
-                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", True)
+                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", False)
 
-                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", False)
+                    rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation + 3.5}
+                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
                         rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation + 3.5}
-                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation - 3.5}
+                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
+                        rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation - 3.5}
-                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                    # Play the mp3 file
+                    audio_manager.play_audio(elevenlabs_output, True, True, True)
 
-                        # Play the mp3 file
-                        audio_manager.play_audio(elevenlabs_output, True, True, True)
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation + 3.5}
+                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
+                        rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation + 3.5}
-                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation - 3.5}
+                        obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
+                        rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation - 3.5}
-                            obswebsockets_manager.set_source_transform("Game", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Game", "Chat_Image_Talk")['rotation']
+                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", True)
 
-                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Paused", True)
-
-                        obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", False)
+                    obswebsockets_manager.set_source_visibility("Game", "Chat_Image_Talk", False)
                 
                 elif message.channel.name == "thealt580":
 
-                    if PLAY_AUDIO:
+                    #THE NEXT LINES MAKES A PNG MOVE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility & get_source_transform is the scene, the second one is the source)
 
-                        #THE NEXT LINES MAKES A PNG MOVE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility & get_source_transform is the scene, the second one is the source)
+                    obswebsockets_manager.set_source_visibility("Scene 2-1", "Chat_Image_Talk", True)
+                    obswebsockets_manager.set_source_visibility("Scene 2-2", "Chat_Image_Talk", True)
 
-                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Talk", True)
+                    obswebsockets_manager.set_source_visibility("Scene 2-1", "Chat_Image_Paused", False)
+                    obswebsockets_manager.set_source_visibility("Scene 2-2", "Chat_Image_Paused", False)
 
-                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Paused", False)
+                    rotation = obswebsockets_manager.get_source_transform("Scene 2-1", "Chat_Image_Talk")['rotation']
 
-                        rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation + 3.5}
+                        obswebsockets_manager.set_source_transform("Scene 2-1", "Chat_Image_Talk", new_transform)
+                        obswebsockets_manager.set_source_transform("Scene 2-2", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
+                        rotation = obswebsockets_manager.get_source_transform("Scene 2-1", "Chat_Image_Talk")['rotation']
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation + 3.5}
-                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation - 3.5}
+                        obswebsockets_manager.set_source_transform("Scene 2-1", "Chat_Image_Talk", new_transform)
+                        obswebsockets_manager.set_source_transform("Scene 2-2", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
+                        rotation = obswebsockets_manager.get_source_transform("Scene 2-1", "Chat_Image_Talk")['rotation']
+                        
+                    # Play the mp3 file
+                    audio_manager.play_audio(elevenlabs_output, True, True, True)
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation - 3.5}
-                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
-                            
-                        # Play the mp3 file
-                        audio_manager.play_audio(elevenlabs_output, True, True, True)
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation + 3.5}
+                        obswebsockets_manager.set_source_transform("Scene 2-1", "Chat_Image_Talk", new_transform)
+                        obswebsockets_manager.set_source_transform("Scene 2-2", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
+                        rotation = obswebsockets_manager.get_source_transform("Scene 2-1", "Chat_Image_Talk")['rotation']
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation + 3.5}
-                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                    for _ in range(5):
+                        new_transform = {"rotation": rotation - 3.5}
+                        obswebsockets_manager.set_source_transform("Scene 2-1", "Chat_Image_Talk", new_transform)
+                        obswebsockets_manager.set_source_transform("Scene 2-2", "Chat_Image_Talk", new_transform)
+                        time.sleep(0.01)
+                        rotation = obswebsockets_manager.get_source_transform("Scene 2-1", "Chat_Image_Talk")['rotation']
 
-                        for _ in range(5):
-                            new_transform = {"rotation": rotation - 3.5}
-                            obswebsockets_manager.set_source_transform("Scene 2", "Chat_Image_Talk", new_transform)
-                            time.sleep(0.01)
-                            rotation = obswebsockets_manager.get_source_transform("Scene 2", "Chat_Image_Talk")['rotation']
+                    obswebsockets_manager.set_source_visibility("Scene 2-1", "Chat_Image_Paused", True)
+                    obswebsockets_manager.set_source_visibility("Scene 2-2", "Chat_Image_Paused", True)
 
-                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Paused", True)
-
-                        obswebsockets_manager.set_source_visibility("Scene 2", "Chat_Image_Talk", False)
+                    obswebsockets_manager.set_source_visibility("Scene 2-1", "Chat_Image_Talk", False)
+                    obswebsockets_manager.set_source_visibility("Scene 2-2", "Chat_Image_Talk", False)
         
         if bannedMessage:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE TIMED OUT FOR 10 SECONDS, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN BAN THEM IF YOU WANT.
+            mod = await message.channel.user()
+            await mod.ban_user(self.token, self.user_id, message.author.id, "INVALID MESSAGE")
             banMessage = f"BANNED MESSAGE DETECTED : BANNING THE SENDER FOR 10 SECONDS"
             print(banMessage)
             elevenlabs_output = elevenlabs_manager.text_to_audio(banMessage, ELEVENLABS_VOICE, False)
             audio_manager.play_audio(elevenlabs_output, True, True, True)
-            mod = await message.channel.user()
-            await mod.timeout_user(self.token, self.user_id, message.author.id, 10 ,"INVALID MESSAGE")
 
         await self.handle_commands(message)
 
@@ -302,6 +308,38 @@ class Bot(commands.Bot):
         await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")} for Fox.")
 
     #@commands.command()
+    #async def kill(self, ctx: commands.Context):
+    #    if ctx.author.name == "thefox580":
+    #        self.kills +=  1
+
+    #        scaleX = obswebsockets_manager.get_source_transform("Scene 2-1", "Minecraft")["scaleX"]
+    #        scaleY = obswebsockets_manager.get_source_transform("Scene 2-1", "Minecraft")["scaleY"]
+
+    #        new_transform = {"scaleX": scaleX+0.05,"scaleY": scaleY+0.05}
+
+    #        obswebsockets_manager.set_source_transform("Scene 2-1", "Minecraft", new_transform)
+    #        obswebsockets_manager.set_source_transform("Scene 2-2", "Minecraft", new_transform)
+
+    #        print(f"Current kill count: {self.kills}")
+    #        await ctx.send(f"NICE KILL !!! New kill count : {self.kills}")
+
+    #@commands.command()
+    #async def dead(self, ctx: commands.Context):
+    #    if ctx.author.name == "thefox580":
+    #        self.deaths +=  1
+
+    #        scaleX = obswebsockets_manager.get_source_transform("Scene 2-1", "Minecraft")["scaleX"]
+    #        scaleY = obswebsockets_manager.get_source_transform("Scene 2-1", "Minecraft")["scaleY"]
+    #        
+    #        new_transform = {"scaleX": scaleX-0.05,"scaleY": scaleY-0.05}
+    #        
+    #        obswebsockets_manager.set_source_transform("Scene 2-1", "Minecraft", new_transform)
+    #        obswebsockets_manager.set_source_transform("Scene 2-2", "Minecraft", new_transform)
+
+    #        print(f"Current kill count: {self.deaths}")
+    #        await ctx.send(f"Hahahaha you died L. New death count : {self.deaths}")
+
+    #@commands.command()
     #async def video(self, ctx: commands.Context):
     #    await ctx.send(f"Fox is working on a Portal 2 Coop video with JoeyFish1000 & Redye")
 
@@ -313,13 +351,67 @@ class Bot(commands.Bot):
     #async def donate(self, ctx: commands.Context):
     #    await ctx.send(f"Donate for TTS at https://streamelements.com/thealt580/tip")
 
+    #@commands.command()
+    #async def donner(self, ctx: commands.Context):
+    #    random = random.randint(0, 14)
+    #    if random == 0:
+    #        await ctx.send(f"Le Téléthon, ça marche, des premiers traitements et des essais en cours qui sauvent des vies et en améliorent aussi ! Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 1:
+    #        await ctx.send(f"Le Téléthon c'est la recherche mais aussi l'accompagnement des malades dans un quotidien semé d'embûches : non seulement la vie avec un handicap, mais souvent un handicap évolutif ! Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 2:
+    #        await ctx.send(f"Les maladies dont s'occupe le Téléthon ce sont des maladies rares, souvent évolutives : perdre la marche dans ces maladies ce n'est pas juste devenir handi, c'est souvent une première étape vers d'autres atteintes, jusqu'aux plus fatales. Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 3:
+    #        await ctx.send(f" Derrière le Téléthon il y a l'AFM-Téléthon, une association pilotée par des malades et parents de malades qui prennent toutes les décisions ! Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 4:
+    #        await ctx.send(f"L'emploi des dons du Téléthon c'est du sérieux : un conseil scientifique qui examine tous les projets et ensuite le conseil d'administration composé de malades et parents de malades qui décide. Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 5:
+    #        await ctx.send(f"Commissaires aux comptes, bureau Veritas et régulièrement la Cour des Comptes (dernier contrôle publié en 2016) l'AFM-Téléthon est régulièrement contrôlée, vous pouvez y aller en toute confiance. Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 6:
+    #        await ctx.send(f"Derrière le Téléthon il y a des labos créés par l'association, ils savent de quoi ils parlent quand ils parlent de recherche. Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 7:
+    #        await ctx.send(f"Grâce aux recherches, 38 essais sont en cours ou en préparation pour 29 maladies, les maladies rares il y en a plus de 7000. Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 8:
+    #        await ctx.send(f"Pour 95% des maladies rares il n'y a pas de traitement. Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 9:
+    #        await ctx.send(f"Les maladies rares concernent chacune peu de personnes, mais au total 3 millions de français ! Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 10:
+    #        await ctx.send(f"Les maladies rares, avant le Téléthon personne ne s'en préoccupait aujourd'huielles sont plus visibles et on a des traitements, il faut continuer ! Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 11:
+    #        await ctx.send(f"Au premier Téléthon on connaissait à peine les gènes responsables de quelques maladies, et là on en est aux gènes-médicaments ! Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 12:
+    #        await ctx.send(f"Les maladies rares ont des noms barbares, mais le plus barbare c'est de vivre avec et sans perspective : le Téléthon change vraiment la donne, ça peut tous nous arriver ! Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    elif random == 13:
+    #        await ctx.send(f"Choisir la vie qui va avec une maladie évolutive c'est un droit, mais c'est encore trop souvent un combat, l'AFM-Téléthon se bat aux côtés des familles Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+    #    else:
+    #        await ctx.send(f" Près de 180 professionnels dans toute la France accompagnent les familles aussi bien sur le médical que l'administratif, pour qu'ils puissent choisir leur vie et pas juste subir la maladie. Faites un don dès maintenant sur https://streamlabscharity.com/teams/@telethon-gaming-2024/telethon-gaming-2024?member=747043827931553181")
+
+    #@commands.command()
+    #async def don(self, ctx:commands.Context):
+    #    await self.donner(ctx=ctx)
+
+    #@commands.command()
+    #async def telethon(self, ctx:commands.Context):
+    #    await self.donner(ctx=ctx)
+
+    #@commands.command()
+    #async def téléthon(self, ctx:commands.Context):
+    #    await self.donner(ctx=ctx)
+
     @commands.command()
     async def donate(self, ctx: commands.Context):
-        await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+        await ctx.send(f"Ice Boat Racing Invitational is rasing money for Jingle Jam with JingleCrafters : https://tiltify.com/@ice-boat-racing-invitational/ice-boat-racing-invitational")
 
     @commands.command()
     async def charity(self, ctx: commands.Context):
-        await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+        await ctx.send(f"Ice Boat Racing Invitational is rasing money for Jingle Jam with JingleCrafters : https://tiltify.com/@ice-boat-racing-invitational/ice-boat-racing-invitational")
+
+    #@commands.command()
+    #async def donate(self, ctx: commands.Context):
+    #    await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+
+    #@commands.command()
+    #async def charity(self, ctx: commands.Context):
+    #    await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
 
     #@commands.command()
     #async def sarcoma(self, ctx: commands.Context):
@@ -353,17 +445,17 @@ class Bot(commands.Bot):
     #async def join(self, ctx: commands.Context):
     #    await ctx.send(f"I'm playing in random lobbies, except if I'm in VC with friends, good luck finding me!")
 
-    @commands.command()
-    async def vanilla(self, ctx: commands.Context):
-        await ctx.send(f"Vanilla SMP is part of the Heart of a Hero campaign raising money to support the Teenage Cancer Trust who support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+    #@commands.command()
+    #async def vanilla(self, ctx: commands.Context):
+    #    await ctx.send(f"Vanilla SMP is part of the Heart of a Hero campaign raising money to support the Teenage Cancer Trust who support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
     
-    @commands.command()
-    async def heart(self, ctx: commands.Context):
-        await ctx.send(f"Heart of a Hero is a year long fundraiser that is raising money to support in the fight against cancer and support those battling it!")
+    #@commands.command()
+    #async def heart(self, ctx: commands.Context):
+    #    await ctx.send(f"Heart of a Hero is a year long fundraiser that is raising money to support in the fight against cancer and support those battling it!")
 
-    @commands.command()
-    async def heartc(self, ctx: commands.Context):
-        await ctx.send(f"Check out the Heart of a Hero Twitter: https://x.com/HeartOfAHer0_")
+    #@commands.command()
+    #async def heartc(self, ctx: commands.Context):
+    #    await ctx.send(f"Check out the Heart of a Hero Twitter: https://x.com/HeartOfAHer0_")
 
 bot = Bot()
 bot.run()
