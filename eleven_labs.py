@@ -14,7 +14,7 @@ try:
   client = ElevenLabs(api_key=ELEVEN_LABS_KEY_2)
   
   # API KEY NB 3 IN CASE THE 1ST AND 2ND ONES ARE OUT OF CHARACTERS
-  client = ElevenLabs(api_key=ELEVEN_LABS_KEY_3)
+  #client = ElevenLabs(api_key=ELEVEN_LABS_KEY_3)
 except TypeError:
   exit("Ooops! You forgot to set ELEVENLABS_API_KEY in your environment!")
 
