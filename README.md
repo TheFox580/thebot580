@@ -8,12 +8,10 @@ It also acts as a moderator bot, as it contains a list of banned word in the cha
 
 ### BEFORE STARTING THE CODE, PLEASE READ (and modify, if you want) eleven_labs.py, websockerts_auth.py AND twitch_bot.py
 ---
-### CREATE A keys.py WITH 4 VARIABLES NAMED:
-- ELEVEN_LABS_KEY_1
-- ELEVEN_LABS_KEY_2
-- ELEVEN_LABS_KEY_3
+### CREATE A keys.py WITH AT LEAST 2 VARIABLES NAMED:
+- ELEVEN_LABS_KEY
 - TWITCH_BOT_TOKEN
-### THESE 4 KEYS MUST EXIST WITHIN keys.py. IF THE 3 'ELEVEN_LABS_KEY' HAVE THE SAME VALUE, IT'S FINE, BUT THE MORE KEYS YOU HAVE, THE BETTER IT WILL BE
+### THESE KEYS MUST EXIST WITHIN keys.py.
 
 Example of keys.py:
 
