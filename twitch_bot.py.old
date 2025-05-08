@@ -1,3 +1,6 @@
+#THIS TWITCH BOT IS USING TWITCHIO 2.10
+#YOU MAY NOT USE THIS BOT IF YOU ARE RUNNING TWITCHIO >= 3.0
+
 import time
 from rich import print
 from eleven_labs import ElevenLabsManager
