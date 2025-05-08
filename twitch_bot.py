@@ -1,19 +1,24 @@
 import time
-#import keyboard
 from rich import print
 from eleven_labs import ElevenLabsManager
 from audio_player import AudioManager
 import twitchio
-from twitchio.ext import commands
+from twitchio.ext import commands, eventsub
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime
-from keys import TWITCH_BOT_TOKEN
+from keys import TWITCH_BOT_TOKEN, TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, EVENT_BROADCASTER_ID_1, refresh_token, TWITCH_WEBHOOK_SECRET
 
 ELEVENLABS_VOICE = "Charlie" # Replace this with the name of whatever voice you have created on Elevenlabs
+
+refresh_token() #refresh_token is a keys.py function that refreshes your old token for a new one, it is advised to create this function if you want a new token, otherwise, comment out this line
 
 elevenlabs_manager = ElevenLabsManager()
 audio_manager = AudioManager()
 obswebsockets_manager = OBSWebsocketsManager()
+esbot = commands.Bot.from_client_credentials(TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET)
+esclient = eventsub.EventSubClient(esbot, webhook_secret=TWITCH_WEBHOOK_SECRET, callback_route="http://localhost:4343/oauth/callback")
+
+EVENTS = True #Set to False if none of the channels your bot is looking at is either affiliate or partner
 
 class Bot(commands.Bot):
 
@@ -21,10 +26,22 @@ class Bot(commands.Bot):
 
         #REPLACE THE CHANNELS IN initial_channels BY THE CHANNELS YOU WANT YOUR BOT TO BE IN
 
-        super().__init__(token=TWITCH_BOT_TOKEN, prefix='!', initial_channels=['thefox580', 'thealt580', 'lerenard580', 'theevents580'])
+        super().__init__(token=TWITCH_BOT_TOKEN, client_secret=TWITCH_BOT_CLIENT_SECRET, prefix='!', initial_channels=['thefox580', 'thealt580', 'lerenard580', 'theevents580'])
         self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on"]
         
-        self.token = TWITCH_BOT_TOKEN
+    async def __ainit__(self) -> None:
+        self.loop.create_task(esclient.listen(port=4000))
+
+        try:
+            await esclient.subscribe_channel_subscriptions(broadcaster=EVENT_BROADCASTER_ID_1)
+            await esclient.subscribe_channel_cheers(broadcaster=EVENT_BROADCASTER_ID_1)
+            await esclient.subscribe_channel_subscription_messages(broadcaster=EVENT_BROADCASTER_ID_1)
+            await esclient.subscribe_channel_subscription_gifts(broadcaster=EVENT_BROADCASTER_ID_1)
+            print("All events have been subscribed & activated! Have a good stream!")
+        except twitchio.HTTPException:
+            EVENTS = False
+            print("There has been an issue when trying to subscribe to events, therefore, event activities have been disabled!")
+
 
     async def event_ready(self):
         print(f"Logged in as | {self.nick}")
@@ -41,6 +58,7 @@ class Bot(commands.Bot):
         
         BANNEDMESSAGE = False
         COMMANDMESSAGE = False
+        CHEERMESSAGE = False
         
         #Send the message in the console
         print(f"From {message.channel.name} --> {message.author.name} : {message.content}")
@@ -52,12 +70,9 @@ class Bot(commands.Bot):
             twitchChatMessage = f"FIRST TIME CHATTER --> {message.author.name} said : "
 
         messageList = message.content.split()
-        cheer_amount = 0
         for word in messageList:
             if "Cheer" in word:
-                if len(word) > 5:
-                    cheer_amount += int(word[5:])
-                    twitchChatMessage = f"{message.author.name} cheered "+ cheer_amount + " and said : "
+                CHEERMESSAGE = True
 
         for word in self.banned_words:
             if word.lower() in message.content.lower():
@@ -77,28 +92,9 @@ class Bot(commands.Bot):
         if message.content[0] == "!" or message.content[0] == '-':
             COMMANDMESSAGE = True
 
-        if not (BANNEDMESSAGE and COMMANDMESSAGE):
+        if not (BANNEDMESSAGE and COMMANDMESSAGE and CHEERMESSAGE):
 
-            messageList = message.content.split()
-            for word in messageList:
-                if "Cheer" in word:
-                    messageList.remove(word)
-                if ("🫡" == word) or ("o7" == word):
-                    twitchChatMessage = twitchChatMessage + "oh 7 "
-                if "nvm" == word:
-                    twitchChatMessage = twitchChatMessage + "nevermind "
-                if "<3" == word:
-                    twitchChatMessage = twitchChatMessage + "love "
-                if "D:" == word:
-                    twitchChatMessage = twitchChatMessage + "D face "
-                if "W" == word.upper():
-                    twitchChatMessage = twitchChatMessage + "double you "
-                if "thefox91" in word:
-                    pass #If the word is my emote, don't say it!
-                else:
-                    twitchChatMessage = twitchChatMessage + word + " "
-            
-            twitchChatMessage = twitchChatMessage[:-1]
+            twitchChatMessage = treat_message(twitchChatMessage)
 
             if twitchChatMessage.split() == []:
                 PLAY_AUDIO = False
@@ -148,7 +144,7 @@ class Bot(commands.Bot):
         if BANNEDMESSAGE:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
             mod = await message.channel.user()
-            await mod.ban_user(self.token, self.user_id, message.author.id, "INVALID MESSAGE")
+            await mod.ban_user(TWITCH_BOT_TOKEN, self.user_id, message.author.id, "INVALID MESSAGE")
             banMessage = f"BANNED MESSAGE DETECTED : BANNING THE SENDER FOREVER"
             print(banMessage)
             elevenlabs_output = elevenlabs_manager.text_to_audio(banMessage, ELEVENLABS_VOICE, False)
@@ -178,9 +174,9 @@ class Bot(commands.Bot):
     async def time(self, ctx: commands.Context):
         await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")} for Fox.")
 
-    @commands.command()
-    async def rs(self, ctx: commands.Context):
-        await ctx.send(f"Random Sunday is a weekly stream where I go live playing random games, literally....")
+    #@commands.command()
+    #async def rs(self, ctx: commands.Context):
+    #    await ctx.send(f"Random Sunday is a weekly stream where I go live playing random games, literally....")
 
     #@commands.command()
     #async def ad(self, ctx: commands.Context):
@@ -244,21 +240,101 @@ class Bot(commands.Bot):
     #async def téléthon(self, ctx:commands.Context):
     #    await self.donner(ctx=ctx)
 
-    #@commands.command()
-    #async def donate(self, ctx: commands.Context):
-    #    await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+    @commands.command()
+    async def donate(self, ctx: commands.Context):
+        await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/UypO9dkP0I")
 
-    #@commands.command()
-    #async def charity(self, ctx: commands.Context):
-    #    await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+    @commands.command()
+    async def charity(self, ctx: commands.Context):
+        await self.donate(ctx=ctx)
 
-    #@commands.command()
-    #async def vanilla(self, ctx: commands.Context):
-    #    await ctx.send(f"Vanilla SMP is part of the Heart of a Hero campaign raising money to support the Teenage Cancer Trust who support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+    @commands.command()
+    async def forakenisle(self, ctx: commands.Context):
+        await ctx.send(f"Forsaken Isle is back for a 3rd season! And this time, they're raising money alongside the Heart of a Hero campaign, raising money to support the Teenage Cancer Trust who support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
+
+    @commands.command()
+    async def fi(self, ctx:commands.Context):
+        await self.forakenisle(ctx=ctx)
     
-    #@commands.command()
-    #async def heart(self, ctx: commands.Context):
-    #    await ctx.send(f"Heart of a Hero is a year long fundraiser that is raising money to support in the fight against cancer and support those battling it!")
+    @commands.command()
+    async def heart(self, ctx: commands.Context):
+        await ctx.send(f"Heart of a Hero is a year long fundraiser that is raising money to support in the fight against cancer and support those battling it!")
 
 bot = Bot()
+if EVENTS:
+    bot.loop.run_until_complete(bot.__ainit__())
+
+@esbot.event()
+async def event_eventsub_notification_subscription(payload:eventsub.ChannelSubscribeData) -> None:
+    if EVENTS:
+        print("Received event : 'New User Subscription'")
+        channel = bot.get_channel(payload.broadcaster.name)
+        await channel.send(f"{payload.user.name} subscribed with a Tier {payload.tier} subscription!")
+    else:
+        print("Events have been disabled, restart the program if you think this is a mistake")
+
+@esbot.event()
+async def event_eventsub_notification_subscription_message(payload:eventsub.ChannelSubscriptionMessageData) -> None:
+    if EVENTS:
+        print("Received event : 'User Resubscription'")
+        channel = bot.get_channel(payload.broadcaster.name)
+        await channel.send(f"{payload.user.name} resubscribed with a Tier {payload.tier} subscription for {payload.duration} months! They've subcribed for {payload.streak} months in a row!")
+        message = f"{payload.user.name} resubscribed with a Tier {payload.tier} subscription for {payload.duration} months! They've subcribed for {payload.streak} months in a row! They said: {treat_message(payload.message)}"
+        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE, False)
+        audio_manager.play_audio(elevenlabs_output, True, True, True)
+    else:
+        print("Events have been disabled, restart the program if you think this is a mistake")
+
+@esbot.event()
+async def event_eventsub_notification_cheer(payload:eventsub.ChannelCheerData) -> None:
+    if EVENTS:
+        print("Received event : 'User Cheer'")
+        channel = bot.get_channel(payload.broadcaster.name)
+        if payload.is_anonymous:
+            await channel.send(f"An anonymous user cheered {payload.bits} bits!")
+            message = f"An anonymous user cheered {payload.bits} bits! They said: {treat_message(payload.message)}"
+        else:
+            await channel.send(f"{payload.user.name} cheered {payload.bits} bits!")
+            message = f"{payload.user.name} cheered {payload.bits} bits! They said: {treat_message(payload.message)}"
+        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE, False)
+        audio_manager.play_audio(elevenlabs_output, True, True, True)
+    else:
+        print("Events have been disabled, restart the program if you think this is a mistake")
+
+@esbot.event()
+async def event_eventsub_notification_subscription_gift(payload:eventsub.ChannelSubscriptionGiftData) -> None:
+    if EVENTS:
+        print("Received event : 'User Sub Gifting'")
+        channel = bot.get_channel(payload.broadcaster.name)
+        if payload.is_anonymous:
+            await channel.send(f"An anonymous user gifted {payload.total} Tier {payload.tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!")
+        else:
+            await channel.send(f"{payload.user} gifted {payload.total} Tier {payload.tier} subs to the community! In total, {payload.user} has gifted {payload.cumulative_total} subs to the community!")
+    else:
+        print("Events have been disabled, restart the program if you think this is a mistake")
+
 bot.run()
+
+def treat_message(message:str) -> str:
+
+    final_message = ""
+    messageList = message.content.split()
+    for word in messageList:
+        if "Cheer" in word:
+            messageList.remove(word)
+        if ("🫡" == word) or ("o7" == word):
+            final_message += "oh 7 "
+        if "nvm" == word:
+            final_message += + "nevermind "
+        if "<3" == word:
+            final_message += + "love "
+        if "D:" == word:
+            final_message += + "D face "
+        if "W" == word.upper():
+            final_message += + "double you "
+        if "thefox91" in word:
+            pass #If the word is my emote, don't say it!
+        else:
+            final_message += word + " "
+    
+    return final_message[:-1]
