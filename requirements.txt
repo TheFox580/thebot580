@@ -9,4 +9,5 @@ pydantic==1.10.13
 pygame-ce==2.4.0
 rich==13.7.0
 soundfile==0.12.1
-tiktoken==0.5.1
+twitchio==3.0.0b4
+asqlite==2.0.0
