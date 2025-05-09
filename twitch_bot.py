@@ -22,12 +22,13 @@ elevenlabs_manager = ElevenLabsManager()
 audio_manager = AudioManager()
 obswebsockets_manager = OBSWebsocketsManager()
 
-LOGGER: logging.Logger = logging.getLogger("Bot")
+LOGGER: logging.Logger = logging.getLogger("TheBot580")
 
 
 class Bot(commands.Bot):
     def __init__(self, *, token_database: asqlite.Pool) -> None:
         self.token_database = token_database
+
         super().__init__(
             client_id=TWITCH_BOT_CLIENT_ID,
             client_secret=TWITCH_BOT_CLIENT_SECRET,
@@ -36,7 +37,7 @@ class Bot(commands.Bot):
             prefix="!",
         )
 
-    """async def setup_hook(self) -> None:
+    async def setup_hook(self) -> None:
         # Add our component which contains our commands...
         await self.add_component(MyComponent(self))
 
@@ -66,17 +67,14 @@ class Bot(commands.Bot):
         # Subscribe and listen to when someone cheers..
         subscriptions.append(eventsub.ChannelCheerSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when someone cheers..
-        subscriptions.append(eventsub.ChannelCheerSubscription(broadcaster_user_id=OWNER_ID))
-
         # Subscribe and listen to when someone follows..
         subscriptions.append(eventsub.ChannelFollowSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
 
         # Subscribe and listen to when someone raids..
         subscriptions.append(eventsub.ChannelRaidSubscription(to_broadcaster_user_id=OWNER_ID))
 
-        for subscription in subscription:
-            await self.subscribe_websocket(payload=subscription)"""
+        for subscription in subscriptions:
+            await self.subscribe_websocket(payload=subscription)
 
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
         # Make sure to call super() as it will add the tokens interally and return us some data...
@@ -120,7 +118,36 @@ class MyComponent(commands.Component):
     def __init__(self, bot: Bot):
         # Passing args is not required...
         # We pass bot here as an example...
+        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on"]
         self.bot = bot
+
+    def treat_message(self, message:str) -> str:
+
+        final_message = ""
+        messageList = message.split()
+        for word in messageList:
+            if "Cheer" in word:
+                messageList.remove(word)
+            if ("🫡" == word) or ("o7" == word):
+                final_message += "oh 7 "
+            if "nvm" == word:
+                final_message += + "nevermind "
+            if "<3" == word:
+                final_message += + "love "
+            if "D:" == word:
+                final_message += + "D face "
+            if "W" == word.upper():
+                final_message += + "double you "
+            else:
+                final_message += word + " "
+        
+        return final_message[:-1]
+
+    def format_tier(self, tier:str, is_gift:bool=False) -> str:
+        if not is_gift:
+            if tier == "1000":
+                return "1 or Prime"
+        return tier[0]
 
     # We use a listener in our Component to display the messages received.
     @commands.Component.listener()
@@ -132,20 +159,14 @@ class MyComponent(commands.Component):
         
         BANNEDMESSAGE = False
         COMMANDMESSAGE = False
-        CHEERMESSAGE = False
 
         print(f"[{payload.broadcaster.name}] - {payload.chatter.name}: {payload.text}")    
 
         #Setup what will be translated as a variable
-        twitchChatMessage = ""
+        twitchChatMessage = payload.text
         if payload.type == "user_intro":
             COMMANDMESSAGE = True
             twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : "
-
-        messageList = payload.text.split()
-        for word in messageList:
-            if "Cheer" in word:
-                CHEERMESSAGE = True
 
         for word in self.banned_words:
             if word.lower() in payload.text.lower():
@@ -166,9 +187,9 @@ class MyComponent(commands.Component):
         if payload.text[0] == "!" or payload.text[0] == '-':
             COMMANDMESSAGE = True
 
-        if not (BANNEDMESSAGE and COMMANDMESSAGE and CHEERMESSAGE):
+        if not (BANNEDMESSAGE and COMMANDMESSAGE):
 
-            twitchChatMessage = treat_message(twitchChatMessage)
+            twitchChatMessage = self.treat_message(twitchChatMessage)
 
             if twitchChatMessage.split() == []:
                 PLAY_AUDIO = False
@@ -278,7 +299,7 @@ class MyComponent(commands.Component):
 
     @commands.command()
     async def time(self, ctx: commands.Context):
-        await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")} for Fox.")
+        await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")} CEST for Fox.")
 
     @commands.command(aliases=["charity"])
     async def donate(self, ctx: commands.Context):
@@ -298,12 +319,13 @@ class MyComponent(commands.Component):
 
     #@commands.command()
     #@commands.is_moderator()
-    #async def say(self, ctx: commands.Context, *, content: str) -> None:
-    #    """Moderator only command which repeats back what you say.
-
-    #    !say hello world, !repeat I am cool LUL
-    #    """
-    #    await ctx.send(content)
+    #async def setgame(self, ctx: commands.Context, *, content: str) -> None:
+    #    text = content.split()
+    #    text.pop(0)
+    #    new_text = ""
+    #    for word in text:
+    #        new_text += word + " "
+    #    await ctx.send(f"Set game category to {new_text}")
 
     @commands.Component.listener()
     async def event_stream_online(self, payload: twitchio.StreamOnline) -> None:
@@ -314,7 +336,7 @@ class MyComponent(commands.Component):
         stream_start_time = datetime.now()
         await payload.broadcaster.send_message(
             sender=BOT_ID,
-            message=f"{payload.broadcaster.display_name} is now live playing {payload.broadcaster.fetch_channel_info().game_name}",
+            message=f"{payload.broadcaster.display_name} is now live",
         )
 
     @commands.Component.listener()
@@ -330,14 +352,14 @@ class MyComponent(commands.Component):
         hours = int(mins // 60)
         await payload.broadcaster.send_message(
             sender=BOT_ID,
-            message=f"The stream is now offline. {payload.broadcaster.display_name} has been live for the past {hours} hour(s), {mins} minute(s) and {secs} second(s)",
+            message=f"The stream is now offline. {payload.broadcaster.display_name} has been live for the past {hours} hour(s), {mins-60*hours} minute(s) and {secs-60*mins-60*hours} second(s)",
         )
 
     @commands.Component.listener()
     async def event_subscription(self, payload: twitchio.ChannelSubscribe) -> None:
         print("Received event : 'New User Subscription'")
         channel = payload.broadcaster
-        sub_tier = format_tier(payload.tier)
+        sub_tier = self.format_tier(payload.tier)
         if not payload.gift:
             await channel.send_message(
                 sender=BOT_ID,
@@ -348,7 +370,7 @@ class MyComponent(commands.Component):
     async def event_subscription_gift(self, payload: twitchio.ChannelSubscriptionGift) -> None:
         print("Received event : 'User Sub Gifting'")
         channel = payload.broadcaster
-        sub_tier = format_tier(payload.tier, True)
+        sub_tier = self.format_tier(payload.tier, True)
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
@@ -361,12 +383,12 @@ class MyComponent(commands.Component):
     async def event_subscription_message(self, payload: twitchio.ChannelSubscriptionMessage) -> None:
         print("Received event : 'User Resubscription'")
         channel = payload.broadcaster
-        sub_tier = format_tier(payload.tier)
+        sub_tier = self.format_tier(payload.tier)
         await channel.send_message(
                 sender=BOT_ID,
                 message=f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row!",
             )
-        message = f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row! They said: \"{treat_message(payload.text)}\""
+        message = f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row! They said: \"{self.treat_message(payload.text)}\""
         elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE, False)
         audio_manager.play_audio(elevenlabs_output, True, True, True)
 
@@ -380,13 +402,13 @@ class MyComponent(commands.Component):
                 sender=BOT_ID,
                 message=f"An anonymous user cheered {payload.bits} bits!",
             )
-            message = f"An anonymous user cheered {payload.bits} bits! They said: {treat_message(payload.message)}"
+            message = f"An anonymous user cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
         else:
             await channel.send_message(
                 sender=BOT_ID,
                 message=f"{payload.user.display_name} cheered {payload.bits} bits!",
             )
-            message = f"{payload.user.display_name} cheered {payload.bits} bits! They said: {treat_message(payload.message)}"
+            message = f"{payload.user.display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
         elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE, False)
         audio_manager.play_audio(elevenlabs_output, True, True, True)
 
@@ -406,7 +428,7 @@ class MyComponent(commands.Component):
         raider = payload.from_broadcaster
         await channel.send_message(
                 sender=BOT_ID,
-                message=f"Thank you so much {raider.display_name} for the raid with {payload.viewer_count} viewers! I hope you had fun playing {raider.fetch_channel_info().game_name}",
+                message=f"Thank you so much {raider.display_name} for the raid with {payload.viewer_count} viewers!",
             )
         await channel.send_shoutout(
             to_broadcaster=raider,
@@ -430,31 +452,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-def treat_message(message:str) -> str:
-
-    final_message = ""
-    messageList = message.content.split()
-    for word in messageList:
-        if "Cheer" in word:
-            messageList.remove(word)
-        if ("🫡" == word) or ("o7" == word):
-            final_message += "oh 7 "
-        if "nvm" == word:
-            final_message += + "nevermind "
-        if "<3" == word:
-            final_message += + "love "
-        if "D:" == word:
-            final_message += + "D face "
-        if "W" == word.upper():
-            final_message += + "double you "
-        else:
-            final_message += word + " "
-    
-    return final_message[:-1]
-
-def format_tier(tier:str, is_gift:bool=False) -> str:
-    if not is_gift:
-        if tier == "1000":
-            return "1 or Prime"
-    return tier[0]
