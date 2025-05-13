@@ -16,7 +16,9 @@ from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_I
 
 ELEVENLABS_VOICE = "Charlie" # Replace this with the name of whatever voice you have created on Elevenlabs
 
-stream_start_time = datetime.now()
+START_TIME = datetime.now()
+SHARED_CHAT_USERS = []
+HYPE_TRAIN_LEVEL = -1
 
 elevenlabs_manager = ElevenLabsManager()
 audio_manager = AudioManager()
@@ -48,20 +50,13 @@ class Bot(commands.Bot):
         # This creates and opens a websocket to Twitch EventSub...
         subscriptions.append(eventsub.ChatMessageSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID))
 
-        # Subscribe and listen to when a stream goes live..
-        # For this example listen to our own stream...
+        # Subscribe and listen to when a stream goes on/offline..
         subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
-
-        # Subscribe and listen to when a stream goes offline..
         subscriptions.append(eventsub.StreamOfflineSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when someone subscribes..
+        # Subscribe and listen to when someone (re)sub(-gift)..
         subscriptions.append(eventsub.ChannelSubscribeSubscription(broadcaster_user_id=OWNER_ID))
-
-        # Subscribe and listen to when someone resubscribes..
         subscriptions.append(eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=OWNER_ID))
-
-        # Subscribe and listen to when someone gift-subscribes..
         subscriptions.append(eventsub.ChannelSubscriptionGiftSubscription(broadcaster_user_id=OWNER_ID))
 
         # Subscribe and listen to when someone cheers..
@@ -73,7 +68,35 @@ class Bot(commands.Bot):
         # Subscribe and listen to when someone raids..
         subscriptions.append(eventsub.ChannelRaidSubscription(to_broadcaster_user_id=OWNER_ID))
 
+        # Subscribe and listen to when the title or the game changes..
+        subscriptions.append(eventsub.ChannelUpdateSubscription(broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when shared chat starts, updates or ends..
+        subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when poll starts or ends..
+        subscriptions.append(eventsub.ChannelPollBeginSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when prediction starts, locks or ends..
+        subscriptions.append(eventsub.ChannelPredictionBeginSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.ChannelPredictionLockSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.ChannelPredictionEndSubscription(broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when goal starts, updates or ends..
+        subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when hype train starts, updates or ends..
+        subscriptions.append(eventsub.HypeTrainBeginSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))
+
         for subscription in subscriptions:
+            print(f"Subscribing to {subscription}")
             await self.subscribe_websocket(payload=subscription)
 
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
@@ -333,7 +356,7 @@ class MyComponent(commands.Component):
 
         # Keep in mind we are assuming this is for ourselves
         # others may not want your bot randomly sending messages...
-        stream_start_time = datetime.now()
+        START_TIME = datetime.now()
         await payload.broadcaster.send_message(
             sender=BOT_ID,
             message=f"{payload.broadcaster.display_name} is now live",
@@ -346,7 +369,7 @@ class MyComponent(commands.Component):
         # Keep in mind we are assuming this is for ourselves
         # others may not want your bot randomly sending messages...
         stream_end_time = datetime.now()
-        stream_time_diff = stream_end_time-stream_start_time
+        stream_time_diff = stream_end_time-START_TIME
         secs = int(stream_time_diff.total_seconds())
         mins = int(secs // 60)
         hours = int(mins // 60)
@@ -385,9 +408,9 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         sub_tier = self.format_tier(payload.tier)
         await channel.send_message(
-                sender=BOT_ID,
-                message=f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row!",
-            )
+            sender=BOT_ID,
+            message=f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row!",
+        )
         message = f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row! They said: \"{self.treat_message(payload.text)}\""
         elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE, False)
         audio_manager.play_audio(elevenlabs_output, True, True, True)
@@ -417,9 +440,9 @@ class MyComponent(commands.Component):
         print("Received event : User Follow")
         channel = payload.broadcaster
         await channel.send_message(
-                sender=BOT_ID,
-                message=f"Thank you {payload.user} for the follow!",
-            )
+            sender=BOT_ID,
+            message=f"Thank you {payload.user} for the follow!",
+        )
 
     @commands.Component.listener()
     async def event_raid(self, payload: twitchio.ChannelRaid) -> None:
@@ -427,14 +450,286 @@ class MyComponent(commands.Component):
         channel = payload.to_broadcaster
         raider = payload.from_broadcaster
         await channel.send_message(
-                sender=BOT_ID,
-                message=f"Thank you so much {raider.display_name} for the raid with {payload.viewer_count} viewers!",
-            )
+            sender=BOT_ID,
+            message=f"Thank you so much {raider.display_name} for the raid with {payload.viewer_count} viewers!",
+        )
         await channel.send_shoutout(
             to_broadcaster=raider,
             moderator=BOT_ID,
         )
+    
+    @commands.Component.listener()
+    async def event_channel_update(self, payload: twitchio.ChannelUpdate) -> None:
+        print("Received event : Channel Update")
+        channel = payload.broadcaster
+        category = payload.category_name
+        title = payload.title
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"Updated title to \"{title}\" and category to \"{category}\"."
+        )
 
+    @commands.Component.listener()
+    async def event_shared_chat_begin(self, payload:twitchio.SharedChatSessionBegin) -> None:
+        print("Received event : Shared Chat session started")
+        channel = payload.broadcaster
+        host = payload.host
+        participants = payload.participants
+        participants_str = payload.host.display_name
+        SHARED_CHAT_USERS.append(host)
+        for participant in participants:
+            SHARED_CHAT_USERS.append(participant)
+            participants_str += f", {participant.display_name}"
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"{host.display_name} has started a shared chat session with {participants_str}."
+        )
+
+    @commands.Component.listener()
+    async def event_shared_chat_update(self, payload:twitchio.SharedChatSessionUpdate) -> None:
+        print("Received event : Shared Chat session updated")
+        channel = payload.broadcaster
+        host = payload.host
+        participants = payload.participants
+        participants_str = payload.host.display_name
+        diff = len(SHARED_CHAT_USERS) - len(participants.append(host))
+        if diff < 0: #If a user was added
+            SHARED_CHAT_USERS = [host]
+            for participant in participants:
+                SHARED_CHAT_USERS.append(participant)
+                participants_str += f", {participant.display_name}"
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"{host.display_name} has added {abs(diff)} users to the shared chat. The participants now are {participants_str}."
+            )
+        else: #If a user was removed
+            SHARED_CHAT_USERS = [host]
+            for participant in participants:
+                SHARED_CHAT_USERS.append(participant)
+                participants_str += f", {participant.display_name}"
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"{host.display_name} has removed {diff} users to the shared chat. The participants now are {participants_str}."
+            )
+
+    @commands.Component.listener()
+    async def event_shared_chat_end(self, payload:twitchio.SharedChatSessionEnd) -> None:
+        print("Received event : Shared Chat session ended")
+        channel = payload.broadcaster
+        host = payload.host
+        SHARED_CHAT_USERS = []
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"{host.display_name} has ended the shared chat session."
+        )
+
+    @commands.Component.listener()
+    async def event_poll_begin(self, payload:twitchio.ChannelPollBegin) -> None:
+        print("Received event : Poll started")
+        channel = payload.broadcaster
+        poll_title = payload.title
+        poll_choices = payload.choices
+        poll_choices_str = f"{poll_choices.pop(0).title}"
+        for choice in poll_choices:
+            poll_choices_str += f", {choice.title}"
+        poll_end = payload.ends_at
+        diff = poll_end - datetime.now()
+        secs = int(diff.total_seconds())
+        mins = int(secs // 60)
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"A new poll has been started ! \"{poll_title}\" | Choices are : {poll_choices_str}. This poll ends in {mins} minute(s)."
+        )
+
+    @commands.Component.listener()
+    async def event_poll_end(self, payload:twitchio.ChannelPollEnd) -> None:
+        print("Received event : Poll ended")
+        channel = payload.broadcaster
+        poll_title = payload.title
+        poll_choices = payload.choices
+        poll_winner = poll_choices[0]
+        poll_choices_str = f"{poll_choices.pop(0).title}"
+        for choice in poll_choices:
+            poll_choices_str += f", {choice.title}"
+            if choice.votes > poll_winner.votes:
+                poll_winner = choice
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"Anwsers are in! {poll_winner.title} won \"{poll_title}\" with {poll_winner.votes} votes | Choices were : {poll_choices_str}."
+        )
+
+    @commands.Component.listener()
+    async def event_prediction_start(self, payload:twitchio.ChannelPredictionBegin) -> None:
+        print("Received event : Prediction started")
+        channel = payload.broadcaster
+        prediction_title = payload.title
+        prediction_outcomes = payload.outcomes
+        prediction_outcomes_str = f"{prediction_outcomes.pop(0).title}"
+        for outcome in prediction_outcomes:
+            prediction_outcomes_str += f", {outcome.title}"
+        prediction_locks = payload.locks_at
+        diff = prediction_locks - datetime.now()
+        secs = int(diff.total_seconds())
+        mins = int(secs // 60)
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"A new prediction has been started ! \"{prediction_title}\" | Outcomes are : {prediction_outcomes_str}. This prediction locks in {mins} minute(s)."
+        )
+
+    @commands.Component.listener()
+    async def event_prediction_lock(self, payload:twitchio.ChannelPredictionLock) -> None:
+        print("Received event : Prediction locked")
+        channel = payload.broadcaster
+        prediction_title = payload.title
+        prediction_outcomes = payload.outcomes
+        prediction_total = 0
+        prediction_highest = prediction_outcomes[0]
+        if prediction_highest.channel_points != None:
+            prediction_total += prediction_highest.channel_points
+        prediction_outcomes_str = f"{prediction_outcomes.pop(0).title}"
+        for outcome in prediction_outcomes:
+            prediction_total += outcome.channel_points
+            prediction_outcomes_str += f", {outcome.title}"
+            if outcome.channel_points > prediction_highest.channel_points:
+                prediction_highest = outcome
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"The \"{prediction_title}\" prediction has been locked! {prediction_highest.title} is the highest outcome with {round(prediction_highest.channel_points/prediction_total*100, 2)}% | Outcomes are : {prediction_outcomes_str}."
+        )
+
+    @commands.Component.listener()
+    async def event_prediction_end(self, payload:twitchio.ChannelPredictionEnd) -> None:
+        print("Received event : Prediction ended")
+        channel = payload.broadcaster
+        prediction_title = payload.title
+        if payload.status == 'canceled':
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"The \"{prediction_title}\" prediction has been canceled! All channel points will be refunded."
+            )
+        else:
+            prediction_winner = payload.winning_outcome
+            prediction_outcomes = payload.outcomes
+            prediction_total = 0
+            prediction_highest = prediction_outcomes[0]
+            if prediction_highest.channel_points != None:
+                prediction_total += prediction_highest.channel_points
+            prediction_outcomes_str = f"{prediction_outcomes.pop(0).title}"
+            for outcome in prediction_outcomes:
+                prediction_total += outcome.channel_points
+                prediction_outcomes_str += f", {outcome.title}"
+                if outcome.channel_points > prediction_highest.channel_points:
+                    prediction_highest = outcome
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"The \"{prediction_title}\" prediction has been ended! {prediction_winner.title} is the winning outcome with {round(prediction_winner.channel_points/prediction_total*100, 2)}% (That's {prediction_total} TheDollar580 for {len(prediction_winner.users)} chatters) | Outcomes were : {prediction_outcomes_str}."
+            )
+
+    @commands.Component.listener()
+    async def event_goal_begin(self, payload:twitchio.GoalBegin) -> None:
+        print("Received event : Goal Begin")
+        channel = payload.broadcaster
+        goal_name = payload.description
+        goal_amount = payload.current_amount
+        goal_end_amount = payload.target_amount
+        goal_type = payload.type
+        if goal_type in ['subscription_count', 'new_subscription', 'new_subscription_count']:
+            goal_type = 'subscription'
+        elif goal_type in ['new_bit', 'new_cheer']:
+            goal_type = 'cheer'
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"A new {goal_type} goal has begun! {goal_name} ({goal_amount}/{goal_end_amount})"
+        )
+
+    @commands.Component.listener()
+    async def event_goal_progress(self, payload:twitchio.GoalProgress) -> None:
+        print("Received event : Goal Begin")
+        channel = payload.broadcaster
+        goal_name = payload.description
+        goal_amount = payload.current_amount
+        goal_end_amount = payload.target_amount
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"{goal_name} updated! ({goal_amount}/{goal_end_amount})"
+        )
+
+    @commands.Component.listener()
+    async def event_goal_end(self, payload:twitchio.GoalEnd) -> None:
+        print("Received event : Goal Begin")
+        channel = payload.broadcaster
+        goal_name = payload.description
+        goal_end_amount = payload.target_amount
+        goal_type = payload.type
+        if goal_type in ['subscription_count', 'new_subscription', 'new_subscription_count']:
+            goal_type = 'subscribers'
+        elif goal_type in ['new_bit', 'new_cheer']:
+            goal_type = 'bits'
+        else:
+            goal_type = 'followers'
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"{goal_name} has been completed! ({goal_end_amount} {goal_type})"
+        )
+
+    @commands.Component.listener()
+    async def event_hype_train(self, payload:twitchio.HypeTrainBegin) -> None:
+        print("Received event : Hype Train started")
+        channel = payload.broadcaster
+        train_level = payload.level
+        HYPE_TRAIN_LEVEL = train_level
+        golden_kappa_text = ""
+        is_golden_kappa = payload.golden_kappa
+        if is_golden_kappa:
+            golden_kappa_text = "Golden Kappa "
+        train_goal = payload.goal
+        train_progress = payload.progress
+        train_level_complete = round(train_progress/train_goal*100,2) #A percentage of level completion
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"A {golden_kappa_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!"
+        )
+
+    @commands.Component.listener()
+    async def event_hype_train_progress(self, payload:twitchio.HypeTrainProgress) -> None:
+        print("Received event : Hype Train progressed")
+        channel = payload.broadcaster
+        train_level = payload.level
+        if train_level > HYPE_TRAIN_LEVEL:
+            HYPE_TRAIN_LEVEL = train_level
+            golden_kappa_text = ""
+            is_golden_kappa = payload.golden_kappa
+            if is_golden_kappa:
+                golden_kappa_text = "Golden Kappa "
+            train_goal = payload.goal
+            train_progress = payload.progress
+            train_level_complete = round(train_progress/train_goal*100,2) #A percentage of level completion
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"The {golden_kappa_text}Hype Train has leveled up! We're {train_level_complete}% through level {train_level}!"
+            )
+
+    @commands.Component.listener()
+    async def event_hype_train_end(self, payload:twitchio.HypeTrainEnd) -> None:
+        print("Received event : Hype Train ended")
+        channel = payload.broadcaster
+        train_level = payload.level
+        HYPE_TRAIN_LEVEL = -1
+        golden_kappa_text = ""
+        is_golden_kappa = payload.golden_kappa
+        if is_golden_kappa:
+            golden_kappa_text = "Golden Kappa "
+        train_goal = payload.goal
+        train_progress = payload.progress
+        train_level_complete = round(train_progress/train_goal*100,2) #A percentage of level completion
+        train_countdown_until = payload.cooldown_until
+        diff = train_countdown_until - datetime.now()
+        secs = int(diff.total_seconds())
+        mins = int(secs // 60)
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"The {golden_kappa_text}Hype Train has left the chat... We reached {train_level_complete}% of level {train_level}! The next Hype Train can come back in {mins} minutes."
+        )
 
 def main() -> None:
     twitchio.utils.setup_logging(level=logging.INFO)
