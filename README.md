@@ -46,32 +46,32 @@ This code uses the TwitchIO **3.0.0 (beta 4)** Library, ElevenLabs **2.0.0**' Te
 
 ### Support for any streamers!
 
-> **Warning**: Any <ins>underlined interaction</ins> requires you to be either an **Affiliated or Partenred streamer**
+> **Warning**: Any checked interaction requires you to be either an **Affiliated or Partenred streamer**
 
 **TheBot580 uses EventSub to allow for interactive moments with chat! So far, TheBot580 interacts with :**
 
-* [**New Follower ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L574)
-* [**<ins>New Subscriber ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L517)
-* [**<ins>Resubscriptions ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L541)
-* [**<ins>Normal / Anonymous Gifted Subscriptions ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L528)
-* [**<ins>Normal / Anonymous Cheer Message ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L554)
-* [**<ins>Prediction Begins ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L697)
-* [**<ins>Prediction Locks ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L715)
-* [**<ins>Prediction Ends ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L736)
-* [**<ins>Poll Begins ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L662)
-* [**<ins>Poll Ends ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L680)
-* Stream [**Starts ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L489) and [**Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L501)
-* [**<ins>Golden / Normal Hype Train Begins ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L811) (Treasure Hype Trains are not supported by the Twitch API yet)
-* [**<ins>Golden / Normal Hype Train Progress ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L829) (Treasure Hype Trains are not supported by the Twitch API yet)
-* [**<ins>Golden / Normal Hype Train Ends ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L848) (Treasure Hype Trains are not supported by the Twitch API yet)
-* [**Shared Chat Collaboration Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L608)
-* [**Shared Chat Collaboration Updates (User join / left) ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L624)
-* [**Shared Chat Collaboration Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L651)
-* [**<ins>Follower / Subcription / Cheer Goal Begins ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L764)
-* [**<ins>Follower / Subcription / Cheer Goal Progress ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L781)
-* [**<ins>Follower / Subcription / Cheer Goal Reached ↗</ins>**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L793)
-* [**Raid ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L583) (Gives an automatic shoutout)
-* [**Title & Category Update ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L597)
+* [ ] [**New Follower ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L574)
+* [x] [**New Subscriber ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L517)
+* [x] [**Resubscriptions ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L541)
+* [x] [**Normal / Anonymous Gifted Subscriptions ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L528)
+* [x] [**Normal / Anonymous Cheer Message ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L554)
+* [x] [**Prediction Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L697)
+* [x] [**Prediction Locks ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L715)
+* [x] [**Prediction Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L736)
+* [x] [**Poll Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L662)
+* [x] [**Poll Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L680)
+* [ ] Stream [**Starts ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L489) and [**Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L501)
+* [x] [**Golden / Normal Hype Train Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L811) (Treasure Hype Trains are not supported by the Twitch API yet)
+* [x] [**Golden / Normal Hype Train Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L829) (Treasure Hype Trains are not supported by the Twitch API yet)
+* [x] [**Golden / Normal Hype Train Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L848) (Treasure Hype Trains are not supported by the Twitch API yet)
+* [ ] [**Shared Chat Collaboration Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L608)
+* [ ] [**Shared Chat Collaboration Updates (User join / left) ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L624)
+* [ ] [**Shared Chat Collaboration Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L651)
+* [x] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L764)
+* [x] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L781)
+* [x] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L793)
+* [ ] [**Raid ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L583) (Gives an automatic shoutout)
+* [ ] [**Title & Category Update ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L597)
 * More to come...
 
 > *Note* : If you don't know how to start TheBot580 (especially for the 1st time), read the [*TwitchIO tutorial ↗*](https://twitchio.dev/en/latest/getting-started/quickstart.html) on how to start the bot!
