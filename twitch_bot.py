@@ -445,7 +445,7 @@ class MyComponent(commands.Component):
             await ctx.send(f"Sorry {ctx.chatter.display_name}, but you are not following the channel...")
         else:
             follow_time = follow_info.followed_at
-            await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(follow_time)} (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
+            await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(follow_time, True)} (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
 
     @commands.command()
     async def lurk(self, ctx: commands.Context):
