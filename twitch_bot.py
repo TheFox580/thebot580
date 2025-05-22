@@ -186,11 +186,11 @@ class MyComponent(commands.Component):
         #Setup what will be translated as a variable
         twitchChatMessage = payload.text
         if payload.type == "user_intro":
+            command_message = True
             twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : "
 
         for word in self.banned_words:
             if word.lower() in payload.text.lower():
-                BANNEDMESSAGE = True
                 banned_message = True
 
         if tts:
@@ -198,7 +198,7 @@ class MyComponent(commands.Component):
                 
                 if payload.chatter.subscriber or payload.chatter.vip or payload.chatter.moderator:
                     if not payload.chatter.broadcaster:
-                        PLAY_AUDIO = True
+                        play_audio = True
             else:
         
         if payload.chatter.name.lower() == "fossabot" or payload.chatter.name.lower() == "streamelements" or payload.chatter.name.lower() == "thebot580" or payload.chatter.name.lower() == "thefox580" or payload.chatter.name.lower() == "thealt580" or payload.chatter.name.lower() == "nightbot":
