@@ -247,14 +247,6 @@ class MyComponent(commands.Component):
                     if not payload.chatter.broadcaster:
                         play_audio = True
             else:
-        
-        if payload.chatter.name.lower() == "fossabot" or payload.chatter.name.lower() == "streamelements" or payload.chatter.name.lower() == "thebot580" or payload.chatter.name.lower() == "thefox580" or payload.chatter.name.lower() == "thealt580" or payload.chatter.name.lower() == "nightbot":
-            COMMANDMESSAGE = True
-        
-        if payload.text[0] == "!" or payload.text[0] == '-':
-            COMMANDMESSAGE = True
-
-        if not (BANNEDMESSAGE and COMMANDMESSAGE):
                 play_audio = True
 
         if payload.chatter.name in ["fossabot", "streamelements", "thebot580", "thefox580", "nightbot"]: #Bots + broadcaster
