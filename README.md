@@ -1,5 +1,7 @@
 # TheBot580
 
+## This page is version 1.0 of TheBot580, and has been deprecated, for an updated version of the code, [visit this page ↗](https://github.com/TheFox580/thebot580/tree/2.0)
+
 This is a fork of [Babagaboosh](https://www.github.com/DougDougGithub/Babagaboosh), changed as a bot for [TheFox580](https://www.twitch.tv/thefox580), [TheAlt580](https://www.twitch.tv/thealt580), [TheEvents580](https://www.twitch.tv/theevents580) and [LeRenard580](https://www.twitch.tv/lerenard580)
 
 This code uses the TwitchIO **3.0.0 (beta 4)** Library, ElevenLabs' Text-To-Speech fonctionnality and PyGame's Audio Library.
