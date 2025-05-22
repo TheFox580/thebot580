@@ -340,6 +340,10 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
         await ctx.send(f"TheBot580 is a custom bot I made in python, based on DougDoug's Babagaboosh's app. It is currently running on version 2.0 (Using TwitchIO 3.0.0b4 & Python 3.13.3)")
+    
+    @commands.command(aliases=["tc"])
+    async def twitchcon(self, ctx: commands.Context):
+        await ctx.send(f"I'll be in Rotterdam from Thursday, May 29th to Monday, June 2nd! Of course, I'll be attending TwitchCon Rotterdam 2025 on Saturday & Sunday, but I will also be at WraithStation's \"Minecraft Quiz & Games In The Park\" on Friday! But wait, there's more! Every night, at around 9PM CEST, I'm gonna be cooking on stream!")
 
     #@commands.command()
     #@commands.is_moderator()
