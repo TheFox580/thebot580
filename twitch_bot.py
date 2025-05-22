@@ -507,14 +507,10 @@ class MyComponent(commands.Component):
 
         # Keep in mind we are assuming this is for ourselves
         # others may not want your bot randomly sending messages...
-        stream_end_time = datetime.now()
-        stream_time_diff = stream_end_time-START_TIME
-        secs = int(stream_time_diff.total_seconds())
-        mins = int(secs // 60)
-        hours = int(mins // 60)
+        stream_time_diff = self.format_time_since(START_TIME)
         await payload.broadcaster.send_message(
             sender=BOT_ID,
-            message=f"The stream is now offline. {payload.broadcaster.display_name} has been live for the past {hours} hour(s), {mins-60*hours} minute(s) and {secs-60*mins-60*hours} second(s)",
+            message=f"The stream is now offline. {payload.broadcaster.display_name} has been live for the past {stream_time_diff}",
         )
 
     @commands.Component.listener()
