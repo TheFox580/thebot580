@@ -7,7 +7,6 @@ import twitchio
 from twitchio.ext import commands
 from twitchio import eventsub
 
-
 from eleven_labs import ElevenLabsManager
 from audio_player import AudioManager
 from obs_websockets import OBSWebsocketsManager
@@ -25,7 +24,6 @@ audio_manager = AudioManager()
 obswebsockets_manager = OBSWebsocketsManager()
 
 LOGGER: logging.Logger = logging.getLogger("TheBot580")
-
 
 class Bot(commands.Bot):
     def __init__(self, *, token_database: asqlite.Pool) -> None:
@@ -49,7 +47,7 @@ class Bot(commands.Bot):
         # Subscribe to read chat (event_message) from our channel as the bot...
         # This creates and opens a websocket to Twitch EventSub...
         subscriptions.append(eventsub.ChatMessageSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID))
-
+        
         # Subscribe and listen to when a stream goes on/offline..
         subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.StreamOfflineSubscription(broadcaster_user_id=OWNER_ID))
