@@ -15,9 +15,9 @@ from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_I
 
 ELEVENLABS_VOICE : str = "Brian" # Replace this with the name of whatever voice you have created on Elevenlabs
 
-START_TIME = datetime.now()
-SHARED_CHAT_USERS = []
-HYPE_TRAIN_LEVEL = -1
+START_TIME : datetime = datetime.now()
+SHARED_CHAT_USERS : list = []
+HYPE_TRAIN_LEVEL : int = -1
 
 elevenlabs_manager = ElevenLabsManager()
 audio_manager = AudioManager()
