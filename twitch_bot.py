@@ -176,33 +176,32 @@ class MyComponent(commands.Component):
     @commands.Component.listener()
     async def event_message(self, payload: twitchio.ChatMessage) -> None:
 
-        TTS = True
-        TTS_EVENT = False
-        PLAY_AUDIO = False
+        tts = True
+        tts_event = False
+        play_audio = False
         
-        BANNEDMESSAGE = False
-        COMMANDMESSAGE = False
+        banned_message = False
+        command_message = False
 
         print(f"[{payload.broadcaster.name}] - {payload.chatter.name}: {payload.text}")    
 
         #Setup what will be translated as a variable
         twitchChatMessage = payload.text
         if payload.type == "user_intro":
-            COMMANDMESSAGE = True
             twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : "
 
         for word in self.banned_words:
             if word.lower() in payload.text.lower():
                 BANNEDMESSAGE = True
+                banned_message = True
 
-        if TTS:
-            if TTS_EVENT:
+        if tts:
+            if tts_event:
                 
                 if payload.chatter.subscriber or payload.chatter.vip or payload.chatter.moderator:
                     if not payload.chatter.broadcaster:
                         PLAY_AUDIO = True
             else:
-                PLAY_AUDIO = True
         
         if payload.chatter.name.lower() == "fossabot" or payload.chatter.name.lower() == "streamelements" or payload.chatter.name.lower() == "thebot580" or payload.chatter.name.lower() == "thefox580" or payload.chatter.name.lower() == "thealt580" or payload.chatter.name.lower() == "nightbot":
             COMMANDMESSAGE = True
@@ -211,13 +210,17 @@ class MyComponent(commands.Component):
             COMMANDMESSAGE = True
 
         if not (BANNEDMESSAGE and COMMANDMESSAGE):
+                play_audio = True
+            command_message = True
+            command_message = True
+        if not (banned_message or command_message):
 
             twitchChatMessage = self.treat_message(twitchChatMessage)
 
             if twitchChatMessage.split() == []:
-                PLAY_AUDIO = False
+                play_audio = False
 
-            if (PLAY_AUDIO and not (COMMANDMESSAGE or BANNEDMESSAGE)):
+            if (play_audio and not (command_message or banned_message)):
 
                 # Send Twitch message to 11Labs to turn into cool audio
                 elevenlabs_output = elevenlabs_manager.text_to_audio(twitchChatMessage, ELEVENLABS_VOICE)
@@ -259,7 +262,7 @@ class MyComponent(commands.Component):
 
                     obswebsockets_manager.set_source_visibility("Bots", "Chat_Image_Talk", False)
                     
-        if BANNEDMESSAGE:
+        if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
             mod = payload.source_broadcaster
             await mod.ban_user(user=payload.chatter.user(), reason="INVALID MESSAGE")
