@@ -169,6 +169,53 @@ class MyComponent(commands.Component):
             if tier == "1000":
                 return "1 or Prime"
         return tier[0]
+    def format_time_since(self, time:datetime) -> str:
+        tz = time.tzinfo
+        now = datetime.now(tz)
+        time_diff = now-time
+
+        secs = int(time_diff.total_seconds())
+        mins = int(secs // 60)
+        secs -= mins*60
+        hours = int(mins // 60)
+        mins -= hours*60
+        days = int(hours // 24)
+        hours -= days*24
+        years = int(days // 365.2422)
+        months_but_it_s_based_from_the_years_because_i_dont_want_to_do_annoying_calculations = (days / 365.2422) - years
+        months = int(months_but_it_s_based_from_the_years_because_i_dont_want_to_do_annoying_calculations*12)
+        days -= int(years*365.2242+months*30.436875)
+
+        seconds_text = "second"
+        minutes_text = "minute"
+        if secs != 1:
+            seconds_text += "s"
+        if mins != 1:
+            minutes_text += "s"
+
+        time_text = f"{mins} {minutes_text} and {secs} {seconds_text}. (Time might be offset by a few days due to leap years.)" #I'm always including the minutes just so that I don't have to handle the "and". Big Brain
+        if hours > 0:
+            if hours == 1:
+                time_text = f"{hours} hour, {time_text}"
+            else:
+                time_text = f"{hours} hours, {time_text}"
+        if days > 0:
+            if days == 1:
+                time_text = f"{days} day, {time_text}"
+            else:
+                time_text = f"{days} days, {time_text}"
+        if months > 0:
+            if months == 1:
+                time_text = f"{months} month, {time_text}"
+            else:
+                time_text = f"{months} months, {time_text}"
+        if years > 0:
+            if years == 1:
+                time_text = f"{years} year, {time_text}"
+            else:
+                time_text = f"{years} years, {time_text}"
+        
+        return time_text
 
     # We use a listener in our Component to display the messages received.
     @commands.Component.listener()
