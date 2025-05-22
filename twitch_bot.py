@@ -225,6 +225,16 @@ class MyComponent(commands.Component):
             return emote in messageList
         return False
     
+    def get_first_emote_in_message(self, message:str, emote_dict:dict[str, tuple[list[str], str]]) -> str:
+        if self.message_has_an_emote(message, emote_dict):
+            messageList = message.split()
+            for word in messageList:
+                for key in emote_dict.keys():
+                    emotes_looked_at = emote_dict[key]
+                    if word in self.formatted_emotes(emotes_looked_at[1], emotes_looked_at[0]):
+                        return word
+        raise ValueError
+    
     def format_time_since(self, time:datetime) -> str:
         tz = time.tzinfo
         now = datetime.now(tz)
