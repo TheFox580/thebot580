@@ -323,7 +323,7 @@ class MyComponent(commands.Component):
 
     @commands.command()
     async def time(self, ctx: commands.Context):
-        await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")} CEST for Fox.")
+        await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S %Z")} for Fox.")
 
     @commands.command(aliases=["charity"])
     async def donate(self, ctx: commands.Context):
