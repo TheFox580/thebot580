@@ -237,7 +237,7 @@ class MyComponent(commands.Component):
                         return word
         raise ValueError
     
-    def format_time_since(self, time:datetime) -> str:
+    def format_time_since(self, time:datetime, leap_year_warning:bool=False) -> str:
         tz = time.tzinfo
         now = datetime.now(tz)
         time_diff = now-time
@@ -261,7 +261,11 @@ class MyComponent(commands.Component):
         if mins != 1:
             minutes_text += "s"
 
-        time_text = f"{mins} {minutes_text} and {secs} {seconds_text}. (Time might be offset by a few days due to leap years.)" #I'm always including the minutes just so that I don't have to handle the "and". Big Brain
+        time_text = f"{mins} {minutes_text} and {secs} {seconds_text}." #I'm always including the minutes just so that I don't have to handle the "and". Big Brain
+
+        if leap_year_warning:
+            time_text += " (Time might be offset by a few days due to leap years.)"
+
         if hours > 0:
             if hours == 1:
                 time_text = f"{hours} hour, {time_text}"
