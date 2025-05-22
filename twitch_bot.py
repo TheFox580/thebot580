@@ -166,6 +166,8 @@ class MyComponent(commands.Component):
                 ([],
                 "")
             }
+        self.emotes_combo : list[str|int] = ["", 0] #Holds a list like : [str("Emote Name"), int(number of instance of this emote in a row)]
+
     def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
         req = requests.get(f'https://api.betterttv.net/3/cached/users/twitch/{broadcaster_id}')
@@ -321,6 +323,24 @@ class MyComponent(commands.Component):
             command_message = True
 
         if not (banned_message or command_message):
+
+            if self.emotes_combo != ["", 0]: #If we currently have a combo
+                if self.message_has_emote(twitchChatMessage, self.emotes_combo[0], self.emotes): #If it is the right emote
+                    self.emotes_combo[1] += 1
+                    print(f"+1 to the {self.emotes_combo[0]} combo by {payload.chatter.display_name} (Now {self.emotes_combo[1]}) ")
+                else:
+                    print(f"{self.emotes_combo[1]}x {self.emotes_combo[0]} combo was ended by {payload.chatter.display_name}")
+                    if self.emotes_combo[1] >= 5:
+                        await payload.broadcaster.send_message(
+                            sender=BOT_ID,
+                            message=f"{self.emotes_combo[1]}x {self.emotes_combo[0]} combo! POGGIES",
+                        )
+                    self.emotes_combo : list[str|int] = ["", 0] #Resetting Emotes Combo, because the emote we were looking for wasn't sent
+            else:
+                if self.message_has_an_emote(twitchChatMessage, self.emotes): #If the message has at least an emote
+                    emote : str = self.get_first_emote_in_message(twitchChatMessage, self.emotes)
+                    self.emotes_combo : list[str|int] = [emote, 1]
+                    print(f"New combo emote : {self.emotes_combo[0]}. Started by {payload.chatter.display_name}")
 
             twitchChatMessage = self.treat_message(twitchChatMessage)
 
