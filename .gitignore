@@ -3,4 +3,5 @@
 __pycache__
 ChatHistoryBackup.txt
 keys.py
+tests.py
 tokens.*
