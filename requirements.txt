@@ -1,6 +1,6 @@
 azure-cognitiveservices-speech==1.34.0
 anyio==4.2.0
-elevenlabs==0.2.8
+elevenlabs==2.0.0
 keyboard==0.13.5
 mutagen==1.46.0
 obs_websocket_py==1.0
@@ -11,3 +11,7 @@ rich==13.7.0
 soundfile==0.12.1
 twitchio==3.0.0b4
 asqlite==2.0.0
+asyncio==3.4.3
+logging==0.4.9.6
+datetime==5.5
+requests==2.32.3
