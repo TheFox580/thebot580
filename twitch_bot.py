@@ -256,8 +256,12 @@ class MyComponent(commands.Component):
 
         if not (BANNEDMESSAGE and COMMANDMESSAGE):
                 play_audio = True
+
+        if payload.chatter.name in ["fossabot", "streamelements", "thebot580", "thefox580", "nightbot"]: #Bots + broadcaster
             command_message = True
+        elif payload.text[0] == "!" or payload.text[0] == '-':
             command_message = True
+
         if not (banned_message or command_message):
 
             twitchChatMessage = self.treat_message(twitchChatMessage)
