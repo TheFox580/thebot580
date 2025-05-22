@@ -14,7 +14,7 @@ from obs_websockets import OBSWebsocketsManager
 from datetime import datetime
 from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_ID
 
-ELEVENLABS_VOICE = "Charlie" # Replace this with the name of whatever voice you have created on Elevenlabs
+ELEVENLABS_VOICE : str = "Brian" # Replace this with the name of whatever voice you have created on Elevenlabs
 
 START_TIME = datetime.now()
 SHARED_CHAT_USERS = []
@@ -220,7 +220,7 @@ class MyComponent(commands.Component):
             if (PLAY_AUDIO and not (COMMANDMESSAGE or BANNEDMESSAGE)):
 
                 # Send Twitch message to 11Labs to turn into cool audio
-                elevenlabs_output = elevenlabs_manager.text_to_audio(twitchChatMessage, ELEVENLABS_VOICE, False)
+                elevenlabs_output = elevenlabs_manager.text_to_audio(twitchChatMessage, ELEVENLABS_VOICE)
 
                 if payload.broadcaster.name == "lerenard580":
                     # Play the mp3 file
@@ -265,7 +265,7 @@ class MyComponent(commands.Component):
             await mod.ban_user(user=payload.chatter.user(), reason="INVALID MESSAGE")
             banMessage = "BANNED MESSAGE DETECTED : BANNING THE SENDER FOREVER"
             print(banMessage)
-            elevenlabs_output = elevenlabs_manager.text_to_audio(banMessage, ELEVENLABS_VOICE, False)
+            elevenlabs_output = elevenlabs_manager.text_to_audio(banMessage, ELEVENLABS_VOICE)
             audio_manager.play_audio(elevenlabs_output, True, True, True)
 
     @commands.command(aliases=["hello", "howdy", "hey"])
@@ -412,7 +412,7 @@ class MyComponent(commands.Component):
             message=f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row!",
         )
         message = f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months! They've subscribed for {payload.streak_months} months in a row! They said: \"{self.treat_message(payload.text)}\""
-        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE, False)
+        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE)
         audio_manager.play_audio(elevenlabs_output, True, True, True)
 
     @commands.Component.listener()
@@ -432,7 +432,7 @@ class MyComponent(commands.Component):
                 message=f"{payload.user.display_name} cheered {payload.bits} bits!",
             )
             message = f"{payload.user.display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
-        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE, False)
+        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE)
         audio_manager.play_audio(elevenlabs_output, True, True, True)
 
     @commands.Component.listener()
