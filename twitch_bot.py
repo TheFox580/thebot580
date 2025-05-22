@@ -147,8 +147,8 @@ class MyComponent(commands.Component):
         final_message = ""
         messageList = message.split()
         for word in messageList:
-            if "Cheer" in word:
-                messageList.remove(word)
+            if "Cheer" in word: #We already handle cheer messages
+                pass
             if ("🫡" == word) or ("o7" == word):
                 final_message += "oh 7 "
             if "nvm" == word:
