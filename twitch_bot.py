@@ -142,6 +142,30 @@ class MyComponent(commands.Component):
         # We pass bot here as an example...
         self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on"]
         self.bot = bot
+        self.emotes : dict[str, tuple[list[str], str]] = { #Replace with your own BTTV, 7TV, FFZ and/or Twitch Emotes | Format : {"Platform":(["emote", "emote", "emote", ...], "prefix")}
+            "7TV": #7TV Emotes
+                (["angry", "awkward", "Bedge", "blobDance", "BoneZone", "BoneZoneD", "bro", "carJAM", "catJAM",
+                "Clap", "COPIUM", "crying", "dinkDonk", "exited", "giveitaname", "happi", "Happy", "horny",
+                "HUH", "huhhh", "KEKW", "KEKWait", "LMAO", "maybe", "Nerd", "NODDERS", "NOPERS", "ok",
+                "pepeD", "popCat", "shocked", "StreamerDoesntKnow", "stressed", "sylishguy",
+                "ThisBusIsLiterallyGoingToDriveThroughYourFuckingWallsAndCrushEveryBoneInsideOfYourWeakShellOfSkin",
+                "WAHOO", "WICKED", "YIPPIE", "GAMBA", "idk", "PepoG", "rizz", "thumbsup", "DICKS", "HUHH"],
+                ""),
+            "BTTV": #BTTV Emotes
+                (self.getBTTVEmotes(OWNER_ID),
+                ""),
+            "FFZ": #FFZ Emotes
+                ([],
+                ""),
+            "TwitchChannel": #Your Twitch Channel Emotes
+                (["Chat", "ChatArrive", "GaySub", "Happy", "Hi", "Kill", "Money", "NotStonks", "NotUltraRage",
+                "Objection", "Oops", "Pfp", "PTDR", "Sad", "Serious", "Stare", "StareSlide", "Stonks", "Sub",
+                "Timeline", "UltraKill", "UltraRage", "XPTDR"],
+                "thefox91"),
+            "Others": #Any other emotes that I don't know / Couldn't be bother to list (i.e. : Twitch Global Emotes or someone's Twitch Channel's Emotes)
+                ([],
+                "")
+            }
     def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
         req = requests.get(f'https://api.betterttv.net/3/cached/users/twitch/{broadcaster_id}')
