@@ -203,6 +203,13 @@ class MyComponent(commands.Component):
             if tier == "1000":
                 return "1 or Prime"
         return tier[0]
+    
+    def formatted_emotes(self, prefix:str, emotes:list[str]) -> str:
+        formatted = []
+        for emote in emotes:
+            formatted.append(f"{prefix}{emote}")
+        return formatted
+    
     def format_time_since(self, time:datetime) -> str:
         tz = time.tzinfo
         now = datetime.now(tz)
