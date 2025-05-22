@@ -219,6 +219,12 @@ class MyComponent(commands.Component):
                     return True
         return False
     
+    def message_has_emote(self, message:str, emote:str, emote_dict:dict[str, tuple[list[str], str]]) -> bool:
+        if self.message_has_an_emote(message, emote_dict):
+            messageList = message.split()
+            return emote in messageList
+        return False
+    
     def format_time_since(self, time:datetime) -> str:
         tz = time.tzinfo
         now = datetime.now(tz)
