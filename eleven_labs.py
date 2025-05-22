@@ -26,19 +26,21 @@ class ElevenLabsManager:
         print(f"\nAll ElevenLabs voices: \n{all_voices.get_all()}\n")
 
     # Convert text to speech, then save it to file. Returns the file path
-    def text_to_audio(self, input_text, voice="Doug VO Only", save_as_wave=True, subdirectory=""):
-        audio_saved = client.generate(
-          text=input_text,
-          voice=voice,
-          model="eleven_monolingual_v1"
-        )
-        if save_as_wave:
-          file_name = f"___Msg{str(hash(input_text))}.wav"
-        else:
-          file_name = f"___Msg{str(hash(input_text))}.mp3"
-        tts_file = os.path.join(os.path.abspath(os.curdir), subdirectory, file_name)
-        save(audio_saved,tts_file)
-        return tts_file
+    def text_to_audio(self, input_text, voice="Doug VO Only", subdirectory=""):
+        voices = client.voices.get_all().voices
+        for voice_from_list in voices:
+          if voice_from_list.name == voice:
+             voice_id = voice_from_list.voice_id
+             audio_saved = client.text_to_speech.convert(
+               text=input_text,
+               voice_id=voice_id,
+               model_id="eleven_multilingual_v2",
+               output_format="mp3_44100_128"
+             )
+             file_name = f"___Msg{str(hash(input_text))}.mp3"
+             tts_file = os.path.join(os.path.abspath(os.curdir), subdirectory, file_name)
+             save(audio_saved,tts_file)
+             return tts_file
 
     # Convert text to speech, then play it out loud
     def text_to_audio_played(self, input_text, voice="Doug VO Only"):
