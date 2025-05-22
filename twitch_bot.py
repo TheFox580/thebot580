@@ -12,6 +12,7 @@ from audio_player import AudioManager
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime
 from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_ID
+import requests
 
 ELEVENLABS_VOICE : str = "Brian" # Replace this with the name of whatever voice you have created on Elevenlabs
 
@@ -144,10 +145,12 @@ class MyComponent(commands.Component):
     def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
         req = requests.get(f'https://api.betterttv.net/3/cached/users/twitch/{broadcaster_id}')
-        res = req.json()
-        for emote in res["sharedEmotes"]:
-            emotes.append(emote["code"])
-        return emotes
+        if req.status_code == 200:
+            res = req.json()
+            for emote in res["sharedEmotes"]:
+                emotes.append(emote["code"])
+            return emotes
+        raise requests.HTTPError
 
     def treat_message(self, message:str) -> str:
 
