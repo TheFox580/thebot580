@@ -141,6 +141,13 @@ class MyComponent(commands.Component):
         # We pass bot here as an example...
         self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on"]
         self.bot = bot
+    def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
+        emotes : list[str] = []
+        req = requests.get(f'https://api.betterttv.net/3/cached/users/twitch/{broadcaster_id}')
+        res = req.json()
+        for emote in res["sharedEmotes"]:
+            emotes.append(emote["code"])
+        return emotes
 
     def treat_message(self, message:str) -> str:
 
