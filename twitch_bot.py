@@ -352,13 +352,14 @@ class MyComponent(commands.Component):
         """
         await ctx.send("The Youtube channel : https://www.youtube.com/@thefox580")
 
-    @commands.command()
+    @commands.command(aliases=["follow",'followsince'])
     async def followage(self, ctx: commands.Context):
-        if ctx.chatter.follow_info() == None:
+        follow_info = await ctx.chatter.follow_info()
+        if follow_info == None:
             await ctx.send(f"Sorry {ctx.chatter.display_name}, but you are not following the channel...")
         else:
-            follow_info = ctx.chatter.follow_info()
-            await ctx.send(f"{ctx.chatter.display_name}, you've been following for {follow_info.followed_at}")
+            follow_time = follow_info.followed_at
+            await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(follow_time)} (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
 
     @commands.command()
     async def lurk(self, ctx: commands.Context):
