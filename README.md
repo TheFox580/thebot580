@@ -20,11 +20,11 @@ This code uses the TwitchIO **3.0.0 (beta 4)** Library, ElevenLabs **2.0.0**' Te
 
 **TheBot580 will by default enable Text-To-Speech messages, meaning that any safe messages will be read out loud by the progam!**
 
-> *Note* : This setting can be disabled by putting `TTS = False` at [*this line ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L292)
+> *Note* : This setting can be disabled by putting `TTS = False` at [*this line ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L296)
 
 > *Tip* : If you're streaming with TTS Enabled, you can use a plugin like [*win-capture-audio ↗*](https://github.com/bozbez/win-capture-audio) and make it output `python.exe` to have TTS on a separate audio channel!
 
-> *Tip* : With this plugin and the [*Move plugin ↗*](https://github.com/exeldro/obs-move-transition), you can make a png move like TheBot580 was actually talking with the use of [*OBS Websockets ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L25)!
+> *Tip* : With this plugin and the [*Move plugin ↗*](https://github.com/exeldro/obs-move-transition), you can make a png move like TheBot580 was actually talking with the use of [*OBS Websockets ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L26)!
 
 ---
 
@@ -32,15 +32,15 @@ This code uses the TwitchIO **3.0.0 (beta 4)** Library, ElevenLabs **2.0.0**' Te
 
 **TheBot580 will automatically count how many times in a row an emote has been used, and will send a message if the emote has been said at least 5 times!**
 
-> *Note* : Although Better TTV Emotes are being automatically added, I haven't implemented custom support for the other platforms yet, so you may enter your own emotes [*here ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L147)
+> *Note* : Although Better TTV Emotes are being automatically added, I haven't implemented custom support for the other platforms yet, so you may enter your own emotes [*here ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L149)
 
-> *Tip* : You can modify the message that the bot sends in chat to your liking [*here ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L336)
+> *Tip* : You can modify the message that the bot sends in chat to your liking [*here ↗*](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L346)
 
 ---
 
 ### Use advanced commands
 
-**Thanks to TwitchIO 3.0.0, we now have more control on how to use bot commands! You can check some I have already set up [here ↗](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L409)!**
+**Thanks to TwitchIO 3.0.0, we now have more control on how to use bot commands! You can check some I have already set up [here ↗](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L416)!**
 
 ---
 
@@ -50,28 +50,28 @@ This code uses the TwitchIO **3.0.0 (beta 4)** Library, ElevenLabs **2.0.0**' Te
 
 **TheBot580 uses EventSub to allow for interactive moments with chat! So far, TheBot580 interacts with :**
 
-* [ ] [**New Follower ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L574)
-* [x] [**New Subscriber ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L517)
-* [x] [**Resubscriptions ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L541)
-* [x] [**Normal / Anonymous Gifted Subscriptions ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L528)
-* [x] [**Normal / Anonymous Cheer Message ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L554)
-* [x] [**Prediction Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L697)
-* [x] [**Prediction Locks ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L715)
-* [x] [**Prediction Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L736)
-* [x] [**Poll Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L662)
-* [x] [**Poll Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L680)
-* [ ] Stream [**Starts ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L489) and [**Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L501)
-* [x] [**Golden / Normal Hype Train Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L811) (Treasure Hype Trains are not supported by the Twitch API yet)
-* [x] [**Golden / Normal Hype Train Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L829) (Treasure Hype Trains are not supported by the Twitch API yet)
-* [x] [**Golden / Normal Hype Train Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L848) (Treasure Hype Trains are not supported by the Twitch API yet)
-* [ ] [**Shared Chat Collaboration Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L608)
-* [ ] [**Shared Chat Collaboration Updates (User join / left) ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L624)
-* [ ] [**Shared Chat Collaboration Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L651)
-* [x] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L764)
-* [x] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L781)
-* [x] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L793)
-* [ ] [**Raid ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L583) (Gives an automatic shoutout)
-* [ ] [**Title & Category Update ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L597)
+* [ ] [**New Follower ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L520)
+* [x] [**New Subscriber ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L529)
+* [x] [**Resubscriptions ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L540)
+* [x] [**Normal / Anonymous Gifted Subscriptions ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L556)
+* [x] [**Normal / Anonymous Cheer Message ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L569)
+* [x] [**Prediction Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L589)
+* [x] [**Prediction Locks ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L606)
+* [x] [**Prediction Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L628)
+* [x] [**Poll Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L656)
+* [x] [**Poll Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L674)
+* [ ] Stream [**Starts ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L691) and [**Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L703)
+* [x] [**Golden / Normal Hype Train Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L715) (Treasure Hype Trains are not supported by the Twitch API yet)
+* [x] [**Golden / Normal Hype Train Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L733) (Treasure Hype Trains are not supported by the Twitch API yet)
+* [x] [**Golden / Normal Hype Train Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L752) (Treasure Hype Trains are not supported by the Twitch API yet)
+* [ ] [**Shared Chat Collaboration Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L774)
+* [ ] [**Shared Chat Collaboration Updates (User join / left) ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L790)
+* [ ] [**Shared Chat Collaboration Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L817)
+* [x] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L828)
+* [x] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L845)
+* [x] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L857)
+* [ ] [**Raid ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L875) (Gives an automatic shoutout)
+* [ ] [**Title & Category Update ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L889)
 * More to come...
 
 > *Note* : If you don't know how to start TheBot580 (especially for the 1st time), read the [*TwitchIO tutorial ↗*](https://twitchio.dev/en/latest/getting-started/quickstart.html) on how to start the bot!
