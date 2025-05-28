@@ -67,9 +67,9 @@ This code uses the TwitchIO **3.0.0 (beta 4)** Library, ElevenLabs **2.0.0**' Te
 * [ ] [**Shared Chat Collaboration Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L774)
 * [ ] [**Shared Chat Collaboration Updates (User join / left) ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L790)
 * [ ] [**Shared Chat Collaboration Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L817)
-* [x] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L828)
-* [x] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L845)
-* [x] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L857)
+* [ ] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L828)
+* [ ] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L845)
+* [ ] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L857)
 * [ ] [**Raid ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L875) (Gives an automatic shoutout)
 * [ ] [**Title & Category Update ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L889)
 * More to come...
