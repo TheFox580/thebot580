@@ -457,6 +457,10 @@ class MyComponent(commands.Component):
             follow_time = follow_info.followed_at
             await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(follow_time, True)}. (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
 
+    @commands.command
+    async def uptime(self, ctx: commands.Context):
+        await ctx.send(f"Fox has been live for {self.format_time_since(datetime.now())} (Stream started at {START_TIME.strftime("%d/%m/%Y at %H:%M:%S %Z")}).")
+
     @commands.command()
     async def lurk(self, ctx: commands.Context):
         await ctx.send(f"You just started lurking {ctx.chatter.display_name}, see ya soon !")
