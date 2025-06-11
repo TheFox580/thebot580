@@ -529,7 +529,7 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         await channel.send_message(
             sender=BOT_ID,
-            message=f"Thank you {payload.user} for the follow!",
+            message=f"Thank you {payload.user.display_name} for the follow!",
         )
 
     @commands.Component.listener()
