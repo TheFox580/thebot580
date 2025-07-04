@@ -8,7 +8,7 @@ This is a fork of [Babagaboosh ↗](https://www.github.com/DougDougGithub/Babaga
 
 This code uses the TwitchIO **3.0.1** Library, ElevenLabs **2.0.0**'s Text-To-Speech fonctionnality, PyGame's Audio Library and OBS Websockets.
 
-## Here are all of TheBot580's functionnality:
+## Here are all of TheBot580's functionnality
 
 ### Moderator Bot
 
@@ -47,6 +47,7 @@ This code uses the TwitchIO **3.0.1** Library, ElevenLabs **2.0.0**'s Text-To-Sp
 ### Support for any streamer
 
 > **Warning**: Any checked interaction requires you to be either an **Affiliated or Partenred streamer**
+
 > *Tip*: *🆙* means this interaction has been updated & *🆕* means this interaction has been added
 
 **TheBot580 uses EventSub to allow for interactive moments with chat! So far, TheBot580 interacts with :**
