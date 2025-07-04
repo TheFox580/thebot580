@@ -742,9 +742,10 @@ class MyComponent(commands.Component):
         train_level = payload.level
         HYPE_TRAIN_LEVEL = train_level
         golden_kappa_text = ""
-        is_golden_kappa = payload.golden_kappa
-        if is_golden_kappa:
+        if payload.type == "golden_kappa":
             golden_kappa_text = "Golden Kappa "
+        elif payload.type == "treasure":
+            golden_kappa_text = "Treasure "
         train_goal = payload.goal
         train_progress = payload.progress
         train_level_complete = round(train_progress/train_goal*100,2) #A percentage of level completion
@@ -761,9 +762,10 @@ class MyComponent(commands.Component):
         if train_level > HYPE_TRAIN_LEVEL: # type: ignore
             HYPE_TRAIN_LEVEL = train_level
             golden_kappa_text = ""
-            is_golden_kappa = payload.golden_kappa
-            if is_golden_kappa:
+            if payload.type == "golden_kappa":
                 golden_kappa_text = "Golden Kappa "
+            elif payload.type == "treasure":
+                golden_kappa_text = "Treasure "
             train_goal = payload.goal
             train_progress = payload.progress
             HYPE_TRAIN_LEVEL_COMPLETE = round(train_progress/train_goal*100,2) #A percentage of level completion
@@ -779,9 +781,10 @@ class MyComponent(commands.Component):
         train_level = payload.level
         HYPE_TRAIN_LEVEL = -1
         golden_kappa_text = ""
-        is_golden_kappa = payload.golden_kappa
-        if is_golden_kappa:
+        if payload.type == "golden_kappa":
             golden_kappa_text = "Golden Kappa "
+        elif payload.type == "treasure":
+            golden_kappa_text = "Treasure "
         train_countdown_until = payload.cooldown_until
         diff = train_countdown_until - datetime.now()
         secs = int(diff.total_seconds())
