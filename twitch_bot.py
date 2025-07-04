@@ -70,6 +70,9 @@ class Bot(commands.Bot):
         # Subscribe and listen to when poll starts or ends..
         subscriptions.append(eventsub.ChannelPollBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when a shoutout is sent in chat..
+        subscriptions.append(eventsub.ShoutoutCreateSubscription(broadcaster_user_id=OWNER_ID))
         
         # Subscribe and listen to when a stream goes on/offline..
         subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
@@ -930,6 +933,27 @@ class MyComponent(commands.Component):
         await channel.send_message(
             sender=BOT_ID,
             message=f"Updated title to \"{title}\" and category to \"{category}\"."
+        )
+
+    @commands.Component.listener()
+    async def event_shoutout_create(self, payload: twitchio.ShoutoutCreate) -> None:
+        print("Received event : Created Shoutout")
+        channel = payload.broadcaster
+        shoutout_receiver = payload.to_broadcaster
+        channel_info_fetch = shoutout_receiver.fetch_channel_info()
+        if type(channel_info_fetch) == twitchio.ChannelInfo:
+            channel_info : twitchio.ChannelInfo = channel_info_fetch
+            game_fetch = channel_info.fetch_game()
+            if game_fetch != None:
+                game : twitchio.Game = game_fetch
+                await channel.send_message(
+                    sender=BOT_ID,
+                    message=f"{shoutout_receiver.display_name} was streaming \"{game.name}\"! If you enjoy it, you should go check it out!"
+                )
+                return
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!"
         )
 
 def main() -> None:
