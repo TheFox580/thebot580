@@ -741,6 +741,10 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         train_level = payload.level
         HYPE_TRAIN_LEVEL = train_level
+        shared_text = ""
+        is_shared = payload.shared_train
+        if is_shared:
+            shared_text = "Shared "
         golden_kappa_text = ""
         if payload.type == "golden_kappa":
             golden_kappa_text = "Golden Kappa "
@@ -751,7 +755,7 @@ class MyComponent(commands.Component):
         train_level_complete = round(train_progress/train_goal*100,2) #A percentage of level completion
         await channel.send_message(
             sender=BOT_ID,
-            message=f"A {golden_kappa_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!"
+            message=f"A {shared_text}{golden_kappa_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!"
         )
 
     @commands.Component.listener()
@@ -761,6 +765,10 @@ class MyComponent(commands.Component):
         train_level = payload.level
         if train_level > HYPE_TRAIN_LEVEL: # type: ignore
             HYPE_TRAIN_LEVEL = train_level
+            shared_text = ""
+            is_shared = payload.shared_train
+            if is_shared:
+                shared_text = "Shared "
             golden_kappa_text = ""
             if payload.type == "golden_kappa":
                 golden_kappa_text = "Golden Kappa "
@@ -771,7 +779,7 @@ class MyComponent(commands.Component):
             HYPE_TRAIN_LEVEL_COMPLETE = round(train_progress/train_goal*100,2) #A percentage of level completion
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"The {golden_kappa_text}Hype Train has leveled up! We're {HYPE_TRAIN_LEVEL_COMPLETE}% through level {train_level}!"
+                message=f"The {shared_text}{golden_kappa_text}Hype Train has leveled up! We're {HYPE_TRAIN_LEVEL_COMPLETE}% through level {train_level}!"
             )
 
     @commands.Component.listener()
@@ -780,6 +788,10 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         train_level = payload.level
         HYPE_TRAIN_LEVEL = -1
+        shared_text = ""
+        is_shared = payload.shared_train
+        if is_shared:
+            shared_text = "Shared "
         golden_kappa_text = ""
         if payload.type == "golden_kappa":
             golden_kappa_text = "Golden Kappa "
@@ -791,7 +803,7 @@ class MyComponent(commands.Component):
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=f"The {golden_kappa_text}Hype Train has left the chat... We reached {HYPE_TRAIN_LEVEL_COMPLETE}% of level {train_level}! The next Hype Train can come back in {mins} minutes."
+            message=f"The {shared_text}{golden_kappa_text}Hype Train has left the chat... We reached {HYPE_TRAIN_LEVEL_COMPLETE}% of level {train_level}! The next Hype Train can come back in {mins} minutes."
         )
 
     @commands.Component.listener()
