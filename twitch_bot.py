@@ -72,7 +72,7 @@ class Bot(commands.Bot):
         subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
 
         # Subscribe and listen to when a shoutout is sent in chat..
-        subscriptions.append(eventsub.ShoutoutCreateSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.ShoutoutCreateSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
         
         # Subscribe and listen to when a stream goes on/offline..
         subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
