@@ -7,22 +7,14 @@ import twitchio
 from twitchio.ext import commands
 from twitchio import eventsub
 
-from eleven_labs import ElevenLabsManager
 from audio_player import AudioManager
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime
-from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_ID
+from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_ID, AZURE_TTS_VOICE
 import requests
-import time
+from tts import TTSManager
 
-ELEVENLABS_VOICE : str = "Brian" # Replace this with the name of whatever voice you have created on Elevenlabs
-
-START_TIME : datetime = datetime.now()
-SHARED_CHAT_USERS : list = []
-HYPE_TRAIN_LEVEL : int = -1
-HYPE_TRAIN_LEVEL_COMPLETE : float = 0
-
-elevenlabs_manager = ElevenLabsManager()
+tts_manager = TTSManager(AZURE_TTS_VOICE)
 audio_manager = AudioManager()
 obswebsockets_manager = OBSWebsocketsManager()
 
@@ -102,7 +94,7 @@ class Bot(commands.Bot):
         for subscription in subscriptions:
             print(f"Subscribing to {subscription}")
             await self.subscribe_websocket(payload=subscription)
-            time.sleep(2) #I'm waiting 2 seconds inbetween each subsriptions because it looks like if you subscribe to events too fast they don't get registered?
+            #time.sleep(2) #I'm waiting 2 seconds inbetween each subsriptions because it looks like if you subscribe to events too fast they don't get registered?
 
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
         # Make sure to call super() as it will add the tokens interally and return us some data...
@@ -146,7 +138,7 @@ class MyComponent(commands.Component):
     def __init__(self, bot: Bot):
         # Passing args is not required...
         # We pass bot here as an example...
-        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on"]
+        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on", "Best view͙e̤rs", "smmtop11.online"]
         self.bot = bot
         self.emotes_dict : dict[str, tuple[list[str], str]] = { #Replace with your own BTTV, 7TV, FFZ and/or Twitch Emotes | Format : {"Platform":(["emote", "emote", "emote", ...], "prefix")}
             "7TV": #7TV Emotes
@@ -173,6 +165,12 @@ class MyComponent(commands.Component):
                 "")
             }
         self.emotes_combo : list = ["", 0] #Holds a list like : [str("Emote Name"), int(number of instance of this emote in a row)]
+        
+        self.shared_chat_users : list = []
+        self.hype_train_level : int = -1
+        self.hype_train_level_complete : float = 0
+        self.start_time : datetime = datetime.now()
+        self.lurkers = []
 
     def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
@@ -241,10 +239,8 @@ class MyComponent(commands.Component):
                         return word
         raise ValueError
     
-    def format_time_since(self, time:datetime, leap_year_warning:bool=False) -> str:
-        tz = time.tzinfo
-        now = datetime.now(tz)
-        time_diff = now-time
+    def format_time_since(self, biggest:datetime, smallest:datetime, leap_year_warning:bool=False) -> str:
+        time_diff = biggest-smallest
 
         secs = int(time_diff.total_seconds())
         mins = int(secs // 60)
@@ -334,7 +330,7 @@ class MyComponent(commands.Component):
             else:
                 play_audio = True
 
-        if payload.chatter.name in ["fossabot", "streamelements", "thebot580", "thefox580", "nightbot"]: #Bots + broadcaster
+        if payload.chatter.name in ["fossabot", "streamelements", "thebot580", "nightbot", payload.broadcaster.name]: #Bots + broadcaster
             command_message = True
         elif payload.text[0] == "!" or payload.text[0] == '-':
             command_message = True
@@ -366,14 +362,15 @@ class MyComponent(commands.Component):
 
             if (play_audio and not (command_message or banned_message)):
 
-                # Send Twitch message to 11Labs to turn into cool audio
-                elevenlabs_output = elevenlabs_manager.text_to_audio(twitchChatMessage, ELEVENLABS_VOICE)
+                # Send Twitch message to Azure to turn into cool audio
+                output = tts_manager.text_to_speech(twitchChatMessage)
 
                 if payload.broadcaster.name == "lerenard580":
-                    # Play the mp3 file
-                    audio_manager.play_audio(elevenlabs_output, True, True, True)
+                    # Play the file
+                    audio_manager.play_audio(output, True, True, True)
 
                 if payload.broadcaster.name == "thefox580":
+                    #THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
 
                     posY = obswebsockets_manager.get_source_transform("Bots", "TwitchChat")['positionY']
                     while posY > 693:
@@ -381,8 +378,8 @@ class MyComponent(commands.Component):
                         new_transform = {"positionY": posY}
                         obswebsockets_manager.set_source_transform("Bots", "TwitchChat", new_transform)
 
-                    # Play the mp3 file
-                    audio_manager.play_audio(elevenlabs_output, True, True, True)
+                    # Play the file
+                    audio_manager.play_audio(output, True, True, True)
 
                     posY = obswebsockets_manager.get_source_transform("Bots", "TwitchChat")['positionY']
                     while posY < 1080:
@@ -393,26 +390,27 @@ class MyComponent(commands.Component):
                 elif payload.broadcaster.name == "thealt580":
 
                     #THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
-                    #I replaced the png moving with the "Audio Move" filter on the "Move" OBS Plugin
-                    
-                    #obswebsockets_manager.set_source_visibility("Bots", "Chat_Image_Talk", True)
 
-                    #obswebsockets_manager.set_source_visibility("Bots", "Chat_Image_Paused", False)
-                    
-                    # Play the mp3 file
-                    audio_manager.play_audio(elevenlabs_output, True, True, True)
-                    
-                    #obswebsockets_manager.set_source_visibility("Bots", "Chat_Image_Paused", True)
+                    posY = obswebsockets_manager.get_source_transform("Bots", "TwitchChat")['positionY']
+                    while posY > 693:
+                        posY -= 1
+                        new_transform = {"positionY": posY}
+                        obswebsockets_manager.set_source_transform("Bots", "TwitchChat", new_transform)
 
-                    #obswebsockets_manager.set_source_visibility("Bots", "Chat_Image_Talk", False)
+                    # Play the file
+                    audio_manager.play_audio(output, True, True, True)
+
+                    posY = obswebsockets_manager.get_source_transform("Bots", "TwitchChat")['positionY']
+                    while posY < 1080:
+                        posY += 1
+                        new_transform = {"positionY": posY}
+                        obswebsockets_manager.set_source_transform("Bots", "TwitchChat", new_transform)
                     
         if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
             await payload.chatter.ban(moderator=BOT_ID, reason="INVALID MESSAGE")
             banMessage = "BANNED MESSAGE DETECTED : MESSAGE WILL NOT BE SAID"
             print(banMessage)
-            #elevenlabs_output = elevenlabs_manager.text_to_audio(banMessage, ELEVENLABS_VOICE)
-            #audio_manager.play_audio(elevenlabs_output, True, True, True)
 
 
     # CHANNEL COMMANDS
@@ -435,7 +433,7 @@ class MyComponent(commands.Component):
 
         !socials
         """
-        await ctx.send("https://www.discord.gg/9tmdgHWaMU, https://www.youtube.com/@thefox580, https://www.twitch.tv/thefox580")
+        await ctx.send("https://www.discord.gg/9tmdgHWaMU, https://www.youtube.com/@thefox580")
 
     @socials.command(name="discord")
     async def socials_discord(self, ctx: commands.Context) -> None:
@@ -461,51 +459,55 @@ class MyComponent(commands.Component):
                 await ctx.send(f"Sorry {ctx.chatter.display_name}, but you are not following the channel...")
             else:
                 follow_time = follow_info.followed_at
-                await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(follow_time, True)}. (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
+                await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(datetime.now(), follow_time, True)}. (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
 
     @commands.command()
     async def uptime(self, ctx: commands.Context):
-        await ctx.send(f"Fox has been live for {self.format_time_since(datetime.now())} (Stream started at {START_TIME.strftime("%d/%m/%Y at %H:%M:%S %Z")}).")
+        await ctx.send(f"Fox has been live for {self.format_time_since(datetime.now(), self.start_time)} (Stream started at {self.start_time.strftime("%d/%m/%Y at %H:%M:%S %Z")}).")
 
     @commands.command()
     async def lurk(self, ctx: commands.Context):
-        await ctx.send(f"You just started lurking {ctx.chatter.display_name}, see ya soon !")
+        if ctx.chatter.name not in self.lurkers:
+            self.lurkers.append(ctx.chatter.name)
+            await ctx.send(f"You just started lurking {ctx.chatter.display_name}, see ya soon!")
+        else:
+            await ctx.send(f"You were already lurking! But see you later {ctx.chatter.display_name}.")
 
     @commands.command()
     async def unlurk(self, ctx: commands.Context):
-        await ctx.send(f"Welcome back {ctx.chatter.display_name} !")
+        if ctx.chatter.name in self.lurkers:
+            self.lurkers.remove(ctx.chatter.name)
+            await ctx.send(f"Welcome back {ctx.chatter.display_name}!")
+        else:
+            await ctx.send(f"You weren't lurking! But welcome back {ctx.chatter.display_name}.")
 
     @commands.command()
     async def time(self, ctx: commands.Context):
         await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S %Z")} for Fox.")
-
-    @commands.command(aliases=["charity"])
-    async def donate(self, ctx: commands.Context):
-        await ctx.send(f"Donate to support the Teenage Cancer Trust as they support young people and their families in their cancer journey: https://tilt.fyi/UypO9dkP0I")
-
-    @commands.command(aliases=["fi"])
-    async def forakenisle(self, ctx: commands.Context):
-        await ctx.send(f"Forsaken Isle is back for a 3rd season! And this time, they're raising money alongside the Heart of a Hero campaign, raising money to support the Teenage Cancer Trust who support young people and their families in their cancer journey: https://tilt.fyi/X7LjIk6BAS")
-    
-    @commands.command()
-    async def heart(self, ctx: commands.Context):
-        await ctx.send(f"Heart of a Hero is a year long fundraiser that is raising money to support in the fight against cancer and support those battling it!")
     
     @commands.command()
     async def today(self, ctx: commands.Context):
-        await ctx.send(f"Today, we're coding for a private event with friends only.")
+        await ctx.send(f"Playing in WubDub's Tomeroo Tournament Birthday Event with @spixkokiri, @redye_ and @joeyfishlive against @bockmind")
+    
+    #@commands.command()
+    #async def subtember(self, ctx: commands.Context):
+    #    await ctx.send(f"NEW : BEFORE THE END OF THE MONTH, FOR EVERY 5+ GIFTED SUBS, VALORANT WILL GIVE ADDITIONAL SUBS FOR EVERYONE! For the next {self.format_time_since(datetime.fromtimestamp(1759338000), datetime.now())}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to https://www.twitch.tv/subs/thefox580 !")
+    
+    #@commands.command(aliases=["donate"])
+    #async def charity(self, ctx: commands.Context):
+    #    await ctx.send(f"We're raising money for the Water Warrior initiative! Donate here: https://tiltify.com/+the-water-warriors/forsaken-islands-fusion-frenzy")
     
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
-        await ctx.send(f"TheBot580 is a custom bot I made in python, based on DougDoug's Babagaboosh's app. It is currently running on version 2.0 (Using TwitchIO 3.0.0b4 & Python 3.13.3)")
+        await ctx.send(f"TheBot580 is a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.0.1 & Python 3.13.6)")
     
-    @commands.command(aliases=["tc"])
-    async def twitchcon(self, ctx: commands.Context):
-        await ctx.send(f"I'll be in Rotterdam from Thursday, May 29th to Monday, June 2nd! Of course, I'll be attending TwitchCon Rotterdam 2025 on Saturday & Sunday, but I will also be at WraithStation's \"Minecraft Quiz & Games In The Park\" on Friday! But wait, there's more! Every night, at around 9PM CEST, I'm gonna be cooking on stream!")
-
     @commands.command()
     async def age(self, ctx: commands.Context):
-        await ctx.send(f"I am {self.format_time_since(datetime.fromtimestamp(1139072400), True)} old.")
+        await ctx.send(f"Fox is {self.format_time_since(datetime.now(), datetime.fromtimestamp(1139072400), True)} old.")
+
+    @commands.command()
+    async def challenge(self, ctx: commands.Context):
+        await ctx.send(f"Every sub / game, Fox will spin a wheel to make the game more or less playable.")
     
     @commands.command()
     @commands.is_moderator()
@@ -515,8 +517,7 @@ class MyComponent(commands.Component):
         if game == None:
             await ctx.send(f"Failed to update the category, please enter a valid category name")
         else:
-            game_id = game.id
-            await ctx.broadcaster.modify_channel(game_id=game_id)
+            await ctx.broadcaster.modify_channel(game_id=game.id)
     
     @commands.command()
     @commands.is_moderator()
@@ -559,8 +560,8 @@ class MyComponent(commands.Component):
             message=f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak}",
         )
         message = f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak} They said: \"{self.treat_message(payload.text)}\""
-        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE)
-        audio_manager.play_audio(elevenlabs_output, True, True, True)
+        output = tts_manager.text_to_speech(message)
+        audio_manager.play_audio(output, True, True, True)
 
     @commands.Component.listener()
     async def event_subscription_gift(self, payload: twitchio.ChannelSubscriptionGift) -> None:
@@ -601,8 +602,8 @@ class MyComponent(commands.Component):
                 message=f"{display_name} cheered {payload.bits} bits!",
             )
             message = f"{display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
-        elevenlabs_output = elevenlabs_manager.text_to_audio(message, ELEVENLABS_VOICE)
-        audio_manager.play_audio(elevenlabs_output, True, True, True)
+        output = tts_manager.text_to_speech(message)
+        audio_manager.play_audio(output, True, True, True)
 
     @commands.Component.listener()
     async def event_prediction_start(self, payload:twitchio.ChannelPredictionBegin) -> None:
@@ -720,7 +721,7 @@ class MyComponent(commands.Component):
 
         # Keep in mind we are assuming this is for ourselves
         # others may not want your bot randomly sending messages...
-        START_TIME = datetime.now()
+        self.start_time = datetime.now()
         await payload.broadcaster.send_message(
             sender=BOT_ID,
             message=f"{payload.broadcaster.display_name} is now live",
@@ -732,7 +733,7 @@ class MyComponent(commands.Component):
 
         # Keep in mind we are assuming this is for ourselves
         # others may not want your bot randomly sending messages...
-        stream_time_diff = self.format_time_since(START_TIME)
+        stream_time_diff = self.format_time_since(datetime.now(), self.start_time)
         await payload.broadcaster.send_message(
             sender=BOT_ID,
             message=f"The stream is now offline. {payload.broadcaster.display_name} has been live for the past {stream_time_diff}",
@@ -743,7 +744,7 @@ class MyComponent(commands.Component):
         print("Received event : Hype Train started")
         channel = payload.broadcaster
         train_level = payload.level
-        HYPE_TRAIN_LEVEL = train_level
+        self.hype_train_level = train_level
         shared_text = ""
         is_shared = payload.shared_train
         if is_shared:
@@ -766,8 +767,8 @@ class MyComponent(commands.Component):
         print("Received event : Hype Train progressed")
         channel = payload.broadcaster
         train_level = payload.level
-        if train_level > HYPE_TRAIN_LEVEL: # type: ignore
-            HYPE_TRAIN_LEVEL = train_level
+        if train_level > self.hype_train_level: # type: ignore
+            self.hype_train_level = train_level
             shared_text = ""
             is_shared = payload.shared_train
             if is_shared:
@@ -779,10 +780,10 @@ class MyComponent(commands.Component):
                 golden_kappa_text = "Treasure "
             train_goal = payload.goal
             train_progress = payload.progress
-            HYPE_TRAIN_LEVEL_COMPLETE = round(train_progress/train_goal*100,2) #A percentage of level completion
+            self.hype_train_level_complete = round(train_progress/train_goal*100,2) #A percentage of level completion
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"The {shared_text}{golden_kappa_text}Hype Train has leveled up! We're {HYPE_TRAIN_LEVEL_COMPLETE}% through level {train_level}!"
+                message=f"The {shared_text}{golden_kappa_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!"
             )
 
     @commands.Component.listener()
@@ -790,7 +791,7 @@ class MyComponent(commands.Component):
         print("Received event : Hype Train ended")
         channel = payload.broadcaster
         train_level = payload.level
-        HYPE_TRAIN_LEVEL = -1
+        self.hype_train_level = -1
         shared_text = ""
         is_shared = payload.shared_train
         if is_shared:
@@ -806,7 +807,7 @@ class MyComponent(commands.Component):
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=f"The {shared_text}{golden_kappa_text}Hype Train has left the chat... We reached {HYPE_TRAIN_LEVEL_COMPLETE}% of level {train_level}! The next Hype Train can come back in {mins} minutes."
+            message=f"The {shared_text}{golden_kappa_text}Hype Train has left the chat... We reached {self.hype_train_level_complete}% of level {train_level}! The next Hype Train can come back in {mins} minutes."
         )
 
     @commands.Component.listener()
@@ -816,9 +817,9 @@ class MyComponent(commands.Component):
         host = payload.host
         participants = payload.participants
         participants_str = payload.host.display_name
-        SHARED_CHAT_USERS.append(host)
+        self.shared_chat_users.append(host)
         for participant in participants:
-            SHARED_CHAT_USERS.append(participant)
+            self.shared_chat_users.append(participant)
             participants_str += f", {participant.display_name}" # type: ignore
         await channel.send_message(
             sender=BOT_ID,
@@ -832,20 +833,20 @@ class MyComponent(commands.Component):
         host = payload.host
         participants = payload.participants
         participants_str = payload.host.display_name
-        diff = len(SHARED_CHAT_USERS) - len(participants.append(host)) # type: ignore
+        diff = len(self.shared_chat_users) - len(participants.append(host)) # type: ignore
         if diff < 0: #If a user was added
-            SHARED_CHAT_USERS = [host]
+            self.shared_chat_users = [host]
             for participant in participants:
-                SHARED_CHAT_USERS.append(participant)
+                self.shared_chat_users.append(participant)
                 participants_str += f", {participant.display_name}" # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
                 message=f"{host.display_name} has added {abs(diff)} users to the shared chat. The participants now are {participants_str}."
             )
         else: #If a user was removed
-            SHARED_CHAT_USERS = [host]
+            self.shared_chat_users = [host]
             for participant in participants:
-                SHARED_CHAT_USERS.append(participant)
+                self.shared_chat_users.append(participant)
                 participants_str += f", {participant.display_name}" # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
@@ -857,7 +858,7 @@ class MyComponent(commands.Component):
         print("Received event : Shared Chat session ended")
         channel = payload.broadcaster
         host = payload.host
-        SHARED_CHAT_USERS = []
+        self.shared_chat_users = []
         await channel.send_message(
             sender=BOT_ID,
             message=f"{host.display_name} has ended the shared chat session."
@@ -951,10 +952,10 @@ class MyComponent(commands.Component):
                     message=f"{shoutout_receiver.display_name} was streaming \"{game.name}\"! If you enjoy it, you should go check it out!"
                 )
                 return
-        await channel.send_message(
-            sender=BOT_ID,
-            message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!"
-        )
+        #await channel.send_message(
+        #    sender=BOT_ID,
+        #    message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!"
+        #)
 
 def main() -> None:
     twitchio.utils.setup_logging(level=logging.INFO)

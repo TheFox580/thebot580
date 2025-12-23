@@ -3,15 +3,15 @@ asqlite==2.0.0
 asyncio==3.4.3
 azure-cognitiveservices-speech==1.44.0
 datetime==5.5
-elevenlabs==2.0.0
 keyboard==0.13.5
 logging==0.4.9.6
 mutagen==1.47.0
 obs_websocket_py==1.0
-openai==1.93.0
 pydantic==2.11.7
 pygame==2.6.1
 requests==2.32.4
 rich==14.0.0
 soundfile==0.13.1
 twitchio==3.0.1
+gtts==2.5.4
+pydub==0.25.1

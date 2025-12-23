@@ -50,6 +50,8 @@ This code uses the TwitchIO **3.0.1** Library, ElevenLabs **2.0.0**'s Text-To-Sp
 
 > *Tip* : *🆙* means this interaction has been updated & *🆕* means this interaction has been added
 
+> *🆙* : The wait time for the bot to start has been removed by `2*<number of subscriptions>`!
+
 **TheBot580 uses EventSub to allow for interactive moments with chat! So far, TheBot580 interacts with :**
 
 * [ ] [**New Follower ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L530)
@@ -63,15 +65,15 @@ This code uses the TwitchIO **3.0.1** Library, ElevenLabs **2.0.0**'s Text-To-Sp
 * [x] [**Poll Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L683)
 * [x] [**Poll Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L701)
 * [ ] Stream [**Starts ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L718) and [**Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L730)
-* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L742) *🆙*
-* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L765) *🆙*
-* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L789) *🆙*
+* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L742)
+* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L765)
+* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L789)
 * [ ] [**Shared Chat Collaboration Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L813)
 * [ ] [**Shared Chat Collaboration Updates (User join / left) ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L829)
 * [ ] [**Shared Chat Collaboration Ends ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L856)
-* [ ] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L867)
-* [ ] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L884)
-* [ ] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L869)
+* [x] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L867) *🆙*
+* [x] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L884) *🆙*
+* [x] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L869) *🆙*
 * [ ] [**Raid ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L914) *(Gives an automatic shoutout)*
 * [ ] [**Title & Category Update ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L928)
 * [ ] [**Shoutout Created (*🆕*) ↗**](https://github.com/TheFox580/thebot580/blob/2.0/twitch_bot.py#L938)
