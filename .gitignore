@@ -1,6 +1,8 @@
 /.venv
 /.vscode
+/audio_tests
 __pycache__
 ChatHistoryBackup.txt
 keys.py
+tests.py
 tokens.*
