@@ -9,7 +9,7 @@ from twitchio import eventsub
 
 from audio_player import AudioManager
 from obs_websockets import OBSWebsocketsManager
-from datetime import datetime
+from datetime import datetime, timezone
 from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_ID, AZURE_TTS_VOICE
 import requests
 from tts import TTSManager
@@ -300,7 +300,7 @@ class MyComponent(commands.Component):
         banned_message = False
         command_message = False
 
-        print(f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text}")    
+        print(f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text}")
 
         #Setup what will be translated as a variable
         twitchChatMessage = payload.text
@@ -453,17 +453,19 @@ class MyComponent(commands.Component):
 
     @commands.command(aliases=["follow",'followsince'])
     async def followage(self, ctx: commands.Context):
+        print(ctx.chatter)
         if type(ctx.chatter) == twitchio.Chatter:
             follow_info = await ctx.chatter.follow_info()
+            print(follow_info)
             if follow_info == None:
                 await ctx.send(f"Sorry {ctx.chatter.display_name}, but you are not following the channel...")
             else:
                 follow_time = follow_info.followed_at
-                await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(datetime.now(), follow_time, True)}. (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
+                await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(datetime.now(timezone.utc), follow_time, True)}. (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
 
     @commands.command()
     async def uptime(self, ctx: commands.Context):
-        await ctx.send(f"Fox has been live for {self.format_time_since(datetime.now(), self.start_time)} (Stream started at {self.start_time.strftime("%d/%m/%Y at %H:%M:%S %Z")}).")
+        await ctx.send(f"Fox has been live for {self.format_time_since(datetime.now(timezone.utc), self.start_time)} (Stream started at {self.start_time.strftime("%d/%m/%Y at %H:%M:%S %Z")}).")
 
     @commands.command()
     async def lurk(self, ctx: commands.Context):
@@ -483,7 +485,7 @@ class MyComponent(commands.Component):
 
     @commands.command()
     async def time(self, ctx: commands.Context):
-        await ctx.send(f"It is currently {datetime.now().strftime("%d/%m/%Y, %H:%M:%S %Z")} for Fox.")
+        await ctx.send(f"It is currently {datetime.now().strftime("%B %d %Y, %H:%M:%S")} for Fox.")
     
     @commands.command()
     async def today(self, ctx: commands.Context):
@@ -504,13 +506,9 @@ class MyComponent(commands.Component):
     @commands.command()
     async def age(self, ctx: commands.Context):
         await ctx.send(f"Fox is {self.format_time_since(datetime.now(), datetime.fromtimestamp(1139072400), True)} old.")
-
-    @commands.command()
-    async def challenge(self, ctx: commands.Context):
-        await ctx.send(f"Every sub / game, Fox will spin a wheel to make the game more or less playable.")
     
     @commands.command()
-    @commands.is_moderator()
+    @commands.is_moderator() #Until TwitchIO 3.2.0 releases, this will not work for users with the Lead Moderator Role
     async def setgame(self, ctx: commands.Context, *, content: str) -> None:
         game : twitchio.Game | None = await ctx.bot.fetch_game(name=content)
         print(game)
@@ -520,7 +518,7 @@ class MyComponent(commands.Component):
             await ctx.broadcaster.modify_channel(game_id=game.id)
     
     @commands.command()
-    @commands.is_moderator()
+    @commands.is_moderator() #Until TwitchIO 3.2.0 releases, this will not work for users with the Lead Moderator Role
     async def settitle(self, ctx: commands.Context, *, content: str) -> None:
         await ctx.broadcaster.modify_channel(title=content)
 
@@ -819,7 +817,8 @@ class MyComponent(commands.Component):
         participants_str = payload.host.display_name
         self.shared_chat_users.append(host)
         for participant in participants:
-            self.shared_chat_users.append(participant)
+            if participant not in self.shared_chat_users:
+                self.shared_chat_users.append(participant)
             participants_str += f", {participant.display_name}" # type: ignore
         await channel.send_message(
             sender=BOT_ID,
@@ -832,12 +831,14 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         host = payload.host
         participants = payload.participants
+        participants.append(host)
         participants_str = payload.host.display_name
-        diff = len(self.shared_chat_users) - len(participants.append(host)) # type: ignore
+        diff = len(self.shared_chat_users) - len(participants)
         if diff < 0: #If a user was added
             self.shared_chat_users = [host]
             for participant in participants:
-                self.shared_chat_users.append(participant)
+                if participant not in self.shared_chat_users:
+                    self.shared_chat_users.append(participant)
                 participants_str += f", {participant.display_name}" # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
@@ -846,7 +847,8 @@ class MyComponent(commands.Component):
         else: #If a user was removed
             self.shared_chat_users = [host]
             for participant in participants:
-                self.shared_chat_users.append(participant)
+                if participant not in self.shared_chat_users:
+                    self.shared_chat_users.append(participant)
                 participants_str += f", {participant.display_name}" # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
