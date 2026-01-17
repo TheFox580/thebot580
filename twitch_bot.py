@@ -38,7 +38,6 @@ class Bot(commands.Bot):
 
         subscriptions = []
 
-
         # Subscribe to read chat (event_message) from our channel as the bot...
         # This creates and opens a websocket to Twitch EventSub...
         subscriptions.append(eventsub.ChatMessageSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID))
@@ -75,10 +74,12 @@ class Bot(commands.Bot):
         subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))
 
+        """
+        # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
         # Subscribe and listen to when shared chat starts, updates or ends..
         subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))"""
 
         # Subscribe and listen to when goal starts, updates or ends..
         subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
@@ -171,6 +172,7 @@ class MyComponent(commands.Component):
         self.hype_train_level_complete : float = 0
         self.start_time : datetime = datetime.now()
         self.lurkers = []
+        self.tts = True
 
     def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
@@ -195,8 +197,12 @@ class MyComponent(commands.Component):
                 final_message += "love "
             if "D:" == word:
                 final_message += "D face "
-            if "W" == word.upper():
-                final_message += "double you "
+            if "D:" == word:
+                final_message += "D face "
+            if ("</3" == word) or ("<3" == word):
+                final_message += "love "
+            if "https" in word:
+                pass
             else:
                 final_message += word + " "
         
@@ -293,7 +299,6 @@ class MyComponent(commands.Component):
     @commands.Component.listener()
     async def event_message(self, payload: twitchio.ChatMessage) -> None:
 
-        tts = True
         tts_event = False
         play_audio = False
         
@@ -321,7 +326,7 @@ class MyComponent(commands.Component):
                     await payload.broadcaster.add_blocked_term(moderator=BOT_ID, text=word.lower())
                     print(f"{word} has been added as a blocked term on your channel.")
 
-        if tts:
+        if self.tts:
             if tts_event:
                 
                 if payload.chatter.subscriber or payload.chatter.vip or payload.chatter.moderator:
@@ -489,7 +494,22 @@ class MyComponent(commands.Component):
     
     @commands.command()
     async def today(self, ctx: commands.Context):
-        await ctx.send(f"Playing in WubDub's Tomeroo Tournament Birthday Event with @spixkokiri, @redye_ and @joeyfishlive against @bockmind")
+        await ctx.send(f"Playing until I either get an official PB in ranked or I crash out (probably gonna be the latter)")
+    
+    @commands.command()
+    async def tts(self, ctx: commands.Context):
+        if ctx.chatter.moderator or ctx.chatter.broadcaster: # type: ignore # type: ignore
+            self.tts = not self.tts
+            if self.tts:
+                await ctx.send(f"TTS has been turned on.")
+                return
+            await ctx.send(f"TTS has been turned off.")
+            return
+        
+        if self.tts:
+            await ctx.send(f"TTS is currently turned on.")
+            return
+        await ctx.send(f"TTS is currently turned off.")
     
     #@commands.command()
     #async def subtember(self, ctx: commands.Context):
@@ -501,7 +521,7 @@ class MyComponent(commands.Component):
     
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
-        await ctx.send(f"TheBot580 is a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.0.1 & Python 3.13.6)")
+        await ctx.send(f"TheBot580 is a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.1.0 & Python 3.13.11)")
     
     @commands.command()
     async def age(self, ctx: commands.Context):
@@ -966,6 +986,7 @@ def main() -> None:
         async with asqlite.create_pool("tokens.db") as tdb, Bot(token_database=tdb) as bot:
             await bot.setup_database()
             await bot.start()
+
 
     try:
         asyncio.run(runner())
