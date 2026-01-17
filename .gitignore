@@ -6,3 +6,5 @@ ChatHistoryBackup.txt
 keys.py
 tests.py
 tokens.*
+_Msg*
+/custom_shit_that_uses_this
