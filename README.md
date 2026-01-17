@@ -20,11 +20,11 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 **TheBot580 will by default enable Text-To-Speech messages, meaning that any safe messages will be read out loud by the progam!**
 
-> *Note* : This setting can be disabled by putting `TTS = False` at [*this line ↗*](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L296)
+> *Note* : This setting can be disabled by putting `self.tts = False`
 
 > *Tip* : If you're streaming with TTS Enabled, you can use a plugin like [*win-capture-audio ↗*](https://github.com/bozbez/win-capture-audio) and make it output `python.exe` to have TTS on a separate audio channel!
 
-> *Tip* : With this plugin and the [*Move plugin ↗*](https://github.com/exeldro/obs-move-transition), you can make a png move like TheBot580 was actually talking with the use of [*OBS Websockets ↗*](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L26)!
+> *Tip* : With this plugin and the [*Move plugin ↗*](https://github.com/exeldro/obs-move-transition), you can make a png move like TheBot580 was actually talking with the use of OBS Websockets
 
 ---
 
@@ -32,15 +32,15 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 **TheBot580 will automatically count how many times in a row an emote has been used, and will send a message if the emote has been said at least 5 times!**
 
-> *Note* : Although Better TTV Emotes are being automatically added, I haven't implemented custom support for the other platforms yet, so you may [*enter your own emotes here ↗*](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L149)
+> *Note* : Although Better TTV Emotes are being automatically added, I haven't implemented custom support for the other platforms yet, so you may enter your own emotes here
 
-> *Tip* : You can modify the message that the bot sends in chat [*to your liking here ↗*](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L346)
+> *Tip* : You can modify the message that the bot sends in chat to your liking here
 
 ---
 
 ### Use advanced commands
 
-**Thanks to TwitchIO 3.0.0, we now have more control on how to use bot commands! [*You can check some I have already set up here ↗*](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L416)!**
+**Thanks to TwitchIO 3.0.0+, we now have more control on how to use bot commands! *You can check some I have already set up!***
 
 ---
 
@@ -50,33 +50,31 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 > *Tip* : *🆙* means this interaction has been updated & *🆕* means this interaction has been added
 
-> *🆙* : The wait time for the bot to start has been removed by `2*<number of subscriptions>`!
-
 **TheBot580 uses EventSub to allow for interactive moments with chat! So far, TheBot580 interacts with :**
 
-* [ ] [**New Follower ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L529)
-* [x] [**New Subscriber ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L538)
-* [x] [**Resubscriptions ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L549)
-* [x] [**Normal / Anonymous Gifted Subscriptions ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L565)
-* [x] [**Normal / Anonymous Cheer Message ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L584)
-* [x] [**Prediction Begins ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L607)
-* [x] [**Prediction Locks ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L625)
-* [x] [**Prediction Ends ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L650)
-* [x] [**Poll Begins ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L682)
-* [x] [**Poll Ends ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L700)
-* [ ] Stream [**Starts ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L717) and [**Ends ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L729)
-* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Begins ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L741)
-* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Progress ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L764)
-* [x] [**Golden / Treasure (*🆕*) / Normal (Shared *🆕*) Hype Train Ends ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L788)
-* [ ] [**Shared Chat Collaboration Begins ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L812)
-* [ ] [**Shared Chat Collaboration Updates (User join / left) ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L829)
-* [ ] [**Shared Chat Collaboration Ends ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L859)
-* [x] [**Follower / Subcription / Cheer Goal Begins ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L870) *🆙*
-* [x] [**Follower / Subcription / Cheer Goal Progress ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L887) *🆙*
-* [x] [**Follower / Subcription / Cheer Goal Reached ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L899) *🆙*
-* [ ] [**Raid ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L917) *(Gives an automatic shoutout)*
-* [ ] [**Title & Category Update ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L931)
-* [ ] [**Shoutout Created (*🆕*) ↗**](https://github.com/TheFox580/thebot580/blob/main/twitch_bot.py#L942)
+* [ ] **New Follower**
+* [x] **New Subscriber**
+* [x] **Resubscriptions**
+* [x] **Normal / Anonymous Gifted Subscriptions**
+* [x] **Normal / Anonymous Cheer Message**
+* [x] **Prediction Begins**
+* [x] **Prediction Locks**
+* [x] **Prediction Ends**
+* [x] **Poll Begins**
+* [x] **Poll Ends**
+* [ ] Stream **Starts** and **Ends**
+* [x] **Golden / Treasure / Normal (Shared) Hype Train Begins**
+* [x] **Golden / Treasure / Normal (Shared) Hype Train Progress**
+* [x] **Golden / Treasure / Normal (Shared) Hype Train Ends**
+* [ ] **Shared Chat Collaboration Begins** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
+* [ ] **Shared Chat Collaboration Updates (User join / left)** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
+* [ ] **Shared Chat Collaboration Ends** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
+* [x] **Follower / Subcription / Cheer Goal Begins**
+* [x] **Follower / Subcription / Cheer Goal Progress**
+* [x] **Follower / Subcription / Cheer Goal Reached**
+* [ ] **Raid** *(Gives an automatic shoutout)*
+* [ ] **Title & Category Update**
+* [ ] **Shoutout Created**
 * More to come...
 
 > *Note* : If you don't know how to start TheBot580 (especially for the 1st time), read the [*TwitchIO tutorial ↗*](https://twitchio.dev/en/latest/getting-started/quickstart.html) on how to start the bot!
@@ -89,7 +87,7 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 * `AZURE_TTS_KEY`
 * `AZURE_TTS_REGION`
-* `AZURE_TTS_VOICE` ([*Click here to see all voices available ↗*](https://aka.ms/speech/voices/neural))
+* `AZURE_TTS_VOICE` ([*Click here to see all voices available ↗*](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#tabpanel_1_tts))
 * `TWITCH_BOT_CLIENT_ID`
 * `TWITCH_BOT_CLIENT_SECRET`
 * `OWNER_ID`
