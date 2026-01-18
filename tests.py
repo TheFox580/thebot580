@@ -2,12 +2,17 @@ import requests
 
 from keys import OWNER_ID
 
-def getBTTVEmotes(broadcaster_id:str):
+def get7TVEmotes(broadcaster_id:str):
     emotes : list[str] = []
-    req = requests.get(f'https://api.betterttv.net/3/cached/users/twitch/{broadcaster_id}')
+
+    req = requests.get(f'https://api.7tv.app/v3/users/twitch/{broadcaster_id}')
     res = req.json()
-    for emote in res["sharedEmotes"]:
-        emotes.append(emote["code"])
+    emote_set = res["emote_set_id"]
+
+    req = requests.get(f'https://api.7tv.app/v3/emote-sets/{emote_set}')
+    res = req.json()
+    for emote in res["emotes"]:
+        emotes.append(emote["name"])
     return emotes
 
-print(getBTTVEmotes(OWNER_ID))
+print(get7TVEmotes(OWNER_ID))

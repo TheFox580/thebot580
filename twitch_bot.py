@@ -7,6 +7,8 @@ import twitchio
 from twitchio.ext import commands
 from twitchio import eventsub
 
+import json
+import math
 from audio_player import AudioManager
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime, timezone
@@ -45,7 +47,7 @@ class Bot(commands.Bot):
         # Subscribe and listen to when someone follows..
         subscriptions.append(eventsub.ChannelFollowSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
 
-        # Subscribe and listen to when someone (re)sub(-gift)..
+        """# Subscribe and listen to when someone (re)sub(-gift)..
         subscriptions.append(eventsub.ChannelSubscribeSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.ChannelSubscriptionGiftSubscription(broadcaster_user_id=OWNER_ID))
@@ -60,7 +62,7 @@ class Bot(commands.Bot):
 
         # Subscribe and listen to when poll starts or ends..
         subscriptions.append(eventsub.ChannelPollBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))"""
 
         # Subscribe and listen to when a shoutout is sent in chat..
         subscriptions.append(eventsub.ShoutoutCreateSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
@@ -69,10 +71,10 @@ class Bot(commands.Bot):
         subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.StreamOfflineSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when hype train starts, updates or ends..
+        """# Subscribe and listen to when hype train starts, updates or ends..
         subscriptions.append(eventsub.HypeTrainBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))"""
 
         """
         # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
@@ -81,10 +83,10 @@ class Bot(commands.Bot):
         subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))"""
 
-        # Subscribe and listen to when goal starts, updates or ends..
+        """# Subscribe and listen to when goal starts, updates or ends..
         subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))"""
 
         # Subscribe and listen to when someone raids..
         subscriptions.append(eventsub.ChannelRaidSubscription(to_broadcaster_user_id=OWNER_ID))
@@ -143,12 +145,7 @@ class MyComponent(commands.Component):
         self.bot = bot
         self.emotes_dict : dict[str, tuple[list[str], str]] = { #Replace with your own BTTV, 7TV, FFZ and/or Twitch Emotes | Format : {"Platform":(["emote", "emote", "emote", ...], "prefix")}
             "7TV": #7TV Emotes
-                (["angry", "awkward", "Bedge", "blobDance", "BoneZone", "BoneZoneD", "bro", "carJAM", "catJAM",
-                "Clap", "COPIUM", "crying", "dinkDonk", "exited", "giveitaname", "happi", "Happy", "horny",
-                "HUH", "huhhh", "KEKW", "KEKWait", "LMAO", "maybe", "Nerd", "NODDERS", "NOPERS", "ok",
-                "pepeD", "popCat", "shocked", "StreamerDoesntKnow", "stressed", "sylishguy",
-                "ThisBusIsLiterallyGoingToDriveThroughYourFuckingWallsAndCrushEveryBoneInsideOfYourWeakShellOfSkin",
-                "WAHOO", "WICKED", "YIPPIE", "GAMBA", "idk", "PepoG", "rizz", "thumbsup", "DICKS", "HUHH"],
+                (self.get7TVEmotes(OWNER_ID),
                 ""),
             "BTTV": #BTTV Emotes
                 (self.getBTTVEmotes(OWNER_ID),
@@ -183,6 +180,21 @@ class MyComponent(commands.Component):
                 emotes.append(emote["code"])
             return emotes
         raise requests.HTTPError
+    
+    
+
+    def get7TVEmotes(self, broadcaster_id:str):
+        emotes : list[str] = []
+
+        req = requests.get(f'https://api.7tv.app/v3/users/twitch/{broadcaster_id}')
+        res = req.json()
+        emote_set = res["emote_set_id"]
+
+        req = requests.get(f'https://api.7tv.app/v3/emote-sets/{emote_set}')
+        res = req.json()
+        for emote in res["emotes"]:
+            emotes.append(emote["name"])
+        return emotes
 
     def treat_message(self, message:str) -> str:
 
@@ -527,6 +539,27 @@ class MyComponent(commands.Component):
     async def age(self, ctx: commands.Context):
         await ctx.send(f"Fox is {self.format_time_since(datetime.now(), datetime.fromtimestamp(1139072400), True)} old.")
     
+    @commands.command()
+    async def look(self, ctx: commands.Context, *, content: str):
+
+        username = content.split()[0]
+
+        req = requests.get(f"https://api.mcsrranked.com/users/{username}")
+        data = json.loads(req.text)
+        if data["status"] == "success":
+            data = data['data']
+            stats = data["statistics"]["season"]
+            totalGamesPlayed = stats["playedMatches"]["ranked"]
+            gamesWon = stats["wins"]["ranked"]
+            gamesLost = stats["loses"]["ranked"]
+            gamesTied = totalGamesPlayed - gamesWon - gamesLost
+            pb = stats["completionTime"]["ranked"]
+            pb = (math.floor((pb / (1000*60)) % 60), math.floor((pb / 1000) % 60), math.floor((pb % 1000)))
+            ffRate = round(stats["forfeits"]["ranked"] / totalGamesPlayed*100, 2)
+            await ctx.send(f"{username} | Elo: {data["eloRate"]} (High/Low: {data["seasonResult"]["highest"]}/{data["seasonResult"]["lowest"]}) | #{data["eloRank"]} === Played {totalGamesPlayed} games | W/D/L {gamesWon}/{gamesTied}/{gamesLost} === PB: {pb[0]}:{pb[1]}:{pb[2]} === {ffRate}%", me=True)
+            return
+        await ctx.send(f"No player with the username \"{username}\" found")
+
     @commands.command()
     @commands.is_moderator() #Until TwitchIO 3.2.0 releases, this will not work for users with the Lead Moderator Role
     async def setgame(self, ctx: commands.Context, *, content: str) -> None:
