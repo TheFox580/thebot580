@@ -47,7 +47,7 @@ class Bot(commands.Bot):
         # Subscribe and listen to when someone follows..
         subscriptions.append(eventsub.ChannelFollowSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
 
-        """# Subscribe and listen to when someone (re)sub(-gift)..
+        # Subscribe and listen to when someone (re)sub(-gift)..
         subscriptions.append(eventsub.ChannelSubscribeSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.ChannelSubscriptionGiftSubscription(broadcaster_user_id=OWNER_ID))
@@ -62,7 +62,7 @@ class Bot(commands.Bot):
 
         # Subscribe and listen to when poll starts or ends..
         subscriptions.append(eventsub.ChannelPollBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))"""
+        subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
 
         # Subscribe and listen to when a shoutout is sent in chat..
         subscriptions.append(eventsub.ShoutoutCreateSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
@@ -71,10 +71,10 @@ class Bot(commands.Bot):
         subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.StreamOfflineSubscription(broadcaster_user_id=OWNER_ID))
 
-        """# Subscribe and listen to when hype train starts, updates or ends..
+        # Subscribe and listen to when hype train starts, updates or ends..
         subscriptions.append(eventsub.HypeTrainBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))"""
+        subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))
 
         """
         # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
@@ -83,10 +83,10 @@ class Bot(commands.Bot):
         subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))"""
 
-        """# Subscribe and listen to when goal starts, updates or ends..
+        # Subscribe and listen to when goal starts, updates or ends..
         subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))"""
+        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))
 
         # Subscribe and listen to when someone raids..
         subscriptions.append(eventsub.ChannelRaidSubscription(to_broadcaster_user_id=OWNER_ID))
@@ -996,21 +996,18 @@ class MyComponent(commands.Component):
         print("Received event : Created Shoutout")
         channel = payload.broadcaster
         shoutout_receiver = payload.to_broadcaster
-        channel_info_fetch = shoutout_receiver.fetch_channel_info()
-        if type(channel_info_fetch) == twitchio.ChannelInfo:
-            channel_info : twitchio.ChannelInfo = channel_info_fetch
-            game_fetch = channel_info.fetch_game()
-            if game_fetch != None:
-                game : twitchio.Game = game_fetch
-                await channel.send_message(
-                    sender=BOT_ID,
-                    message=f"{shoutout_receiver.display_name} was streaming \"{game.name}\"! If you enjoy it, you should go check it out!"
-                )
-                return
-        #await channel.send_message(
-        #    sender=BOT_ID,
-        #    message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!"
-        #)
+        channel_info = await shoutout_receiver.fetch_channel_info()
+        game = await channel_info.fetch_game()
+        if game != None:
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"{shoutout_receiver.display_name} was streaming \"{game.name}\"! If you enjoy it, you should go check it out!"
+            )
+            return
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!"
+        )
 
 def main() -> None:
     twitchio.utils.setup_logging(level=logging.INFO)
