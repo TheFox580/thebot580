@@ -181,26 +181,27 @@ class MyComponent(commands.Component):
             return emotes
         raise requests.HTTPError
     
-    
-
     def get7TVEmotes(self, broadcaster_id:str):
         emotes : list[str] = []
 
         req = requests.get(f'https://api.7tv.app/v3/users/twitch/{broadcaster_id}')
-        res = req.json()
-        emote_set = res["emote_set_id"]
+        if req.status_code == 200:
+            res = req.json()
+            emote_set = res["emote_set_id"]
 
-        req = requests.get(f'https://api.7tv.app/v3/emote-sets/{emote_set}')
-        res = req.json()
-        for emote in res["emotes"]:
-            emotes.append(emote["name"])
-        return emotes
+            req = requests.get(f'https://api.7tv.app/v3/emote-sets/{emote_set}')
+            res = req.json()
+            for emote in res["emotes"]:
+                emotes.append(emote["name"])
+            return emotes
+        raise requests.HTTPError
 
     def treat_message(self, message:str) -> str:
 
         final_message = ""
         messageList = message.split()
         for word in messageList:
+            word = word.replace("_", " ")
             if "Cheer" in word: #We don't want it to say the bits amount!
                 pass
             if ("🫡" == word) or ("o7" == word):
@@ -506,7 +507,8 @@ class MyComponent(commands.Component):
     
     @commands.command()
     async def today(self, ctx: commands.Context):
-        await ctx.send(f"Playing until I either get an official PB in ranked or I crash out (probably gonna be the latter)")
+        channelInfo : twitchio.ChannelInfo = await ctx.broadcaster.fetch_channel_info()
+        await ctx.send(channelInfo.title.split('} ')[1])
     
     @commands.command()
     async def tts(self, ctx: commands.Context):
@@ -553,15 +555,18 @@ class MyComponent(commands.Component):
             gamesWon = stats["wins"]["ranked"]
             gamesLost = stats["loses"]["ranked"]
             gamesTied = totalGamesPlayed - gamesWon - gamesLost
-            pb = stats["completionTime"]["ranked"]
-            pb = (math.floor((pb / (1000*60)) % 60), math.floor((pb / 1000) % 60), math.floor((pb % 1000)))
+            pb = stats["bestTime"]["ranked"]
+            if pb == None:
+                pb = ("no", "pb", "yet")
+            else:
+                pb = (math.floor((pb / (1000*60)) % 60), math.floor((pb / 1000) % 60), math.floor((pb % 1000)))
             ffRate = round(stats["forfeits"]["ranked"] / totalGamesPlayed*100, 2)
-            await ctx.send(f"{username} | Elo: {data["eloRate"]} (High/Low: {data["seasonResult"]["highest"]}/{data["seasonResult"]["lowest"]}) | #{data["eloRank"]} === Played {totalGamesPlayed} games | W/D/L {gamesWon}/{gamesTied}/{gamesLost} === PB: {pb[0]}:{pb[1]}:{pb[2]} === {ffRate}%", me=True)
+            await ctx.send(f"{username} | Elo: {data["eloRate"]} (High/Low: {data["seasonResult"]["highest"]}/{data["seasonResult"]["lowest"]}) | #{data["eloRank"]} === Played {totalGamesPlayed} games | W/D/L {gamesWon}/{gamesTied}/{gamesLost} === PB: {pb[0]}:{pb[1]}.{pb[2]} === {ffRate}% Forfeit Rate", me=True)
             return
         await ctx.send(f"No player with the username \"{username}\" found")
 
     @commands.command()
-    @commands.is_moderator() #Until TwitchIO 3.2.0 releases, this will not work for users with the Lead Moderator Role
+    @commands.is_moderator()
     async def setgame(self, ctx: commands.Context, *, content: str) -> None:
         game : twitchio.Game | None = await ctx.bot.fetch_game(name=content)
         print(game)
@@ -571,7 +576,7 @@ class MyComponent(commands.Component):
             await ctx.broadcaster.modify_channel(game_id=game.id)
     
     @commands.command()
-    @commands.is_moderator() #Until TwitchIO 3.2.0 releases, this will not work for users with the Lead Moderator Role
+    @commands.is_moderator()
     async def settitle(self, ctx: commands.Context, *, content: str) -> None:
         await ctx.broadcaster.modify_channel(title=content)
 
@@ -696,7 +701,7 @@ class MyComponent(commands.Component):
             channel_points = prediction_highest.channel_points
         await channel.send_message(
             sender=BOT_ID,
-            message=f"The \"{prediction_title}\" prediction has been locked! {prediction_highest.title} is the highest outcome with {round(channel_points/prediction_total*100, 2)}% | Outcomes are : {prediction_outcomes_str}."
+            message=f"The \"{prediction_title}\" prediction has been locked! \"{prediction_highest.title}\" is the highest outcome with {round(channel_points/prediction_total*100, 2)}% | Outcomes are : {prediction_outcomes_str}."
         )
 
     @commands.Component.listener()
@@ -728,7 +733,7 @@ class MyComponent(commands.Component):
                 channel_points = prediction_winner.channel_points # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"The \"{prediction_title}\" prediction has been ended! {prediction_winner.title} is the winning outcome with {round(channel_points/prediction_total*100, 2)}% (That's {prediction_total} TheDollar580 for {len(prediction_winner.users)} chatters) | Outcomes were : {prediction_outcomes_str}." # type: ignore
+                message=f"The \"{prediction_title}\" prediction has been ended! \"{prediction_winner.title}\" is the winning outcome with {round(channel_points/prediction_total*100, 2)}% (That's {prediction_total} TheDollar580 for {len(prediction_winner.users)} chatters) | Outcomes were : {prediction_outcomes_str}." # type: ignore
             )
 
     @commands.Component.listener()
