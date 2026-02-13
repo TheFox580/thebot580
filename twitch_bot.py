@@ -143,24 +143,20 @@ class MyComponent(commands.Component):
         # We pass bot here as an example...
         self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on", "Best view͙e̤rs", "smmtop11.online"]
         self.bot = bot
-        self.emotes_dict : dict[str, tuple[list[str], str]] = { #Replace with your own BTTV, 7TV, FFZ and/or Twitch Emotes | Format : {"Platform":(["emote", "emote", "emote", ...], "prefix")}
+
+        twitchEmotes = self.getTwitchEmotes(OWNER_ID)
+
+        self.emotes_dict : dict[str, list[str]] = { #Replace with your own BTTV, 7TV, FFZ and/or Twitch Emotes | Format : {"Platform":(["emote", "emote", "emote", ...], "prefix")}
             "7TV": #7TV Emotes
-                (self.get7TVEmotes(OWNER_ID),
-                ""),
+                self.get7TVEmotes(OWNER_ID),
             "BTTV": #BTTV Emotes
-                (self.getBTTVEmotes(OWNER_ID),
-                ""),
+                self.getBTTVEmotes(OWNER_ID),
             "FFZ": #FFZ Emotes
-                ([],
-                ""),
+                self.getFFZEmotes(OWNER_ID),
             "TwitchChannel": #Your Twitch Channel Emotes
-                (["Chat", "ChatArrive", "GaySub", "Happy", "Hi", "Kill", "Money", "NotStonks", "NotUltraRage",
-                "Objection", "Oops", "Pfp", "PTDR", "Sad", "Serious", "Stare", "StareSlide", "Stonks", "Sub",
-                "Timeline", "UltraKill", "UltraRage", "XPTDR"],
-                "thefox91"),
+                twitchEmotes[0],
             "Others": #Any other emotes that I don't know / Couldn't be bother to list (i.e. : Twitch Global Emotes or someone's Twitch Channel's Emotes)
-                ([],
-                "")
+                twitchEmotes[1]
             }
         self.emotes_combo : list = ["", 0] #Holds a list like : [str("Emote Name"), int(number of instance of this emote in a row)]
         
@@ -174,18 +170,18 @@ class MyComponent(commands.Component):
     def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
         req = requests.get(f'https://api.betterttv.net/3/cached/users/twitch/{broadcaster_id}')
-        if req.status_code == 200:
+        if req.ok:
             res = req.json()
             for emote in res["sharedEmotes"]:
                 emotes.append(emote["code"])
             return emotes
         raise requests.HTTPError
     
-    def get7TVEmotes(self, broadcaster_id:str):
+    def get7TVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
 
         req = requests.get(f'https://api.7tv.app/v3/users/twitch/{broadcaster_id}')
-        if req.status_code == 200:
+        if req.ok:
             res = req.json()
             emote_set = res["emote_set_id"]
 
@@ -195,6 +191,59 @@ class MyComponent(commands.Component):
                 emotes.append(emote["name"])
             return emotes
         raise requests.HTTPError
+    
+    def getFFZEmotes(self, broadcaster_id:str) -> list[str]:
+        emotes : list[str] = []
+
+        req = requests.get(f'https://api.frankerfacez.com/v1/room/id/{broadcaster_id}')
+
+        if req.ok :
+            res = req.json()
+            emoteSet  = res["room"]["set"]
+            currentSet = res["sets"][str(emoteSet)]
+            for emote in currentSet["emoticons"]:
+                emotes.append(emote["name"])
+            return emotes
+        raise requests.HTTPError
+    
+    def getTwitchEmotes(self, broadcaster_id:str) -> tuple[list[str], list[str]]:
+        emotes : tuple[list[str], list[str]] = ([], [])
+
+        params = {"client_id": TWITCH_BOT_CLIENT_ID, "client_secret": TWITCH_BOT_CLIENT_SECRET, "grant_type":"client_credentials"}
+
+        req = requests.post("https://id.twitch.tv/oauth2/token", params=params)
+
+        if not req.ok:
+            raise requests.HTTPError
+        res = req.json()
+        access_token = res["access_token"]
+
+        headers = {"Authorization": f"Bearer {access_token}", "Client-Id": TWITCH_BOT_CLIENT_ID}
+
+        req = requests.get(f'https://api.twitch.tv/helix/chat/emotes?broadcaster_id={broadcaster_id}', headers=headers)
+
+        if not req.ok :
+            raise requests.HTTPError
+        
+        res = req.json()
+        emote1 = []
+        for emote in res["data"]:
+            emote1.append(emote["name"])
+
+        req = requests.get(f'https://api.twitch.tv/helix/chat/emotes/global', headers=headers)
+
+        if not req.ok :
+            raise requests.HTTPError
+        
+        res = req.json()
+        emote2 = []
+        for emote in res["data"]:
+            emote2.append(emote["name"])
+
+        emotes : tuple[list[str], list[str]] = (emote1, emote2)
+
+        return emotes
+
 
     def treat_message(self, message:str) -> str:
 
@@ -227,34 +276,28 @@ class MyComponent(commands.Component):
                 return "1 or Prime"
         return tier[0]
     
-    def formatted_emotes(self, prefix:str, emotes:list[str]) -> list[str]:
-        formatted : list[str] = []
-        for emote in emotes:
-            formatted.append(f"{prefix}{emote}")
-        return formatted
-    
-    def message_has_an_emote(self, message:str, emote_dict:dict[str, tuple[list[str], str]]) -> bool:
+    def message_has_an_emote(self, message:str, emote_dict:dict[str, list[str]]) -> bool:
         messageList = message.split()
         for word in messageList:
             for key in emote_dict.keys():
                 emotes_looked_at = emote_dict[key]
-                if word in self.formatted_emotes(emotes_looked_at[1], emotes_looked_at[0]):
+                if word in emotes_looked_at:
                     return True
         return False
     
-    def message_has_emote(self, message:str, emote:str, emote_dict:dict[str, tuple[list[str], str]]) -> bool:
+    def message_has_emote(self, message:str, emote:str, emote_dict:dict[str, list[str]]) -> bool:
         if self.message_has_an_emote(message, emote_dict):
             messageList = message.split()
             return emote in messageList
         return False
     
-    def get_first_emote_in_message(self, message:str, emote_dict:dict[str, tuple[list[str], str]]) -> str:
+    def get_first_emote_in_message(self, message:str, emote_dict:dict[str, list[str]]) -> str:
         if self.message_has_an_emote(message, emote_dict):
             messageList = message.split()
             for word in messageList:
                 for key in emote_dict.keys():
                     emotes_looked_at = emote_dict[key]
-                    if word in self.formatted_emotes(emotes_looked_at[1], emotes_looked_at[0]):
+                    if word in emotes_looked_at:
                         return word
         raise ValueError
     
