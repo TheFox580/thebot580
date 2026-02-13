@@ -32,8 +32,6 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 **TheBot580 will automatically count how many times in a row an emote has been used, and will send a message if the emote has been said at least 5 times!**
 
-> *Note* : Although Better TTV Emotes are being automatically added, I haven't implemented custom support for the other platforms yet, so you may enter your own emotes here
-
 > *Tip* : You can modify the message that the bot sends in chat to your liking here
 
 ---
