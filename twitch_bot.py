@@ -253,17 +253,17 @@ class MyComponent(commands.Component):
             word = word.replace("_", " ")
             if "Cheer" in word: #We don't want it to say the bits amount!
                 pass
-            if ("🫡" == word) or ("o7" == word):
+            elif ("🫡" == word) or ("o7" == word):
                 final_message += "oh 7 "
-            if "<3" == word:
-                final_message += "love "
-            if "D:" == word:
+            elif "D:" == word:
                 final_message += "D face "
-            if "D:" == word:
+            elif "D:" == word:
                 final_message += "D face "
-            if ("</3" == word) or ("<3" == word):
+            elif ("</3" == word) or ("<3" == word):
                 final_message += "love "
-            if "https" in word:
+            elif "https" in word:
+                pass
+            elif self.message_has_an_emote(word, self.emotes_dict):
                 pass
             else:
                 final_message += word + " "
