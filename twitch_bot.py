@@ -175,7 +175,7 @@ class MyComponent(commands.Component):
             for emote in res["sharedEmotes"]:
                 emotes.append(emote["code"])
             return emotes
-        raise requests.HTTPError
+        return []
     
     def get7TVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
@@ -190,7 +190,7 @@ class MyComponent(commands.Component):
             for emote in res["emotes"]:
                 emotes.append(emote["name"])
             return emotes
-        raise requests.HTTPError
+        return []
     
     def getFFZEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
@@ -204,7 +204,7 @@ class MyComponent(commands.Component):
             for emote in currentSet["emoticons"]:
                 emotes.append(emote["name"])
             return emotes
-        raise requests.HTTPError
+        return []
     
     def getTwitchEmotes(self, broadcaster_id:str) -> tuple[list[str], list[str]]:
         emotes : tuple[list[str], list[str]] = ([], [])
@@ -214,7 +214,8 @@ class MyComponent(commands.Component):
         req = requests.post("https://id.twitch.tv/oauth2/token", params=params)
 
         if not req.ok:
-            raise requests.HTTPError
+            return ([], [])
+        
         res = req.json()
         access_token = res["access_token"]
 
@@ -223,7 +224,7 @@ class MyComponent(commands.Component):
         req = requests.get(f'https://api.twitch.tv/helix/chat/emotes?broadcaster_id={broadcaster_id}', headers=headers)
 
         if not req.ok :
-            raise requests.HTTPError
+            return ([], [])
         
         res = req.json()
         emote1 = []
@@ -233,7 +234,7 @@ class MyComponent(commands.Component):
         req = requests.get(f'https://api.twitch.tv/helix/chat/emotes/global', headers=headers)
 
         if not req.ok :
-            raise requests.HTTPError
+            return ([], [])
         
         res = req.json()
         emote2 = []
