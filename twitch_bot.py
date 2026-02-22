@@ -487,7 +487,7 @@ class MyComponent(commands.Component):
     
     @commands.command()
     async def emotes(self, ctx: commands.Context) -> None:
-        await ctx.send("To have acces to a lot of new emotes, install the BetterTTV (https://betterttv.com) or 7TV (https://7tv.app/) extension on your navigator")
+        await ctx.reply("To have acces to a lot of new emotes, install the BetterTTV (https://betterttv.com) or 7TV (https://7tv.app/) extension on your navigator")
 
     @commands.group(invoke_fallback=True)
     async def socials(self, ctx: commands.Context) -> None:
@@ -495,7 +495,7 @@ class MyComponent(commands.Component):
 
         !socials
         """
-        await ctx.send("https://www.discord.gg/9tmdgHWaMU, https://www.youtube.com/@thefox580")
+        await ctx.reply("https://www.discord.gg/9tmdgHWaMU, https://www.youtube.com/@thefox580")
 
     @socials.command(name="discord")
     async def socials_discord(self, ctx: commands.Context) -> None:
@@ -503,7 +503,7 @@ class MyComponent(commands.Component):
 
         !socials discord
         """
-        await ctx.send("The discord : https://www.discord.gg/9tmdgHWaMU")
+        await ctx.reply("The discord : https://www.discord.gg/9tmdgHWaMU")
 
     @socials.command(name="youtube")
     async def socials_youtube(self, ctx: commands.Context) -> None:
@@ -511,7 +511,7 @@ class MyComponent(commands.Component):
 
         !socials discord
         """
-        await ctx.send("The Youtube channel : https://www.youtube.com/@thefox580")
+        await ctx.reply("The Youtube channel : https://www.youtube.com/@thefox580")
 
     @commands.command(aliases=["follow",'followsince'])
     async def followage(self, ctx: commands.Context):
@@ -520,34 +520,34 @@ class MyComponent(commands.Component):
             follow_info = await ctx.chatter.follow_info()
             print(follow_info)
             if follow_info == None:
-                await ctx.send(f"Sorry {ctx.chatter.display_name}, but you are not following the channel...")
+                await ctx.reply(f"Sorry {ctx.chatter.display_name}, but you are not following the channel...")
             else:
                 follow_time = follow_info.followed_at
-                await ctx.send(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(datetime.now(timezone.utc), follow_time, True)}. (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
+                await ctx.reply(f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(datetime.now(timezone.utc), follow_time, True)}. (Followed on {follow_time.strftime("%d/%m/%Y at %H:%M:%S %Z")})")
 
     @commands.command()
     async def uptime(self, ctx: commands.Context):
-        await ctx.send(f"Fox has been live for {self.format_time_since(datetime.now(timezone.utc), self.start_time)} (Stream started at {self.start_time.strftime("%d/%m/%Y at %H:%M:%S %Z")}).")
+        await ctx.reply(f"Fox has been live for {self.format_time_since(datetime.now(timezone.utc), self.start_time)} (Stream started at {self.start_time.strftime("%d/%m/%Y at %H:%M:%S %Z")}).")
 
     @commands.command()
     async def lurk(self, ctx: commands.Context):
         if ctx.chatter.name not in self.lurkers:
             self.lurkers.append(ctx.chatter.name)
-            await ctx.send(f"You just started lurking {ctx.chatter.display_name}, see ya soon!")
+            await ctx.reply(f"You just started lurking {ctx.chatter.display_name}, see ya soon!")
         else:
-            await ctx.send(f"You were already lurking! But see you later {ctx.chatter.display_name}.")
+            await ctx.reply(f"You were already lurking! But see you later {ctx.chatter.display_name}.")
 
     @commands.command()
     async def unlurk(self, ctx: commands.Context):
         if ctx.chatter.name in self.lurkers:
             self.lurkers.remove(ctx.chatter.name)
-            await ctx.send(f"Welcome back {ctx.chatter.display_name}!")
+            await ctx.reply(f"Welcome back {ctx.chatter.display_name}!")
         else:
-            await ctx.send(f"You weren't lurking! But welcome back {ctx.chatter.display_name}.")
+            await ctx.reply(f"You weren't lurking! But welcome back {ctx.chatter.display_name}.")
 
     @commands.command()
     async def time(self, ctx: commands.Context):
-        await ctx.send(f"It is currently {datetime.now().strftime("%B %d %Y, %H:%M:%S")} for Fox.")
+        await ctx.reply(f"It is currently {datetime.now().strftime("%B %d %Y, %H:%M:%S")} for Fox.")
     
     @commands.command()
     async def today(self, ctx: commands.Context):
@@ -559,15 +559,15 @@ class MyComponent(commands.Component):
         if ctx.chatter.moderator or ctx.chatter.broadcaster: # type: ignore # type: ignore
             self.tts = not self.tts
             if self.tts:
-                await ctx.send(f"TTS has been turned on.")
+                await ctx.reply(f"TTS has been turned on.")
                 return
-            await ctx.send(f"TTS has been turned off.")
+            await ctx.reply(f"TTS has been turned off.")
             return
         
         if self.tts:
-            await ctx.send(f"TTS is currently turned on.")
+            await ctx.reply(f"TTS is currently turned on.")
             return
-        await ctx.send(f"TTS is currently turned off.")
+        await ctx.reply(f"TTS is currently turned off.")
     
     #@commands.command()
     #async def subtember(self, ctx: commands.Context):
@@ -579,7 +579,7 @@ class MyComponent(commands.Component):
     
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
-        await ctx.send(f"TheBot580 is a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.1.0 & Python 3.13.11)")
+        await ctx.reply(f"I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.2.0 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580", me=True)
     
     @commands.command()
     async def age(self, ctx: commands.Context):
@@ -605,9 +605,17 @@ class MyComponent(commands.Component):
             else:
                 pb = (math.floor((pb / (1000*60)) % 60), math.floor((pb / 1000) % 60), math.floor((pb % 1000)))
             ffRate = round(stats["forfeits"]["ranked"] / totalGamesPlayed*100, 2)
-            await ctx.send(f"{username} | Elo: {data["eloRate"]} (High/Low: {data["seasonResult"]["highest"]}/{data["seasonResult"]["lowest"]}) | #{data["eloRank"]} === Played {totalGamesPlayed} games | W/D/L {gamesWon}/{gamesTied}/{gamesLost} === PB: {pb[0]}:{pb[1]}.{pb[2]} === {ffRate}% Forfeit Rate", me=True)
+            await ctx.reply(f"{username} | Elo: {data["eloRate"]} (High/Low: {data["seasonResult"]["highest"]}/{data["seasonResult"]["lowest"]}) | #{data["eloRank"]} === Played {totalGamesPlayed} games | W/D/L {gamesWon}/{gamesTied}/{gamesLost} === PB: {pb[0]}:{pb[1]}.{pb[2]} === {ffRate}% Forfeit Rate", me=True)
             return
-        await ctx.send(f"No player with the username \"{username}\" found")
+        await ctx.reply(f"No player with the username \"{username}\" found")
+    
+    @commands.command()
+    async def coding(self, ctx: commands.Context):
+        await ctx.reply(f"Fox is coding for WubDub_'s upcoming Minecraft Event, \"Goofy Games\". I wrote this command in advance so idk what I'm working on right now, but maybe it's written on screen.")
+
+    @commands.command()
+    async def team(self, ctx: commands.Context):
+        await ctx.reply(f"In this event, Fox is in a team with WubDub_, Madnes & daneloldane!")
 
     @commands.command()
     @commands.is_moderator()
@@ -615,7 +623,7 @@ class MyComponent(commands.Component):
         game : twitchio.Game | None = await ctx.bot.fetch_game(name=content)
         print(game)
         if game == None:
-            await ctx.send(f"Failed to update the category, please enter a valid category name")
+            await ctx.reply(f"Failed to update the category, please enter a valid category name")
         else:
             await ctx.broadcaster.modify_channel(game_id=game.id)
     
