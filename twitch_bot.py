@@ -12,7 +12,7 @@ import math
 from audio_player import AudioManager
 from obs_websockets import OBSWebsocketsManager
 from datetime import datetime, timezone
-from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_ID, AZURE_TTS_VOICE
+from keys import TWITCH_BOT_CLIENT_ID, TWITCH_BOT_CLIENT_SECRET, OWNER_ID, BOT_ID, AZURE_TTS_VOICE, IS_LEVELED_UP
 import requests
 from tts import TTSManager
 
@@ -60,40 +60,41 @@ class Bot(commands.Bot):
         # Subscribe and listen to when the title or the game changes..
         subscriptions.append(eventsub.ChannelUpdateSubscription(broadcaster_user_id=OWNER_ID))
 
-        """
-        # Subscribe and listen to when someone (re)sub(-gift)..
-        subscriptions.append(eventsub.ChannelSubscribeSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.ChannelSubscriptionGiftSubscription(broadcaster_user_id=OWNER_ID))
+        # Affiliate & Partner only subscriptions:
+        if IS_LEVELED_UP:
+        
+            # Subscribe and listen to when someone (re)sub(-gift)..
+            subscriptions.append(eventsub.ChannelSubscribeSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.ChannelSubscriptionGiftSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when someone cheers..
-        subscriptions.append(eventsub.ChannelCheerSubscription(broadcaster_user_id=OWNER_ID))
+            # Subscribe and listen to when someone cheers..
+            subscriptions.append(eventsub.ChannelCheerSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when prediction starts, locks or ends..
-        subscriptions.append(eventsub.ChannelPredictionBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.ChannelPredictionLockSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.ChannelPredictionEndSubscription(broadcaster_user_id=OWNER_ID))
+            # Subscribe and listen to when prediction starts, locks or ends..
+            subscriptions.append(eventsub.ChannelPredictionBeginSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.ChannelPredictionLockSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.ChannelPredictionEndSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when poll starts or ends..
-        subscriptions.append(eventsub.ChannelPollBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
+            # Subscribe and listen to when poll starts or ends..
+            subscriptions.append(eventsub.ChannelPollBeginSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when hype train starts, updates or ends..
-        subscriptions.append(eventsub.HypeTrainBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))
+            # Subscribe and listen to when hype train starts, updates or ends..
+            subscriptions.append(eventsub.HypeTrainBeginSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))
 
-        """
-        # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
-        # Subscribe and listen to when shared chat starts, updates or ends..
-        subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
+            # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
+            # Subscribe and listen to when shared chat starts, updates or ends..
+            subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when goal starts, updates or ends..
-        subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))"""
+            # Subscribe and listen to when goal starts, updates or ends..
+            subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))
 
         for subscription in subscriptions:
             print(f"Subscribing to {subscription}")
@@ -632,7 +633,6 @@ class MyComponent(commands.Component):
     @commands.is_moderator()
     async def settitle(self, ctx: commands.Context, *, content: str) -> None:
         await ctx.broadcaster.modify_channel(title=content)
-
 
     # CHANNEL INTERACTIONS
 
