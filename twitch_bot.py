@@ -60,6 +60,14 @@ class Bot(commands.Bot):
         # Subscribe and listen to when the title or the game changes..
         subscriptions.append(eventsub.ChannelUpdateSubscription(broadcaster_user_id=OWNER_ID))
 
+        """
+        # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
+        # Subscribe and listen to when shared chat starts, updates or ends..
+        subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
+        """
+
         # Affiliate & Partner only subscriptions:
         if IS_LEVELED_UP:
         
@@ -84,12 +92,6 @@ class Bot(commands.Bot):
             subscriptions.append(eventsub.HypeTrainBeginSubscription(broadcaster_user_id=OWNER_ID))
             subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
             subscriptions.append(eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID))
-
-            # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
-            # Subscribe and listen to when shared chat starts, updates or ends..
-            subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
-            subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
-            subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
 
             # Subscribe and listen to when goal starts, updates or ends..
             subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
