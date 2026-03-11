@@ -575,7 +575,7 @@ class MyComponent(commands.Component):
     
     #@commands.command()
     #async def subtember(self, ctx: commands.Context):
-    #    await ctx.send(f"NEW : BEFORE THE END OF THE MONTH, FOR EVERY 5+ GIFTED SUBS, VALORANT WILL GIVE ADDITIONAL SUBS FOR EVERYONE! For the next {self.format_time_since(datetime.fromtimestamp(1759338000), datetime.now())}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to https://www.twitch.tv/subs/thefox580 !")
+    #    await ctx.send(f"For the next {self.format_time_since(datetime.fromtimestamp(1759338000), datetime.now())}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to https://www.twitch.tv/subs/thefox580 !")
     
     #@commands.command(aliases=["donate"])
     #async def charity(self, ctx: commands.Context):
@@ -613,13 +613,34 @@ class MyComponent(commands.Component):
             return
         await ctx.reply(f"No player with the username \"{username}\" found")
     
-    @commands.command()
-    async def coding(self, ctx: commands.Context):
-        await ctx.reply(f"Fox is coding for WubDub_'s upcoming Minecraft Event, \"Goofy Games\". I wrote this command in advance so idk what I'm working on right now, but maybe it's written on screen.")
+    #@commands.command()
+    #async def coding(self, ctx: commands.Context):
+    #    await ctx.reply(f"Fox is coding for WubDub_'s upcoming Minecraft Event, \"Goofy Games\". I wrote this command in advance so idk what I'm working on right now, but maybe it's written on screen.")
+
+    #@commands.command()
+    #async def team(self, ctx: commands.Context):
+    #    await ctx.reply(f"In this event, Fox is in a team with WubDub_, Madnes & daneloldane!")
 
     @commands.command()
-    async def team(self, ctx: commands.Context):
-        await ctx.reply(f"In this event, Fox is in a team with WubDub_, Madnes & daneloldane!")
+    async def sick(self, ctx: commands.Context):
+        await ctx.reply(f"Fox has been sick with tonsillitis since tuesday, that's why her voice is a bit weird.")
+
+    @commands.command()
+    async def backseat(self, ctx: commands.Context):
+        await ctx.send_announcement(f"No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating", color="green")
+
+    @commands.command()
+    async def sub20(self, ctx: commands.Context):
+        await ctx.reply(f"The Sub 20 Marathon has been moved to Thursday 12th because Fox has been sick all week.")
+
+    @commands.command()
+    async def pb(self, ctx: commands.Context):
+        pb = ""
+        with open("./custom_shit_that_uses_this/pb.txt", "r") as file:
+            for lines in file:
+                pb = lines
+            file.close()
+        await ctx.reply(f"Fox's current PB is {pb} (In private rooms)")
 
     @commands.command()
     @commands.is_moderator()
