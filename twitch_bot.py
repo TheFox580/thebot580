@@ -47,6 +47,20 @@ class Bot(commands.Bot):
         # Subscribe and listen to when someone follows..
         subscriptions.append(eventsub.ChannelFollowSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
 
+        # Subscribe and listen to when a shoutout is sent in chat..
+        subscriptions.append(eventsub.ShoutoutCreateSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
+        
+        # Subscribe and listen to when a stream goes on/offline..
+        subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.StreamOfflineSubscription(broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when someone raids..
+        subscriptions.append(eventsub.ChannelRaidSubscription(to_broadcaster_user_id=OWNER_ID))
+
+        # Subscribe and listen to when the title or the game changes..
+        subscriptions.append(eventsub.ChannelUpdateSubscription(broadcaster_user_id=OWNER_ID))
+
+        """
         # Subscribe and listen to when someone (re)sub(-gift)..
         subscriptions.append(eventsub.ChannelSubscribeSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=OWNER_ID))
@@ -64,13 +78,6 @@ class Bot(commands.Bot):
         subscriptions.append(eventsub.ChannelPollBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID))
 
-        # Subscribe and listen to when a shoutout is sent in chat..
-        subscriptions.append(eventsub.ShoutoutCreateSubscription(broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID))
-        
-        # Subscribe and listen to when a stream goes on/offline..
-        subscriptions.append(eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.StreamOfflineSubscription(broadcaster_user_id=OWNER_ID))
-
         # Subscribe and listen to when hype train starts, updates or ends..
         subscriptions.append(eventsub.HypeTrainBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.HypeTrainProgressSubscription(broadcaster_user_id=OWNER_ID))
@@ -81,18 +88,12 @@ class Bot(commands.Bot):
         # Subscribe and listen to when shared chat starts, updates or ends..
         subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))"""
+        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
 
         # Subscribe and listen to when goal starts, updates or ends..
         subscriptions.append(eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID))
         subscriptions.append(eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))
-
-        # Subscribe and listen to when someone raids..
-        subscriptions.append(eventsub.ChannelRaidSubscription(to_broadcaster_user_id=OWNER_ID))
-
-        # Subscribe and listen to when the title or the game changes..
-        subscriptions.append(eventsub.ChannelUpdateSubscription(broadcaster_user_id=OWNER_ID))
+        subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))"""
 
         for subscription in subscriptions:
             print(f"Subscribing to {subscription}")
@@ -141,7 +142,7 @@ class MyComponent(commands.Component):
     def __init__(self, bot: Bot):
         # Passing args is not required...
         # We pass bot here as an example...
-        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on", "Best view͙e̤rs", "smmtop11.online"]
+        self.banned_words = ["dogehype", "viewers. shop", "dghype", "add me on", "graphic designer", "Best viewers on", "Cheap viewers on", "streamrise", "add me up on", "nezhna .com", "streamviewers org", "streamboo .com", "i am a commission artist", "Cheap V̐iewers", "creativefollowers.online", "telegram:", "adding me up on", "Best view͙e̤rs", "smmtop11.online", "streamboo .live"]
         self.bot = bot
 
         twitchEmotes = self.getTwitchEmotes(OWNER_ID)
