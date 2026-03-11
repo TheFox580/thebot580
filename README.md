@@ -46,11 +46,20 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 > **Warning** : Any checked interaction requires you to be either an **Affiliated or Partenred streamer**
 
+> *Tip* : You can modify whether you're an affiliate / partner streamer or not by changing `IS_LEVELED_UP` in `keys.py`
+
 > *Tip* : *🆙* means this interaction has been updated & *🆕* means this interaction has been added
 
 **TheBot580 uses EventSub to allow for interactive moments with chat! So far, TheBot580 interacts with :**
 
 * [ ] **New Follower**
+* [ ] **Shoutout Created**
+* [ ] Stream **Starts** and **Ends**
+* [ ] **Raid** *(Gives an automatic shoutout)*
+* [ ] **Title & Category Update**
+* [ ] **Shared Chat Collaboration Begins** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
+* [ ] **Shared Chat Collaboration Updates (User join / left)** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
+* [ ] **Shared Chat Collaboration Ends** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
 * [x] **New Subscriber**
 * [x] **Resubscriptions**
 * [x] **Normal / Anonymous Gifted Subscriptions**
@@ -60,19 +69,12 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 * [x] **Prediction Ends**
 * [x] **Poll Begins**
 * [x] **Poll Ends**
-* [ ] Stream **Starts** and **Ends**
 * [x] **Golden / Treasure / Normal (Shared) Hype Train Begins**
 * [x] **Golden / Treasure / Normal (Shared) Hype Train Progress**
 * [x] **Golden / Treasure / Normal (Shared) Hype Train Ends**
-* [ ] **Shared Chat Collaboration Begins** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
-* [ ] **Shared Chat Collaboration Updates (User join / left)** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
-* [ ] **Shared Chat Collaboration Ends** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
 * [x] **Follower / Subcription / Cheer Goal Begins**
 * [x] **Follower / Subcription / Cheer Goal Progress**
 * [x] **Follower / Subcription / Cheer Goal Reached**
-* [ ] **Raid** *(Gives an automatic shoutout)*
-* [ ] **Title & Category Update**
-* [ ] **Shoutout Created**
 * More to come...
 
 > *Note* : If you don't know how to start TheBot580 (especially for the 1st time), read the [*TwitchIO tutorial ↗*](https://twitchio.dev/en/latest/getting-started/quickstart.html) on how to start the bot!
@@ -81,7 +83,7 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 ### BEFORE STARTING THE CODE, PLEASE READ (and modify, if you want) `tts.py`, `websockerts_auth.py` AND `twitch_bot.py`
 
-### CREATE A `keys.py` WITH AT LEAST 7 VARIABLES NAMED
+### CREATE A `keys.py` WITH AT LEAST 8 VARIABLES NAMED
 
 * `AZURE_TTS_KEY`
 * `AZURE_TTS_REGION`
@@ -90,11 +92,12 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 * `TWITCH_BOT_CLIENT_SECRET`
 * `OWNER_ID`
 * `BOT_ID`
+* `IS_LEVELED_UP` (*Set to `True` if you're an Affiliate or a Partner streamer, `False` otherwise*)
 
 ### THESE KEYS MUST EXIST WITHIN `keys.py`
 
 Example of `keys.py`:
 
-![10 lines, most of them having a key with an example of what is meant to be in it.](keys.png)
+![12 lines, most of them having a key with an example of what is meant to be in it.](keys.png)
 
 ## ALSO YOU NEED OBS TO BE OPEN FOR THE BOT TO WORK BECAUSE IT CONNECTS TO OBS THROUGH WEBSOCKETS
