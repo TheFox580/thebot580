@@ -38,7 +38,7 @@ class Bot(commands.Bot):
         # Add our component which contains our commands...
         await self.add_component(MyComponent(self))
 
-        subscriptions = []
+        subscriptions: list[eventsub.SubscriptionPayload] = []
 
         # Subscribe to read chat (event_message) from our channel as the bot...
         # This creates and opens a websocket to Twitch EventSub...
@@ -98,9 +98,16 @@ class Bot(commands.Bot):
             subscriptions.append(eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID))
             subscriptions.append(eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID))
 
+            # Subscribe and listen to when Channel Points are redeemed..
+            subscriptions.append(eventsub.ChannelPointsAutoRedeemSubscription(broadcaster_user_id=OWNER_ID))
+            subscriptions.append(eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=OWNER_ID))
+
         for subscription in subscriptions:
             print(f"Subscribing to {subscription}")
-            await self.subscribe_websocket(payload=subscription)
+            try:
+                await self.subscribe_websocket(payload=subscription)
+            except twitchio.exceptions.HTTPException:
+                print(f"Failed to subscribe to this subscription.")
             #time.sleep(2) #I'm waiting 2 seconds inbetween each subsriptions because it looks like if you subscribe to events too fast they don't get registered?
 
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
@@ -169,7 +176,7 @@ class MyComponent(commands.Component):
         self.hype_train_level_complete : float = 0
         self.start_time : datetime = datetime.now()
         self.lurkers = []
-        self.tts = True
+        self.activate_tts = True
 
     def getBTTVEmotes(self, broadcaster_id:str) -> list[str]:
         emotes : list[str] = []
@@ -253,19 +260,21 @@ class MyComponent(commands.Component):
     def treat_message(self, message:str) -> str:
 
         final_message = ""
+        if "Cheer" in message: #We don't want it to say the bits amount!
+            return ""
         messageList = message.split()
         for word in messageList:
             word = word.replace("_", " ")
-            if "Cheer" in word: #We don't want it to say the bits amount!
-                pass
-            elif ("🫡" == word) or ("o7" == word):
+            if ("🫡" == word) or ("o7" == word):
                 final_message += "oh 7 "
             elif "D:" == word:
                 final_message += "D face "
             elif "D:" == word:
                 final_message += "D face "
-            elif ("</3" == word) or ("<3" == word):
+            elif "<3" == word:
                 final_message += "love "
+            elif "</3" == word:
+                final_message += "don't love "
             elif "https" in word:
                 pass
             elif self.message_has_an_emote(word, self.emotes_dict):
@@ -386,8 +395,9 @@ class MyComponent(commands.Component):
                 if word.lower() not in blocked_terms:
                     await payload.broadcaster.add_blocked_term(moderator=BOT_ID, text=word.lower())
                     print(f"{word} has been added as a blocked term on your channel.")
+                    await payload.delete(moderator=BOT_ID)
 
-        if self.tts:
+        if self.activate_tts:
             if tts_event:
                 
                 if payload.chatter.subscriber or payload.chatter.vip or payload.chatter.moderator:
@@ -474,7 +484,10 @@ class MyComponent(commands.Component):
                     
         if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
-            await payload.chatter.ban(moderator=BOT_ID, reason="INVALID MESSAGE")
+            await payload.chatter.ban(
+                moderator=BOT_ID,
+                reason="INVALID MESSAGE"
+            )
             banMessage = "BANNED MESSAGE DETECTED : MESSAGE WILL NOT BE SAID"
             print(banMessage)
 
@@ -561,14 +574,14 @@ class MyComponent(commands.Component):
     @commands.command()
     async def tts(self, ctx: commands.Context):
         if ctx.chatter.moderator or ctx.chatter.broadcaster: # type: ignore # type: ignore
-            self.tts = not self.tts
-            if self.tts:
+            self.activate_tts = not self.activate_tts
+            if self.activate_tts:
                 await ctx.reply(f"TTS has been turned on.")
                 return
             await ctx.reply(f"TTS has been turned off.")
             return
         
-        if self.tts:
+        if self.activate_tts:
             await ctx.reply(f"TTS is currently turned on.")
             return
         await ctx.reply(f"TTS is currently turned off.")
@@ -621,17 +634,18 @@ class MyComponent(commands.Component):
     #async def team(self, ctx: commands.Context):
     #    await ctx.reply(f"In this event, Fox is in a team with WubDub_, Madnes & daneloldane!")
 
-    @commands.command()
-    async def sick(self, ctx: commands.Context):
-        await ctx.reply(f"Fox has been sick with tonsillitis since tuesday, that's why her voice is a bit weird.")
+    #@commands.command()
+    #async def sick(self, ctx: commands.Context):
+    #    await ctx.reply(f"Fox has been sick with tonsillitis since tuesday, that's why her voice is a bit weird.")
 
-    @commands.command()
-    async def backseat(self, ctx: commands.Context):
-        await ctx.send_announcement(f"No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating", color="green")
+    #@commands.command()
+    #async def backseat(self, ctx: commands.Context):
+    #    await ctx.send_announcement(f"No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating.", color="green")
 
     @commands.command()
     async def sub20(self, ctx: commands.Context):
-        await ctx.reply(f"The Sub 20 Marathon has been moved to Thursday 12th because Fox has been sick all week.")
+        await ctx.reply(f"The Sub 20 Marathon is NOW!!! Fox will stream every day until she reaches a sub 20 !pb (or whatever subs will make her do!)")
+        await ctx.reply(f"5 Sub Gifts = Ranked match | 10 Sub Gifts = Doing Another Sub 20 | 20 Sub Gifts = !pb has to be 30 seconds less.")
 
     @commands.command()
     async def pb(self, ctx: commands.Context):
@@ -1089,6 +1103,86 @@ class MyComponent(commands.Component):
             sender=BOT_ID,
             message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!"
         )
+
+    @commands.Component.listener()
+    async def event_automatic_redemption_add(self, payload: twitchio.ChannelPointsAutoRedeemAdd) -> None:
+        print("Received event : Auto Channel Point Redeemed")
+        channel = payload.broadcaster #The channel it happened on
+        user = payload.user #The user who redeemed this reward
+        reward = payload.reward #The reward object
+        reward_type = reward.type #The type of reward
+        reward_cost = reward.channel_points #The cost of the reward, in channel points (NOT BITS)
+        reward_id = payload.id #The reward ID of this reward
+        reward_redeemed_at = payload.redeemed_at #When the reward was redeemed
+
+        emote_unlocked = reward.emote #The emote unlocked from reward_type in "reward_type in ['random_sub_emote_unlock', 'chosen_sub_emote_unlock']"
+        user_input = payload.user_input
+
+        chat_message = payload.text
+
+        #While most attributes won't be used, it's always good to have them down for later.
+
+    @commands.Component.listener()
+    async def event_custom_redemption_add(self, payload: twitchio.ChannelPointsRedemptionAdd) -> None:
+        print("Received event : Channel Point Redeemed")
+        channel = payload.broadcaster #The channel it happened on
+        user = payload.user #The user who redeemed this reward
+        reward = payload.reward #The reward object
+        reward_color = reward.colour #The color background of the reward
+        reward_cooldown = reward.cooldown_until #The time until the reward can be redeemed again
+        reward_cost = reward.cost #The cost of the reward, in channel points
+        reward_redeem_count = reward.current_stream_redeems #How many times this reward has been redeemed (based on "reward_max_per_stream"") -> None if the streamer isn't live or no limit is set
+        reward_defaut_image = reward.default_image #A dictionnary of the default image
+        reward_enabled = reward.enabled #If this reward is visible to the viewers
+        reward_global_cooldown = reward.global_cooldown #The cooldown time before the reward can be redeemed again
+        reward_id = reward.id #The reward ID of this reward
+        reward_title = reward.title #The title of this reward
+        reward_is_instock = reward.in_stock #If the reward is in stock, False if the viewers can't see it
+        reward_need_input = reward.input_required #Whether an input is required or not for this reward
+        reward_max_per_stream = reward.max_per_stream #How many times this reward can be redeemed -> None if this reward doesn't have a limit
+        reward_max_per_user_per_stream = reward.max_per_user_per_stream #How many times a user can redeem this reward per stream -> None if this reward doesn't have a limit
+        reward_is_paused = reward.paused #If the reward is paused, True if the viewers can't see it
+        reward_prompt = reward.prompt #The description of the reward
+        reward_redeemed_at = payload.redeemed_at #When the reward was redeemed
+        reward_status = payload.status #The reward status (defaults to 'unfulfilled')
+
+        user_input = payload.user_input #The input provided by the user, "" if none was (/ was needed)
+
+        #While most attributes won't be used, it's always good to have them down for later.
+
+        if reward_id == "6fb34032-e66f-4e4a-a390-8a0f092323e0": #Self-Timeout reward
+            await channel.timeout_user(
+                moderator=BOT_ID,
+                user=user,
+                reason="Self-Timeout reward",
+                duration=600
+            )
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"{user.display_name} timed themselves out for 10 minutes, good luck out there!"
+            )
+
+        if reward_id == "d5f04aa1-7abc-4244-83f3-d141970bb9d3": #Timeout Other reward
+
+            targetted_user = await self.bot.fetch_user(login=user_input)
+
+            if type(targetted_user) == twitchio.User:
+
+                await channel.timeout_user(
+                    moderator=BOT_ID,
+                    user=targetted_user,
+                    reason="Timeout Other reward",
+                    duration=600
+                )
+                await channel.send_message(
+                    sender=BOT_ID,
+                    message=f"{user.display_name} timed {targetted_user.display_name} out for 10 minutes, good luck out there!"
+                )
+
+            else:
+                await payload.refund(token_for=channel)
+                await channel.send_whisper(to_user=user, message=f"The user \"{user_input}\" does not exist. Please try again with a correct username only.")
+                print(f"{user.display_name} tried to timeout \"{user_input}\", but this User ID doesn't exist. Warned them in whisper with account \"TheFox580\"")
 
 def main() -> None:
     twitchio.utils.setup_logging(level=logging.INFO)
