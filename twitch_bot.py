@@ -203,7 +203,7 @@ class Bot(commands.AutoBot):
                 )
             )
 
-        resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(subscriptions)
+        resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(self.)
         if resp.errors:
             LOGGER.warning(
                 "Failed to subscribe to: %r, for user: %s", resp.errors, payload.user_id
@@ -1498,9 +1498,83 @@ async def setup_database(
                 [
                     eventsub.ChatMessageSubscription(
                         broadcaster_user_id=row["user_id"], user_id=BOT_ID
+                    ),
+                    eventsub.ChannelFollowSubscription(
+                        broadcaster_user_id=row["user_id"], moderator_user_id=BOT_ID
+                    ),
+                    eventsub.ShoutoutCreateSubscription(
+                        broadcaster_user_id=row["user_id"], moderator_user_id=BOT_ID
+                    ),
+                    eventsub.StreamOnlineSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.StreamOfflineSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelRaidSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelUpdateSubscription(
+                        broadcaster_user_id=row["user_id"]
                     )
                 ]
             )
+
+            if IS_LEVELED_UP:
+                subs.extend([
+                    eventsub.ChannelSubscribeSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelSubscribeMessageSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelSubscriptionGiftSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelCheerSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelPredictionBeginSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelPredictionLockSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelPredictionEndSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelPollBeginSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelPollEndSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.HypeTrainBeginSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.HypeTrainProgressSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.HypeTrainEndSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.GoalBeginSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.GoalProgressSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.GoalEndSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelPointsAutoRedeemSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.ChannelPointsRedeemAddSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+
+                ])
 
     return tokens, subs
 
