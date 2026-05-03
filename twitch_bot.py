@@ -293,7 +293,7 @@ class MyComponent(commands.Component):
             "Others":  # Any other emotes that I don't know / Couldn't be bother to list (i.e. : Twitch Global Emotes or someone's Twitch Channel's Emotes)
             twitchEmotes[1],
         }
-        self.chat_emotes_combo: list = [
+        self.chat_emotes_combo: list = [  # type: ignore
             "",
             0,
         ]  # Holds a list like : [str("Emote Name"), int(number of instance of this emote in a row)]
@@ -347,7 +347,7 @@ class MyComponent(commands.Component):
         return []
 
     def getTwitchEmotes(self, broadcaster_id: str) -> tuple[list[str], list[str]]:
-        emotes: tuple[list[str], list[str]] = ([], [])
+        emotes: tuple[list[str], list[str]] = ([], [])  # type: ignore
 
         params = {
             "client_id": TWITCH_BOT_CLIENT_ID,
@@ -382,7 +382,7 @@ class MyComponent(commands.Component):
             emote1.append(emote["name"])
 
         req = requests.get(
-            f"https://api.twitch.tv/helix/chat/emotes/global", headers=headers
+            "https://api.twitch.tv/helix/chat/emotes/global", headers=headers
         )
 
         if not req.ok:
@@ -596,7 +596,7 @@ class MyComponent(commands.Component):
                             sender=BOT_ID,
                             message=f"{self.chat_emotes_combo[1]}x {self.chat_emotes_combo[0]} combo! POGGIES",
                         )
-                    self.chat_emotes_combo: list = [
+                    self.chat_emotes_combo: list = [  # type: ignore
                         "",
                         0,
                     ]  # Resetting Emotes Combo, because the emote we were looking for wasn't sent
@@ -734,10 +734,10 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["follow", "followsince"])
     async def followage(self, ctx: commands.Context):
         print(ctx.chatter)
-        if type(ctx.chatter) == twitchio.Chatter:
+        if type(ctx.chatter) is twitchio.Chatter:
             follow_info = await ctx.chatter.follow_info()
             print(follow_info)
-            if follow_info == None:
+            if follow_info is None:
                 await ctx.reply(
                     f"Sorry {ctx.chatter.display_name}, but you are not following the channel..."
                 )
@@ -791,15 +791,15 @@ class MyComponent(commands.Component):
         if ctx.chatter.moderator or ctx.chatter.broadcaster:  # type: ignore # type: ignore
             self.activate_tts = not self.activate_tts
             if self.activate_tts:
-                await ctx.reply(f"TTS has been turned on.")
+                await ctx.reply("TTS has been turned on.")
                 return
-            await ctx.reply(f"TTS has been turned off.")
+            await ctx.reply("TTS has been turned off.")
             return
 
         if self.activate_tts:
-            await ctx.reply(f"TTS is currently turned on.")
+            await ctx.reply("TTS is currently turned on.")
             return
-        await ctx.reply(f"TTS is currently turned off.")
+        await ctx.reply("TTS is currently turned off.")
 
     # @commands.command()
     # async def subtember(self, ctx: commands.Context):
@@ -812,7 +812,7 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
         await ctx.reply(
-            f"I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.2.0 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580",
+            "I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.2.0 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580",
             me=True,
         )
 
@@ -836,7 +836,7 @@ class MyComponent(commands.Component):
             gamesLost = stats["loses"]["ranked"]
             gamesTied = totalGamesPlayed - gamesWon - gamesLost
             pb = stats["bestTime"]["ranked"]
-            if pb == None:
+            if pb is None:
                 pb = ("no", "pb", "yet")
             else:
                 pb = (
@@ -887,11 +887,11 @@ class MyComponent(commands.Component):
 
     @commands.command()
     async def games(self, ctx: commands.Context):
-        await ctx.reply(f"Fox is playing Portal 2, Peggle Deluxe and a Bingo")
+        await ctx.reply("Fox is playing Balatro, Portal 2, Trackmania and a Bingo")
 
     @commands.command()
     async def archipelago(self, ctx: commands.Context):
-        link = "https://archipelago.gg/tracker/vUG5pb0URBK_AkaWXVAfAA"
+        link = "https://archipelago.gg/tracker/ANatV6flTqei79kJ7RpPig"
         await ctx.reply(
             f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
         )
@@ -901,9 +901,9 @@ class MyComponent(commands.Component):
     async def setgame(self, ctx: commands.Context, *, content: str) -> None:
         game: twitchio.Game | None = await ctx.bot.fetch_game(name=content)
         print(game)
-        if game == None:
+        if game is None:
             await ctx.reply(
-                f"Failed to update the category, please enter a valid category name"
+                "Failed to update the category, please enter a valid category name"
             )
         else:
             await ctx.broadcaster.modify_channel(game_id=game.id)
@@ -943,7 +943,7 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         sub_tier = self.format_tier(payload.tier)
         streak = ""
-        if payload.streak_months != None and payload.streak_months > 0:
+        if payload.streak_months is not None and payload.streak_months > 0:
             streak = f" They've subscribed for {payload.streak_months} months in a row!"
         await channel.send_message(
             sender=BOT_ID,
@@ -961,7 +961,7 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         sub_tier = self.format_tier(payload.tier, True)
         display_name = "An anonymous user"
-        if type(payload.user.display_name) == str:  # type: ignore
+        if type(payload.user.display_name) is str:  # type: ignore
             display_name = payload.user.display_name  # type: ignore
         if payload.anonymous:
             await channel.send_message(
@@ -980,7 +980,7 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         message = ""
         display_name = "An anonymous user"
-        if type(payload.user.display_name) == str:  # type: ignore
+        if type(payload.user.display_name) is str:  # type: ignore
             display_name = payload.user.display_name  # type: ignore
         if payload.anonymous:
             await channel.send_message(
@@ -1027,20 +1027,20 @@ class MyComponent(commands.Component):
         prediction_outcomes = payload.outcomes
         prediction_total = 0
         prediction_highest = prediction_outcomes[0]
-        if prediction_highest.channel_points != None:
+        if prediction_highest.channel_points is not None:
             prediction_total += prediction_highest.channel_points
         prediction_outcomes_str = f"{prediction_outcomes.pop(0).title}"
         for outcome in prediction_outcomes:
-            if outcome.channel_points != None:
+            if outcome.channel_points is not None:
                 prediction_total += outcome.channel_points
                 prediction_outcomes_str += f", {outcome.title}"
                 if (
-                    prediction_highest.channel_points != None
+                    prediction_highest.channel_points is not None
                     and outcome.channel_points > prediction_highest.channel_points
                 ):
                     prediction_highest = outcome
         channel_points = 0
-        if prediction_highest.channel_points != None:
+        if prediction_highest.channel_points is not None:
             channel_points = prediction_highest.channel_points
         await channel.send_message(
             sender=BOT_ID,
@@ -1064,20 +1064,20 @@ class MyComponent(commands.Component):
             prediction_outcomes = payload.outcomes
             prediction_total = 0
             prediction_highest = prediction_outcomes[0]
-            if prediction_highest.channel_points != None:
+            if prediction_highest.channel_points is not None:
                 prediction_total += prediction_highest.channel_points
             prediction_outcomes_str = f"{prediction_outcomes.pop(0).title}"
             for outcome in prediction_outcomes:
-                if outcome.channel_points != None:
+                if outcome.channel_points is not None:
                     prediction_total += outcome.channel_points
                     prediction_outcomes_str += f", {outcome.title}"
                     if (
-                        prediction_winner.channel_points != None
-                        and outcome.channel_points > prediction_winner.channel_points
+                        prediction_winner.channel_points is not None  # type: ignore
+                        and outcome.channel_points > prediction_winner.channel_points  # type: ignore
                     ):  # type: ignore
                         prediction_highest = outcome
             channel_points = 0
-            if prediction_winner.channel_points != None:  # type: ignore
+            if prediction_winner.channel_points is not None:  # type: ignore
                 channel_points = prediction_winner.channel_points  # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
@@ -1113,8 +1113,8 @@ class MyComponent(commands.Component):
         for choice in poll_choices:
             poll_choices_str += f", {choice.title}"
             if (
-                choice.votes != None
-                and poll_winner.votes != None
+                choice.votes is not None
+                and poll_winner.votes is not None
                 and choice.votes > poll_winner.votes
             ):
                 poll_winner = choice
@@ -1316,17 +1316,17 @@ class MyComponent(commands.Component):
             message=f"A new {goal_type} goal has begun! {goal_name} ({goal_amount}/{goal_end_amount})",
         )
 
-    @commands.Component.listener()
-    async def event_goal_progress(self, payload: twitchio.GoalProgress) -> None:
-        print("Received event : Goal Begin")
-        channel = payload.broadcaster
-        goal_name = payload.description
-        goal_amount = payload.current_amount
-        goal_end_amount = payload.target_amount
-        await channel.send_message(
-            sender=BOT_ID,
-            message=f"{goal_name} updated! ({goal_amount}/{goal_end_amount})",
-        )
+    # @commands.Component.listener()
+    # async def event_goal_progress(self, payload: twitchio.GoalProgress) -> None:
+    #    print("Received event : Goal Begin")
+    #    channel = payload.broadcaster
+    #    goal_name = payload.description
+    #    goal_amount = payload.current_amount
+    #    goal_end_amount = payload.target_amount
+    #    await channel.send_message(
+    #        sender=BOT_ID,
+    #        message=f"{goal_name} updated! ({goal_amount}/{goal_end_amount})",
+    #    )
 
     @commands.Component.listener()
     async def event_goal_end(self, payload: twitchio.GoalEnd) -> None:
@@ -1382,7 +1382,7 @@ class MyComponent(commands.Component):
         shoutout_receiver = payload.to_broadcaster
         channel_info = await shoutout_receiver.fetch_channel_info()
         game = await channel_info.fetch_game()
-        if game != None:
+        if game is not None:
             await channel.send_message(
                 sender=BOT_ID,
                 message=f'{shoutout_receiver.display_name} was streaming "{game.name}"! If you enjoy it, you should go check it out!',
@@ -1398,20 +1398,20 @@ class MyComponent(commands.Component):
         self, payload: twitchio.ChannelPointsAutoRedeemAdd
     ) -> None:
         print("Received event : Auto Channel Point Redeemed")
-        channel = payload.broadcaster  # The channel it happened on
-        user = payload.user  # The user who redeemed this reward
-        reward = payload.reward  # The reward object
-        reward_type = reward.type  # The type of reward
-        reward_cost = (
-            reward.channel_points
-        )  # The cost of the reward, in channel points (NOT BITS)
-        reward_id = payload.id  # The reward ID of this reward
-        reward_redeemed_at = payload.redeemed_at  # When the reward was redeemed
+        # channel = payload.broadcaster  # The channel it happened on
+        # user = payload.user  # The user who redeemed this reward
+        # reward = payload.reward  # The reward object
+        # reward_type = reward.type  # The type of reward
+        # reward_cost = (
+        #    reward.channel_points
+        # )  # The cost of the reward, in channel points (NOT BITS)
+        # reward_id = payload.id  # The reward ID of this reward
+        # reward_redeemed_at = payload.redeemed_at  # When the reward was redeemed
 
-        emote_unlocked = reward.emote  # The emote unlocked from reward_type in "reward_type in ['random_sub_emote_unlock', 'chosen_sub_emote_unlock']"
-        user_input = payload.user_input
+        # emote_unlocked = reward.emote  # The emote unlocked from reward_type in "reward_type in ['random_sub_emote_unlock', 'chosen_sub_emote_unlock']"
+        # user_input = payload.user_input
 
-        chat_message = payload.text
+        # chat_message = payload.text
 
         # While most attributes won't be used, it's always good to have them down for later.
 
@@ -1423,33 +1423,33 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster  # The channel it happened on
         user = payload.user  # The user who redeemed this reward
         reward = payload.reward  # The reward object
-        reward_color = reward.colour  # The color background of the reward
-        reward_cooldown = (
-            reward.cooldown_until
-        )  # The time until the reward can be redeemed again
-        reward_cost = reward.cost  # The cost of the reward, in channel points
-        reward_redeem_count = reward.current_stream_redeems  # How many times this reward has been redeemed (based on "reward_max_per_stream"") -> None if the streamer isn't live or no limit is set
-        reward_defaut_image = reward.default_image  # A dictionnary of the default image
-        reward_enabled = reward.enabled  # If this reward is visible to the viewers
-        reward_global_cooldown = (
-            reward.global_cooldown
-        )  # The cooldown time before the reward can be redeemed again
+        # reward_color = reward.colour  # The color background of the reward
+        # reward_cooldown = (
+        #    reward.cooldown_until
+        # )  # The time until the reward can be redeemed again
+        # reward_cost = reward.cost  # The cost of the reward, in channel points
+        # reward_redeem_count = reward.current_stream_redeems  # How many times this reward has been redeemed (based on "reward_max_per_stream"") -> None if the streamer isn't live or no limit is set
+        # reward_defaut_image = reward.default_image  # A dictionnary of the default image
+        # reward_enabled = reward.enabled  # If this reward is visible to the viewers
+        # reward_global_cooldown = (
+        #    reward.global_cooldown
+        # )  # The cooldown time before the reward can be redeemed again
         reward_id = reward.id  # The reward ID of this reward
-        reward_title = reward.title  # The title of this reward
-        reward_is_instock = (
-            reward.in_stock
-        )  # If the reward is in stock, False if the viewers can't see it
-        reward_need_input = (
-            reward.input_required
-        )  # Whether an input is required or not for this reward
-        reward_max_per_stream = reward.max_per_stream  # How many times this reward can be redeemed -> None if this reward doesn't have a limit
-        reward_max_per_user_per_stream = reward.max_per_user_per_stream  # How many times a user can redeem this reward per stream -> None if this reward doesn't have a limit
-        reward_is_paused = (
-            reward.paused
-        )  # If the reward is paused, True if the viewers can't see it
-        reward_prompt = reward.prompt  # The description of the reward
-        reward_redeemed_at = payload.redeemed_at  # When the reward was redeemed
-        reward_status = payload.status  # The reward status (defaults to 'unfulfilled')
+        # reward_title = reward.title  # The title of this reward
+        # reward_is_instock = (
+        #    reward.in_stock
+        # )  # If the reward is in stock, False if the viewers can't see it
+        # reward_need_input = (
+        #    reward.input_required
+        # )  # Whether an input is required or not for this reward
+        # reward_max_per_stream = reward.max_per_stream  # How many times this reward can be redeemed -> None if this reward doesn't have a limit
+        # reward_max_per_user_per_stream = reward.max_per_user_per_stream  # How many times a user can redeem this reward per stream -> None if this reward doesn't have a limit
+        # reward_is_paused = (
+        #    reward.paused
+        # )  # If the reward is paused, True if the viewers can't see it
+        # reward_prompt = reward.prompt  # The description of the reward
+        # reward_redeemed_at = payload.redeemed_at  # When the reward was redeemed
+        # reward_status = payload.status  # The reward status (defaults to 'unfulfilled')
 
         user_input = (
             payload.user_input
@@ -1469,7 +1469,7 @@ class MyComponent(commands.Component):
         if reward_id == "d5f04aa1-7abc-4244-83f3-d141970bb9d3":  # Timeout Other reward
             targetted_user = await self.bot.fetch_user(login=user_input)
 
-            if type(targetted_user) == twitchio.User:
+            if type(targetted_user) is twitchio.User:
                 await channel.timeout_user(
                     moderator=BOT_ID,
                     user=targetted_user,
