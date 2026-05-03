@@ -108,13 +108,17 @@ class Bot(commands.AutoBot):
             eventsub.ChannelUpdateSubscription(broadcaster_user_id=payload.user_id)
         )
 
-        """
         # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
         # Subscribe and listen to when shared chat starts, updates or ends..
-        subscriptions.append(eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID))
-        subscriptions.append(eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID))
-        """
+        subscriptions.append(
+            eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID)
+        )
+        subscriptions.append(
+            eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID)
+        )
+        subscriptions.append(
+            eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID)
+        )
 
         # Affiliate & Partner only subscriptions:
         if IS_LEVELED_UP:
@@ -203,7 +207,11 @@ class Bot(commands.AutoBot):
                 )
             )
 
-        resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(self.)
+            subscriptions.append(
+                eventsub.AdBreakBeginSubscription(broadcaster_user_id=payload.user_id),
+            )
+
+        resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(subscriptions)
         if resp.errors:
             LOGGER.warning(
                 "Failed to subscribe to: %r, for user: %s", resp.errors, payload.user_id
@@ -265,6 +273,7 @@ class MyComponent(commands.Component):
             "smmtop11.online",
             "streamboo .live",
             "smmtask.ru",
+            "maxexposure.online",
         ]
         self.bot = bot
 
@@ -518,7 +527,7 @@ class MyComponent(commands.Component):
         command_message = False
 
         print(
-            f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text}"
+            f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text} {f'(From {payload.source_broadcaster.display_name})' if payload.source_broadcaster is not None else ''}"
         )
 
         # Setup what will be translated as a variable
@@ -565,6 +574,8 @@ class MyComponent(commands.Component):
         ]:  # Bots + broadcaster
             command_message = True
         elif payload.text[0] == "!" or payload.text[0] == "-":
+            command_message = True
+        elif payload.source_broadcaster is None:
             command_message = True
 
         if not (banned_message or command_message):
@@ -1146,11 +1157,11 @@ class MyComponent(commands.Component):
         is_shared = payload.shared_train
         if is_shared:
             shared_text = "Shared "
-        golden_kappa_text = ""
+        special_text = ""
         if payload.type == "golden_kappa":
-            golden_kappa_text = "Golden Kappa "
+            special_text = "Golden Kappa "
         elif payload.type == "treasure":
-            golden_kappa_text = "Treasure "
+            special_text = "Treasure "
         train_goal = payload.goal
         train_progress = payload.progress
         train_level_complete = round(
@@ -1158,7 +1169,7 @@ class MyComponent(commands.Component):
         )  # A percentage of level completion
         await channel.send_message(
             sender=BOT_ID,
-            message=f"A {shared_text}{golden_kappa_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!",
+            message=f"A {shared_text}{special_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!",
         )
 
     @commands.Component.listener()
@@ -1174,11 +1185,11 @@ class MyComponent(commands.Component):
             is_shared = payload.shared_train
             if is_shared:
                 shared_text = "Shared "
-            golden_kappa_text = ""
+            special_text = ""
             if payload.type == "golden_kappa":
-                golden_kappa_text = "Golden Kappa "
+                special_text = "Golden Kappa "
             elif payload.type == "treasure":
-                golden_kappa_text = "Treasure "
+                special_text = "Treasure "
             train_goal = payload.goal
             train_progress = payload.progress
             self.hype_train_level_complete = round(
@@ -1186,7 +1197,7 @@ class MyComponent(commands.Component):
             )  # A percentage of level completion
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"The {shared_text}{golden_kappa_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!",
+                message=f"The {shared_text}{special_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!",
             )
 
     @commands.Component.listener()
@@ -1199,18 +1210,20 @@ class MyComponent(commands.Component):
         is_shared = payload.shared_train
         if is_shared:
             shared_text = "Shared "
-        golden_kappa_text = ""
+        special_text = ""
         if payload.type == "golden_kappa":
-            golden_kappa_text = "Golden Kappa "
+            special_text = "Golden Kappa "
         elif payload.type == "treasure":
-            golden_kappa_text = "Treasure "
+            special_text = "Treasure "
         train_countdown_until = payload.cooldown_until
-        diff = train_countdown_until - datetime.now()
+        diff = (
+            datetime.fromtimestamp(train_countdown_until.timestamp()) - datetime.now()
+        )
         secs = int(diff.total_seconds())
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=f"The {shared_text}{golden_kappa_text}Hype Train has left the chat... We reached {self.hype_train_level_complete}% of level {train_level}! The next Hype Train can come back in {mins} minutes.",
+            message=f"The {shared_text}{special_text}Hype Train has left the chat... We reached {self.hype_train_level_complete}% of level {train_level}! The next Hype Train can come back in {mins} minutes.",
         )
 
     @commands.Component.listener()
@@ -1221,12 +1234,14 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         host = payload.host
         participants = payload.participants
-        participants_str = payload.host.display_name
-        self.shared_chat_users.append(host)
+        participants_str = ""
         for participant in participants:
-            if participant not in self.shared_chat_users:
-                self.shared_chat_users.append(participant)
-            participants_str += f", {participant.display_name}"  # type: ignore
+            if participant.id != host.id:
+                if participant not in self.shared_chat_users:
+                    self.shared_chat_users.append(participant)
+                participants_str += (
+                    f"{'' if len(participants_str) == 0 else ', '}{participant.name}"  # type: ignore
+                )
         await channel.send_message(
             sender=BOT_ID,
             message=f"{host.display_name} has started a shared chat session with {participants_str}.",
@@ -1240,28 +1255,31 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         host = payload.host
         participants = payload.participants
-        participants.append(host)
-        participants_str = payload.host.display_name
-        diff = len(self.shared_chat_users) - len(participants)
+        participants_str = ""
+        diff = len(self.shared_chat_users) - (len(participants) - 1)
         if diff < 0:  # If a user was added
-            self.shared_chat_users = [host]
             for participant in participants:
-                if participant not in self.shared_chat_users:
-                    self.shared_chat_users.append(participant)
-                participants_str += f", {participant.display_name}"  # type: ignore
+                if participant.id != host.id:
+                    if participant not in self.shared_chat_users:
+                        self.shared_chat_users.append(participant)
+                participants_str += (
+                    f"{'' if len(participants_str) == 0 else ', '}{participant.name}"  # type: ignore
+                )
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{host.display_name} has added {abs(diff)} users to the shared chat. The participants now are {participants_str}.",
+                message=f"{host.name} has added {abs(diff)} users to the shared chat. The participants now are {participants_str}.",
             )
         else:  # If a user was removed
-            self.shared_chat_users = [host]
+            self.shared_chat_users = []
             for participant in participants:
-                if participant not in self.shared_chat_users:
+                if participant.id != host.id:
                     self.shared_chat_users.append(participant)
-                participants_str += f", {participant.display_name}"  # type: ignore
+                participants_str += (
+                    f"{'' if len(participants_str) == 0 else ', '}{participant.name}"  # type: ignore
+                )
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{host.display_name} has removed {diff} users to the shared chat. The participants now are {participants_str}.",
+                message=f"{host.name} has removed {diff} users to the shared chat. The participants now are {participants_str}.",
             )
 
     @commands.Component.listener()
@@ -1274,7 +1292,7 @@ class MyComponent(commands.Component):
         self.shared_chat_users = []
         await channel.send_message(
             sender=BOT_ID,
-            message=f"{host.display_name} has ended the shared chat session.",
+            message=f"{host.name} has ended the shared chat session.",
         )
 
     @commands.Component.listener()
@@ -1473,6 +1491,18 @@ class MyComponent(commands.Component):
                     f'{user.display_name} tried to timeout "{user_input}", but this User ID doesn\'t exist. Warned them in whisper with account "TheFox580"'
                 )
 
+    @commands.Component.listener()
+    async def event_ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:
+        print("Received event : Ad Break Starts")
+        channel = payload.broadcaster
+        started_at = payload.started_at
+        duration = payload.duration
+
+        await channel.send_message(
+            sender=BOT_ID,
+            message=f"⚠️ An {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
+        )
+
 
 async def setup_database(
     db: asqlite.Pool,
@@ -1512,69 +1542,82 @@ async def setup_database(
                         broadcaster_user_id=row["user_id"]
                     ),
                     eventsub.ChannelRaidSubscription(
-                        broadcaster_user_id=row["user_id"]
+                        to_broadcaster_user_id=row["user_id"]
                     ),
                     eventsub.ChannelUpdateSubscription(
                         broadcaster_user_id=row["user_id"]
-                    )
+                    ),
+                    eventsub.SharedChatSessionBeginSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.SharedChatSessionUpdateSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
+                    eventsub.SharedChatSessionEndSubscription(
+                        broadcaster_user_id=row["user_id"]
+                    ),
                 ]
             )
 
             if IS_LEVELED_UP:
-                subs.extend([
-                    eventsub.ChannelSubscribeSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelSubscribeMessageSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelSubscriptionGiftSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelCheerSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelPredictionBeginSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelPredictionLockSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelPredictionEndSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelPollBeginSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelPollEndSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.HypeTrainBeginSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.HypeTrainProgressSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.HypeTrainEndSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.GoalBeginSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.GoalProgressSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.GoalEndSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelPointsAutoRedeemSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelPointsRedeemAddSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-
-                ])
+                subs.extend(
+                    [
+                        eventsub.ChannelSubscribeSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelSubscribeMessageSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelSubscriptionGiftSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelCheerSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelPredictionBeginSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelPredictionLockSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelPredictionEndSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelPollBeginSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelPollEndSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.HypeTrainBeginSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.HypeTrainProgressSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.HypeTrainEndSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.GoalBeginSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.GoalProgressSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.GoalEndSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelPointsAutoRedeemSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.ChannelPointsRedeemAddSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                        eventsub.AdBreakBeginSubscription(
+                            broadcaster_user_id=row["user_id"]
+                        ),
+                    ]
+                )
 
     return tokens, subs
 
