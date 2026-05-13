@@ -45,7 +45,7 @@ class Bot(commands.AutoBot):
             client_id=TWITCH_BOT_CLIENT_ID,
             client_secret=TWITCH_BOT_CLIENT_SECRET,
             bot_id=BOT_ID,
-            owner_id=owner,
+            owner_id=OWNER_ID,
             prefix="!",
             subscriptions=subs,
             force_subscribe=True,
@@ -536,22 +536,22 @@ class MyComponent(commands.Component):
             command_message = True
             twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : "
 
-        blocked_terms: list[str] = []
-        async for blocked_term in payload.broadcaster.fetch_blocked_terms(
-            moderator=BOT_ID
-        ):
-            term: twitchio.BlockedTerm = blocked_term
-            blocked_terms.append(term.text.lower())
+        # blocked_terms: list[str] = []
+        # async for blocked_term in payload.broadcaster.fetch_blocked_terms(
+        #    moderator=BOT_ID
+        # ):
+        #    term: twitchio.BlockedTerm = blocked_term
+        #    blocked_terms.append(term.text.lower())
 
-        for word in self.banned_words:
-            if word.lower() in payload.text.lower():
-                banned_message = True
-                if word.lower() not in blocked_terms:
-                    await payload.broadcaster.add_blocked_term(
-                        moderator=BOT_ID, text=word.lower()
-                    )
-                    print(f"{word} has been added as a blocked term on your channel.")
-                    await payload.delete(moderator=BOT_ID)
+        # for word in self.banned_words:
+        #    if word.lower() in payload.text.lower():
+        #        banned_message = True
+        #        if word.lower() not in blocked_terms:
+        #            await payload.broadcaster.add_blocked_term(
+        #                moderator=BOT_ID, text=word.lower()
+        #            )
+        #            print(f"{word} has been added as a blocked term on your channel.")
+        #            await payload.delete(moderator=BOT_ID)
 
         if self.activate_tts:
             if tts_event:
@@ -575,7 +575,7 @@ class MyComponent(commands.Component):
             command_message = True
         elif payload.text[0] == "!" or payload.text[0] == "-":
             command_message = True
-        elif payload.source_broadcaster is None:
+        elif payload.source_broadcaster is not None:
             command_message = True
 
         if not (banned_message or command_message):
@@ -787,6 +787,12 @@ class MyComponent(commands.Component):
         await ctx.send(channelInfo.title.split("} ")[1])
 
     @commands.command()
+    async def ai(self, ctx: commands.Context):
+        await ctx.reply(
+            "I don't use AI for anything, coding, art, ... I believe anyone can do anything with enough will, make whatever you want by yourself and have fun!"
+        )
+
+    @commands.command()
     async def tts(self, ctx: commands.Context):
         if ctx.chatter.moderator or ctx.chatter.broadcaster:  # type: ignore # type: ignore
             self.activate_tts = not self.activate_tts
@@ -960,6 +966,7 @@ class MyComponent(commands.Component):
         print("Received event : 'User Sub Gifting'")
         channel = payload.broadcaster
         sub_tier = self.format_tier(payload.tier, True)
+        message = ""
         display_name = "An anonymous user"
         if type(payload.user.display_name) is str:  # type: ignore
             display_name = payload.user.display_name  # type: ignore
@@ -968,11 +975,15 @@ class MyComponent(commands.Component):
                 sender=BOT_ID,
                 message=f"An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!",
             )
+            message = f"An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!"
         else:
             await channel.send_message(
                 sender=BOT_ID,
                 message=f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!",
             )
+            message = f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!"
+        output = tts_manager.text_to_speech(message)
+        audio_manager.play_audio(output, True, True, True)
 
     @commands.Component.listener()
     async def event_cheer(self, payload: twitchio.ChannelCheer) -> None:
@@ -1527,34 +1538,26 @@ async def setup_database(
             subs.extend(
                 [
                     eventsub.ChatMessageSubscription(
-                        broadcaster_user_id=row["user_id"], user_id=BOT_ID
+                        broadcaster_user_id=OWNER_ID, user_id=BOT_ID
                     ),
                     eventsub.ChannelFollowSubscription(
-                        broadcaster_user_id=row["user_id"], moderator_user_id=BOT_ID
+                        broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID
                     ),
                     eventsub.ShoutoutCreateSubscription(
-                        broadcaster_user_id=row["user_id"], moderator_user_id=BOT_ID
+                        broadcaster_user_id=OWNER_ID, moderator_user_id=BOT_ID
                     ),
-                    eventsub.StreamOnlineSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.StreamOfflineSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelRaidSubscription(
-                        to_broadcaster_user_id=row["user_id"]
-                    ),
-                    eventsub.ChannelUpdateSubscription(
-                        broadcaster_user_id=row["user_id"]
-                    ),
+                    eventsub.StreamOnlineSubscription(broadcaster_user_id=OWNER_ID),
+                    eventsub.StreamOfflineSubscription(broadcaster_user_id=OWNER_ID),
+                    eventsub.ChannelRaidSubscription(to_broadcaster_user_id=OWNER_ID),
+                    eventsub.ChannelUpdateSubscription(broadcaster_user_id=OWNER_ID),
                     eventsub.SharedChatSessionBeginSubscription(
-                        broadcaster_user_id=row["user_id"]
+                        broadcaster_user_id=OWNER_ID
                     ),
                     eventsub.SharedChatSessionUpdateSubscription(
-                        broadcaster_user_id=row["user_id"]
+                        broadcaster_user_id=OWNER_ID
                     ),
                     eventsub.SharedChatSessionEndSubscription(
-                        broadcaster_user_id=row["user_id"]
+                        broadcaster_user_id=OWNER_ID
                     ),
                 ]
             )
@@ -1563,59 +1566,47 @@ async def setup_database(
                 subs.extend(
                     [
                         eventsub.ChannelSubscribeSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.ChannelSubscribeMessageSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.ChannelSubscriptionGiftSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
-                        eventsub.ChannelCheerSubscription(
-                            broadcaster_user_id=row["user_id"]
-                        ),
+                        eventsub.ChannelCheerSubscription(broadcaster_user_id=OWNER_ID),
                         eventsub.ChannelPredictionBeginSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.ChannelPredictionLockSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.ChannelPredictionEndSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.ChannelPollBeginSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.ChannelPollEndSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.HypeTrainBeginSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.HypeTrainProgressSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
-                        eventsub.HypeTrainEndSubscription(
-                            broadcaster_user_id=row["user_id"]
-                        ),
-                        eventsub.GoalBeginSubscription(
-                            broadcaster_user_id=row["user_id"]
-                        ),
-                        eventsub.GoalProgressSubscription(
-                            broadcaster_user_id=row["user_id"]
-                        ),
-                        eventsub.GoalEndSubscription(
-                            broadcaster_user_id=row["user_id"]
-                        ),
+                        eventsub.HypeTrainEndSubscription(broadcaster_user_id=OWNER_ID),
+                        eventsub.GoalBeginSubscription(broadcaster_user_id=OWNER_ID),
+                        eventsub.GoalProgressSubscription(broadcaster_user_id=OWNER_ID),
+                        eventsub.GoalEndSubscription(broadcaster_user_id=OWNER_ID),
                         eventsub.ChannelPointsAutoRedeemSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.ChannelPointsRedeemAddSubscription(
-                            broadcaster_user_id=row["user_id"]
+                            broadcaster_user_id=OWNER_ID
                         ),
-                        eventsub.AdBreakBeginSubscription(
-                            broadcaster_user_id=row["user_id"]
-                        ),
+                        eventsub.AdBreakBeginSubscription(broadcaster_user_id=OWNER_ID),
                     ]
                 )
 
