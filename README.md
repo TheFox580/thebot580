@@ -81,7 +81,7 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 ## IT IS MORE THAN ADVISED TO KNOW PYTHON (otherwise you can't understand what this code does and this is kinda dumb...)
 
-### BEFORE STARTING THE CODE, PLEASE READ (and modify, if you want) `tts.py`, `websockerts_auth.py` AND `twitch_bot.py`
+### BEFORE STARTING THE CODE, PLEASE READ (and modify, if you want) `tts.py`, `websockets_auth.py` AND `twitch_bot.py`
 
 ### CREATE A `keys.py` WITH AT LEAST 8 VARIABLES NAMED
 
