@@ -44,11 +44,11 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 ### Support for any streamer
 
-> **Warning** : Any checked interaction requires you to be either an **Affiliated or Partenred streamer**
-
-> *Tip* : You can modify whether you're an affiliate / partner streamer or not by changing `IS_LEVELED_UP` in `keys.py`
-
 > *Tip* : *🆙* means this interaction has been updated & *🆕* means this interaction has been added
+
+> **Info** : *🆙* As of May 13, 2026, any streamer who has completed the **[Monetization Onboarding](https://dashboard.twitch.tv/monetization/revenue)** can access those features!
+
+> *Tip* : You can modify whether you've completed the onboarding or not by changing `HAS_ONBOARDED` in `keys.py`
 
 **TheBot580 uses EventSub to allow for interactive moments with chat! So far, TheBot580 interacts with :**
 
@@ -57,9 +57,9 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 * [ ] Stream **Starts** and **Ends**
 * [ ] **Raid** *(Gives an automatic shoutout)*
 * [ ] **Title & Category Update**
-* [ ] **Shared Chat Collaboration Begins** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
-* [ ] **Shared Chat Collaboration Updates (User join / left)** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
-* [ ] **Shared Chat Collaboration Ends** *🆙 | This has been disabled by default because it's broken and I need to fix it.*
+* [ ] **Shared Chat Collaboration Begins** *🆙 Fixed!*
+* [ ] **Shared Chat Collaboration Updates (User join / left)** *🆙 Fixed!*
+* [ ] **Shared Chat Collaboration Ends** *🆙 Fixed!*
 * [x] **New Subscriber**
 * [x] **Resubscriptions**
 * [x] **Normal / Anonymous Gifted Subscriptions**
@@ -92,7 +92,7 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 * `TWITCH_BOT_CLIENT_SECRET`
 * `OWNER_ID`
 * `BOT_ID`
-* `IS_LEVELED_UP` (*Set to `True` if you're an Affiliate or a Partner streamer, `False` otherwise*)
+* `HAS_ONBOARDED`
 
 ### THESE KEYS MUST EXIST WITHIN `keys.py`
 

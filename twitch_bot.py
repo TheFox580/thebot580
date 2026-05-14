@@ -16,7 +16,7 @@ from audio_player import AudioManager
 from keys import (
     AZURE_TTS_VOICE,
     BOT_ID,
-    IS_LEVELED_UP,
+    HAS_ONBOARDED,
     OWNER_ID,
     TWITCH_BOT_CLIENT_ID,
     TWITCH_BOT_CLIENT_SECRET,
@@ -121,7 +121,7 @@ class Bot(commands.AutoBot):
         )
 
         # Affiliate & Partner only subscriptions:
-        if IS_LEVELED_UP:
+        if HAS_ONBOARDED:
             # Subscribe and listen to when someone (re)sub(-gift)..
             subscriptions.append(
                 eventsub.ChannelSubscribeSubscription(
@@ -1562,7 +1562,7 @@ async def setup_database(
                 ]
             )
 
-            if IS_LEVELED_UP:
+            if HAS_ONBOARDED:
                 subs.extend(
                     [
                         eventsub.ChannelSubscribeSubscription(
