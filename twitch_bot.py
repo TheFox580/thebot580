@@ -537,22 +537,22 @@ class MyComponent(commands.Component):
             command_message = True
             twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : "
 
-        # blocked_terms: list[str] = []
-        # async for blocked_term in payload.broadcaster.fetch_blocked_terms(
-        #    moderator=BOT_ID
-        # ):
-        #    term: twitchio.BlockedTerm = blocked_term
-        #    blocked_terms.append(term.text.lower())
+        blocked_terms: list[str] = []
+        async for blocked_term in payload.broadcaster.fetch_blocked_terms(
+            moderator=BOT_ID
+        ):
+            term: twitchio.BlockedTerm = blocked_term
+            blocked_terms.append(term.text.lower())
 
-        # for word in self.banned_words:
-        #    if word.lower() in payload.text.lower():
-        #        banned_message = True
-        #        if word.lower() not in blocked_terms:
-        #            await payload.broadcaster.add_blocked_term(
-        #                moderator=BOT_ID, text=word.lower()
-        #            )
-        #            print(f"{word} has been added as a blocked term on your channel.")
-        #            await payload.delete(moderator=BOT_ID)
+        for word in self.banned_words:
+            if word.lower() in payload.text.lower():
+                banned_message = True
+                if word.lower() not in blocked_terms:
+                    await payload.broadcaster.add_blocked_term(
+                        moderator=BOT_ID, text=word.lower()
+                    )
+                    print(f"{word} has been added as a blocked term on your channel.")
+                    await payload.delete(moderator=BOT_ID)
 
         if self.activate_tts:
             if tts_event:
