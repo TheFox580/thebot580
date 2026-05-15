@@ -304,6 +304,7 @@ class MyComponent(commands.Component):
         self.start_time: datetime = datetime.now()
         self.lurkers = []
         self.activate_tts = True
+        self.message_sent = 0
 
     def getBTTVEmotes(self, broadcaster_id: str) -> list[str]:
         emotes: list[str] = []
@@ -579,6 +580,7 @@ class MyComponent(commands.Component):
             command_message = True
 
         if not (banned_message or command_message):
+            self.message_sent += 1
             if self.chat_emotes_combo != ["", 0]:  # If we currently have a combo
                 if self.message_has_emote(
                     twitchChatMessage, self.chat_emotes_combo[0], self.emotes_dict
@@ -927,7 +929,7 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         await channel.send_message(
             sender=BOT_ID,
-            message=f"Thank you {payload.user.display_name} for the follow!",
+            message=f"Thank you {payload.user.display_name} for the follow! thefox91Hi",
         )
 
     @commands.Component.listener()
@@ -953,7 +955,7 @@ class MyComponent(commands.Component):
             streak = f" They've subscribed for {payload.streak_months} months in a row!"
         await channel.send_message(
             sender=BOT_ID,
-            message=f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak}",
+            message=f"thefox91Stonks {payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak}",
         )
         message = f'{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak} They said: "{self.treat_message(payload.text)}"'
         output = tts_manager.text_to_speech(message)
@@ -973,13 +975,13 @@ class MyComponent(commands.Component):
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!",
+                message=f"thefox91Stonks An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!",
             )
             message = f"An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!"
         else:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!",
+                message=f"thefox91Stonks {display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!",
             )
             message = f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!"
         output = tts_manager.text_to_speech(message)
@@ -996,13 +998,13 @@ class MyComponent(commands.Component):
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"An anonymous user cheered {payload.bits} bits!",
+                message=f"thefox91Stonks An anonymous user cheered {payload.bits} bits!",
             )
             message = f"An anonymous user cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
         else:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{display_name} cheered {payload.bits} bits!",
+                message=f"thefox91Stonks {display_name} cheered {payload.bits} bits!",
             )
             message = f"{display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
         output = tts_manager.text_to_speech(message)
@@ -1092,7 +1094,7 @@ class MyComponent(commands.Component):
                 channel_points = prediction_winner.channel_points  # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
-                message=f'The "{prediction_title}" prediction has been ended! "{prediction_winner.title}" is the winning outcome with {round(channel_points / prediction_total * 100, 2)}% (That\'s {prediction_total} TheDollar580 for {len(prediction_winner.users)} chatters) | Outcomes were : {prediction_outcomes_str}.',  # type: ignore
+                message=f'The "{prediction_title}" prediction has been ended! "{prediction_winner.title}" is the winning outcome with {round(channel_points / prediction_total * 100, 2)}% (That\'s {prediction_total} TheDollar580 for {len(prediction_winner.users)} chatters thefox91Stonks) | Outcomes were : {prediction_outcomes_str}.',  # type: ignore
             )
 
     @commands.Component.listener()
@@ -1180,7 +1182,7 @@ class MyComponent(commands.Component):
         )  # A percentage of level completion
         await channel.send_message(
             sender=BOT_ID,
-            message=f"A {shared_text}{special_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!",
+            message=f"thefox91Stonks A {shared_text}{special_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!",
         )
 
     @commands.Component.listener()
@@ -1208,7 +1210,7 @@ class MyComponent(commands.Component):
             )  # A percentage of level completion
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"The {shared_text}{special_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!",
+                message=f"thefox91Stonks The {shared_text}{special_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!",
             )
 
     @commands.Component.listener()
@@ -1234,7 +1236,7 @@ class MyComponent(commands.Component):
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=f"The {shared_text}{special_text}Hype Train has left the chat... We reached {self.hype_train_level_complete}% of level {train_level}! The next Hype Train can come back in {mins} minutes.",
+            message=f"thefox91Stonks The {shared_text}{special_text}Hype Train has left the chat... We reached {self.hype_train_level_complete}% of level {train_level}! The next Hype Train can come back in {mins} minutes.",
         )
 
     @commands.Component.listener()
@@ -1322,22 +1324,22 @@ class MyComponent(commands.Component):
             goal_type = "subscription"
         elif goal_type in ["new_bit", "new_cheer"]:
             goal_type = "cheer"
-        await channel.send_message(
-            sender=BOT_ID,
-            message=f"A new {goal_type} goal has begun! {goal_name} ({goal_amount}/{goal_end_amount})",
-        )
+        # await channel.send_message(
+        #    sender=BOT_ID,
+        #    message=f"A new {goal_type} goal has begun! {goal_name} ({goal_amount}/{goal_end_amount})",
+        # )
 
-    # @commands.Component.listener()
-    # async def event_goal_progress(self, payload: twitchio.GoalProgress) -> None:
-    #    print("Received event : Goal Begin")
-    #    channel = payload.broadcaster
-    #    goal_name = payload.description
-    #    goal_amount = payload.current_amount
-    #    goal_end_amount = payload.target_amount
-    #    await channel.send_message(
-    #        sender=BOT_ID,
-    #        message=f"{goal_name} updated! ({goal_amount}/{goal_end_amount})",
-    #    )
+    @commands.Component.listener()
+    async def event_goal_progress(self, payload: twitchio.GoalProgress) -> None:
+        print("Received event : Goal Begin")
+        channel = payload.broadcaster
+        goal_name = payload.description
+        goal_amount = payload.current_amount
+        goal_end_amount = payload.target_amount
+        # await channel.send_message(
+        #    sender=BOT_ID,
+        #    message=f"{goal_name} updated! ({goal_amount}/{goal_end_amount})",
+        # )
 
     @commands.Component.listener()
     async def event_goal_end(self, payload: twitchio.GoalEnd) -> None:
@@ -1356,10 +1358,10 @@ class MyComponent(commands.Component):
             goal_type = "bits"
         else:
             goal_type = "followers"
-        await channel.send_message(
-            sender=BOT_ID,
-            message=f"{goal_name} has been completed! ({goal_end_amount} {goal_type})",
-        )
+        # await channel.send_message(
+        #    sender=BOT_ID,
+        #    message=f"{goal_name} has been completed! ({goal_end_amount} {goal_type})",
+        # )
 
     @commands.Component.listener()
     async def event_raid(self, payload: twitchio.ChannelRaid) -> None:
@@ -1375,16 +1377,16 @@ class MyComponent(commands.Component):
             moderator=BOT_ID,
         )
 
-    # @commands.Component.listener()
-    # async def event_channel_update(self, payload: twitchio.ChannelUpdate) -> None:
-    #    print("Received event : Channel Update")
-    #    channel = payload.broadcaster
-    #    category = payload.category_name
-    #    title = payload.title
-    #    await channel.send_message(
-    #        sender=BOT_ID,
-    #        message=f"Updated title to \"{title}\" and category to \"{category}\"."
-    #    )
+    @commands.Component.listener()
+    async def event_channel_update(self, payload: twitchio.ChannelUpdate) -> None:
+        print("Received event : Channel Update")
+        channel = payload.broadcaster
+        category = payload.category_name
+        title = payload.title
+        # await channel.send_message(
+        #    sender=BOT_ID,
+        #    message=f"Updated title to \"{title}\" and category to \"{category}\"."
+        # )
 
     @commands.Component.listener()
     async def event_shoutout_create(self, payload: twitchio.ShoutoutCreate) -> None:
@@ -1434,33 +1436,33 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster  # The channel it happened on
         user = payload.user  # The user who redeemed this reward
         reward = payload.reward  # The reward object
-        # reward_color = reward.colour  # The color background of the reward
-        # reward_cooldown = (
-        #    reward.cooldown_until
-        # )  # The time until the reward can be redeemed again
-        # reward_cost = reward.cost  # The cost of the reward, in channel points
-        # reward_redeem_count = reward.current_stream_redeems  # How many times this reward has been redeemed (based on "reward_max_per_stream"") -> None if the streamer isn't live or no limit is set
-        # reward_defaut_image = reward.default_image  # A dictionnary of the default image
-        # reward_enabled = reward.enabled  # If this reward is visible to the viewers
-        # reward_global_cooldown = (
-        #    reward.global_cooldown
-        # )  # The cooldown time before the reward can be redeemed again
+        reward_color = reward.colour  # The color background of the reward
+        reward_cooldown = (
+            reward.cooldown_until
+        )  # The time until the reward can be redeemed again
+        reward_cost = reward.cost  # The cost of the reward, in channel points
+        reward_redeem_count = reward.current_stream_redeems  # How many times this reward has been redeemed (based on "reward_max_per_stream"") -> None if the streamer isn't live or no limit is set
+        reward_defaut_image = reward.default_image  # A dictionnary of the default image
+        reward_enabled = reward.enabled  # If this reward is visible to the viewers
+        reward_global_cooldown = (
+            reward.global_cooldown
+        )  # The cooldown time before the reward can be redeemed again
         reward_id = reward.id  # The reward ID of this reward
-        # reward_title = reward.title  # The title of this reward
-        # reward_is_instock = (
-        #    reward.in_stock
-        # )  # If the reward is in stock, False if the viewers can't see it
-        # reward_need_input = (
-        #    reward.input_required
-        # )  # Whether an input is required or not for this reward
-        # reward_max_per_stream = reward.max_per_stream  # How many times this reward can be redeemed -> None if this reward doesn't have a limit
-        # reward_max_per_user_per_stream = reward.max_per_user_per_stream  # How many times a user can redeem this reward per stream -> None if this reward doesn't have a limit
-        # reward_is_paused = (
-        #    reward.paused
-        # )  # If the reward is paused, True if the viewers can't see it
-        # reward_prompt = reward.prompt  # The description of the reward
-        # reward_redeemed_at = payload.redeemed_at  # When the reward was redeemed
-        # reward_status = payload.status  # The reward status (defaults to 'unfulfilled')
+        reward_title = reward.title  # The title of this reward
+        reward_is_instock = (
+            reward.in_stock
+        )  # If the reward is in stock, False if the viewers can't see it
+        reward_need_input = (
+            reward.input_required
+        )  # Whether an input is required or not for this reward
+        reward_max_per_stream = reward.max_per_stream  # How many times this reward can be redeemed -> None if this reward doesn't have a limit
+        reward_max_per_user_per_stream = reward.max_per_user_per_stream  # How many times a user can redeem this reward per stream -> None if this reward doesn't have a limit
+        reward_is_paused = (
+            reward.paused
+        )  # If the reward is paused, True if the viewers can't see it
+        reward_prompt = reward.prompt  # The description of the reward
+        reward_redeemed_at = payload.redeemed_at  # When the reward was redeemed
+        reward_status = payload.status  # The reward status (defaults to 'unfulfilled')
 
         user_input = (
             payload.user_input
@@ -1509,10 +1511,12 @@ class MyComponent(commands.Component):
         started_at = payload.started_at
         duration = payload.duration
 
-        await channel.send_message(
-            sender=BOT_ID,
-            message=f"⚠️ An {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
-        )
+        if self.message_sent >= 5:
+            await channel.send_message(
+                sender=BOT_ID,
+                message=f"⚠️ An {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
+            )
+            self.message_sent = 0
 
 
 async def setup_database(
