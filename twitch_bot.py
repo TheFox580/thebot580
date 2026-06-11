@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import math
+import random
 import sqlite3
 from datetime import datetime, timezone
 
@@ -12,11 +13,14 @@ from twitchio import eventsub
 from twitchio.ext import commands
 
 import mcci
+import mongo
+import socket_client
 from audio_player import AudioManager
 from keys import (
     AZURE_TTS_VOICE,
     BOT_ID,
     HAS_ONBOARDED,
+    MONGODB_URL,
     OWNER_ID,
     TWITCH_BOT_CLIENT_ID,
     TWITCH_BOT_CLIENT_SECRET,
@@ -277,6 +281,10 @@ class MyComponent(commands.Component):
         ]
         self.bot = bot
 
+        self.socket = socket_client.SocketClient()
+
+        self.getAccessToken()
+
         twitchEmotes = self.getTwitchEmotes(OWNER_ID)
 
         self.emotes_dict: dict[
@@ -293,6 +301,9 @@ class MyComponent(commands.Component):
             "Others":  # Any other emotes that I don't know / Couldn't be bother to list (i.e. : Twitch Global Emotes or someone's Twitch Channel's Emotes)
             twitchEmotes[1],
         }
+
+        self.badges_dict: dict[str, dict[str, str]] = self.getTwitchBadges(OWNER_ID)
+
         self.chat_emotes_combo: list = [  # type: ignore
             "",
             0,
@@ -303,8 +314,15 @@ class MyComponent(commands.Component):
         self.hype_train_level_complete: float = 0
         self.start_time: datetime = datetime.now()
         self.lurkers = []
-        self.activate_tts = True
+        self.activate_tts = False
         self.message_sent = 0
+        self.db = mongo.Database(MONGODB_URL)
+        # self.db.update(
+        #    "twitch_api",
+        #    "messages",
+        #    {"user_id": OWNER_ID},
+        #    {"$set": {"user_id": OWNER_ID, "messages": []}},
+        # )
 
     def getBTTVEmotes(self, broadcaster_id: str) -> list[str]:
         emotes: list[str] = []
@@ -321,6 +339,11 @@ class MyComponent(commands.Component):
     def get7TVEmotes(self, broadcaster_id: str) -> list[str]:
         emotes: list[str] = []
 
+        req = requests.get("https://api.7tv.app/v3/emote-sets/global")
+        res = req.json()
+        for emote in res["emotes"]:
+            emotes.append(emote["name"])
+
         req = requests.get(f"https://api.7tv.app/v3/users/twitch/{broadcaster_id}")
         if req.ok:
             res = req.json()
@@ -330,8 +353,7 @@ class MyComponent(commands.Component):
             res = req.json()
             for emote in res["emotes"]:
                 emotes.append(emote["name"])
-            return emotes
-        return []
+        return emotes
 
     def getFFZEmotes(self, broadcaster_id: str) -> list[str]:
         emotes: list[str] = []
@@ -347,9 +369,7 @@ class MyComponent(commands.Component):
             return emotes
         return []
 
-    def getTwitchEmotes(self, broadcaster_id: str) -> tuple[list[str], list[str]]:
-        emotes: tuple[list[str], list[str]] = ([], [])  # type: ignore
-
+    def getAccessToken(self):
         params = {
             "client_id": TWITCH_BOT_CLIENT_ID,
             "client_secret": TWITCH_BOT_CLIENT_SECRET,
@@ -362,10 +382,13 @@ class MyComponent(commands.Component):
             return ([], [])
 
         res = req.json()
-        access_token = res["access_token"]
+        self.access_token = res["access_token"]
+
+    def getTwitchEmotes(self, broadcaster_id: str) -> tuple[list[str], list[str]]:
+        emotes: tuple[list[str], list[str]] = ([], [])  # type: ignore
 
         headers = {
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"Bearer {self.access_token}",
             "Client-Id": TWITCH_BOT_CLIENT_ID,
         }
 
@@ -397,6 +420,48 @@ class MyComponent(commands.Component):
         emotes: tuple[list[str], list[str]] = (emote1, emote2)
 
         return emotes
+
+    def getTwitchBadges(self, broadcaster_id: str) -> dict[str, dict[str, str]]:
+        badges = {}
+
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Client-Id": TWITCH_BOT_CLIENT_ID,
+        }
+
+        req = requests.get(
+            "https://api.twitch.tv/helix/chat/badges/global",
+            headers=headers,
+        )
+
+        if not req.ok:
+            return badges
+
+        res = req.json()
+
+        for badge in res["data"]:
+            badge_comp = {}
+            for version in badge["versions"]:
+                badge_comp[version["id"]] = version["image_url_1x"].split("/1")[0]
+            badges[badge["set_id"]] = badge_comp
+
+        req = requests.get(
+            f"https://api.twitch.tv/helix/chat/badges?broadcaster_id={broadcaster_id}",
+            headers=headers,
+        )
+
+        if not req.ok:
+            return badges
+
+        res = req.json()
+
+        for badge in res["data"]:
+            badge_comp = {}
+            for version in badge["versions"]:
+                badge_comp[version["id"]] = version["image_url_1x"].split("/1")[0]
+            badges[badge["set_id"]] = badge_comp
+
+        return badges
 
     def treat_message(self, message: str) -> str:
         final_message = ""
@@ -571,7 +636,6 @@ class MyComponent(commands.Component):
             "streamelements",
             "thebot580",
             "nightbot",
-            payload.broadcaster.name,
         ]:  # Bots + broadcaster
             command_message = True
         elif payload.text[0] == "!" or payload.text[0] == "-":
@@ -580,6 +644,27 @@ class MyComponent(commands.Component):
             command_message = True
 
         if not (banned_message or command_message):
+            # Send new message to server
+
+            color = (
+                payload.chatter.color.html
+                if payload.chatter.color is not None
+                else "#%06x" % random.randint(0, 0xFFFFFF)
+            )
+            print(color)
+
+            message = {
+                "badges": [
+                    self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
+                ],
+                "chatter": payload.chatter.display_name,
+                "username": payload.chatter.name,
+                "color": color,
+                "message": payload.text,
+            }
+
+            self.socket.send("new_message_bot", message)
+
             self.message_sent += 1
             if self.chat_emotes_combo != ["", 0]:  # If we currently have a combo
                 if self.message_has_emote(
@@ -813,9 +898,12 @@ class MyComponent(commands.Component):
     # async def subtember(self, ctx: commands.Context):
     #    await ctx.send(f"For the next {self.format_time_since(datetime.fromtimestamp(1759338000), datetime.now())}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to https://www.twitch.tv/subs/thefox580 !")
 
-    # @commands.command(aliases=["donate"])
-    # async def charity(self, ctx: commands.Context):
-    #    await ctx.send(f"We're raising money for the Water Warrior initiative! Donate here: https://tiltify.com/+the-water-warriors/forsaken-islands-fusion-frenzy")
+    @commands.command(aliases=["donate"])
+    async def charity(self, ctx: commands.Context):
+        await ctx.send_announcement(
+            "We're raising money for the Sarcoma Foundation of America initiative! Donate here: https://thewebsite580.vercel.app/donate",
+            color="green",
+        )
 
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
@@ -876,9 +964,11 @@ class MyComponent(commands.Component):
     # async def coding(self, ctx: commands.Context):
     #    await ctx.reply(f"Fox is coding for WubDub_'s upcoming Minecraft Event, \"Goofy Games\". I wrote this command in advance so idk what I'm working on right now, but maybe it's written on screen.")
 
-    # @commands.command()
-    # async def team(self, ctx: commands.Context):
-    #    await ctx.reply(f"In this event, Fox is in a team with iyici, pebbltree & Skeli__!")
+    @commands.command()
+    async def team(self, ctx: commands.Context):
+        await ctx.reply(
+            "In this event, Fox is in a team with KaNukei, Ceeps & DaHouse_Panda!"
+        )
 
     # @commands.command()
     # async def backseat(self, ctx: commands.Context):
@@ -893,15 +983,24 @@ class MyComponent(commands.Component):
     #        file.close()
     #    await ctx.reply(f"Fox's current PB is {pb} (In private rooms)")
 
-    @commands.command()
-    async def games(self, ctx: commands.Context):
-        await ctx.reply("Fox is playing Balatro, Portal 2, Trackmania and a Bingo")
+    # @commands.command()
+    # async def games(self, ctx: commands.Context):
+    #     await ctx.reply("Fox is playing Balatro, Portal 2, Trackmania and a Bingo")
 
-    @commands.command()
-    async def archipelago(self, ctx: commands.Context):
-        link = "https://archipelago.gg/tracker/ANatV6flTqei79kJ7RpPig"
-        await ctx.reply(
-            f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
+    # @commands.command()
+    # async def archipelago(self, ctx: commands.Context):
+    #     link = "https://archipelago.gg/tracker/ANatV6flTqei79kJ7RpPig"
+    #     await ctx.reply(
+    #         f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
+    #     )
+
+    @commands.command(aliases=["sludgineers"])
+    @commands.cooldown(
+        rate=1, per=60 * 10, key=commands.BucketType.chatter
+    )  # Cooldown for 1 / 10mins
+    async def sludge(self, ctx: commands.Context):
+        await ctx.send_announcement(
+            "Thanks to Funk Games for the key! The game comes out on June 1st, and you can buy it there: https://lurk.ly/pJVjlz"
         )
 
     @commands.command()

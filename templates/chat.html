@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            html {
+                background-color: rgba(0, 0, 0, 0);
+            }
+
+            .messageContent {
+            }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+            integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+            crossorigin="anonymous"
+        ></script>
+        <script type="text/javascript" charset="utf-8">
+            async function getPronouns() {
+                const all_pronouns_req = await fetch(
+                    `https://api.pronouns.alejo.io/v1/pronouns`,
+                );
+
+                if (all_pronouns_req.ok) {
+                    const all_pronouns = await all_pronouns_req.json();
+                    return all_pronouns;
+                }
+            }
+
+            const topSize = "text-xl";
+            const bottomSize = "text-2xl";
+
+            document.addEventListener("DOMContentLoaded", async () => {
+                const all_pronouns = await getPronouns();
+                console.log(all_pronouns);
+
+                const socket = io();
+
+                socket.on("message_send", (msg, cb) => {
+                    console.log("Got data: " + msg.message);
+                });
+
+                socket.on("new_message_chat", async (msg, cb) => {
+                    console.log("Got a new message: ");
+                    console.log(msg);
+
+                    const chatbox = document.getElementById("chatbox");
+
+                    //Max 50 message
+
+                    if (chatbox.children.length >= 50) {
+                        chatbox.firstElementChild.remove();
+                    }
+
+                    const chatMessage = document.createElement("div");
+                    chatMessage.classList.add(
+                        "w-auto",
+                        "flex",
+                        "flex-col",
+                        "mb-5",
+                        "border-4",
+                        "p-2.5",
+                        "rounded-2xl",
+                    );
+                    chatMessage.style.borderColor = msg.color;
+
+                    const chatMessageAuthor = document.createElement("div");
+                    chatMessageAuthor.classList.add(
+                        "w-auto",
+                        "flex",
+                        "flex-row",
+                        "items-center",
+                        "justify-center",
+                    );
+
+                    const badgeSize = 24;
+
+                    const chatMessageBadges = document.createElement("div");
+                    chatMessageBadges.classList.add(
+                        "flex",
+                        "flex-row",
+                        "items-center",
+                        "justify-center",
+                        `w-[${badgeSize * msg.badges.length}px]`,
+                    );
+
+                    for (const badgeURL of msg.badges) {
+                        const badge = document.createElement("img");
+                        badge.src = badgeURL + "/2";
+                        badge.classList.add(
+                            `w-[${badgeSize}px]`,
+                            `h-[${badgeSize}px]`,
+                        );
+
+                        chatMessageBadges.appendChild(badge);
+                    }
+
+                    chatMessageAuthor.appendChild(chatMessageBadges);
+
+                    const pronouns_req = await fetch(
+                        `https://api.pronouns.alejo.io/v1/users/${msg.username}`,
+                    );
+                    if (pronouns_req.ok) {
+                        const pronouns = await pronouns_req.json();
+                        const correct_pronouns = [
+                            all_pronouns[pronouns.pronoun_id],
+                            all_pronouns[pronouns.pronoun_id].singular
+                                ? all_pronouns[pronouns.pronoun_id]
+                                : all_pronouns[pronouns.alt_pronoun_id],
+                        ];
+                        const chatMessagePronouns = document.createElement("p");
+                        chatMessagePronouns.textContent =
+                            correct_pronouns[0].subject +
+                            (correct_pronouns[0].singular
+                                ? ""
+                                : "/" + correct_pronouns[1].object);
+                        chatMessagePronouns.classList.add(
+                            "text-white",
+                            msg.chatter.length < 12 ? "border-5" : "border-3",
+                            "rounded-xl",
+                            "px-2",
+                            "mx-2",
+                            msg.chatter.length < 12 ? bottomSize : topSize,
+                            "text-center",
+                            "items-center",
+                            "justify-center",
+                            `w-${(msg.chatter.length < 12 ? 4.5 : 3.75) * chatMessagePronouns.textContent.length}`,
+                        );
+
+                        chatMessageAuthor.appendChild(chatMessagePronouns);
+                    }
+
+                    const chatMessageAuthorName = document.createElement("p");
+                    chatMessageAuthorName.textContent = msg.chatter;
+                    chatMessageAuthorName.style.color = msg.color;
+                    chatMessageAuthorName.classList.add(
+                        "font-bold",
+                        msg.chatter.length < 12 ? bottomSize : topSize,
+                    );
+
+                    chatMessageAuthor.appendChild(chatMessageAuthorName);
+
+                    chatMessage.appendChild(chatMessageAuthor);
+
+                    const chatMessageComponent = document.createElement("div");
+                    chatMessageComponent.classList.add(
+                        "flex",
+                        "flex-row",
+                        "items-center",
+                        "justify-center",
+                        "w-auto",
+                    );
+
+                    const chatMessageContent = document.createElement("p");
+                    chatMessageContent.textContent = msg.message;
+                    chatMessageContent.classList.add(
+                        "text-white",
+                        "messageContent",
+                        bottomSize,
+                        "mt-2.5",
+                    );
+
+                    chatMessageComponent.appendChild(chatMessageContent);
+
+                    chatMessage.appendChild(chatMessageComponent);
+
+                    chatbox.appendChild(chatMessage);
+                });
+            });
+        </script>
+    </head>
+    <body class="w-screen h-screen items-center justify-center">
+        <div
+            class="w-full h-full flex flex-col items-center justify-end"
+            id="chatbox"
+        ></div>
+    </body>
+</html>
