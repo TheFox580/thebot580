@@ -1,6 +1,6 @@
 # TheBot580
 
-## **WARNING**! THIS IS THE V2 VERISON OF THE BOT, USING THE LATEST VERSION OF ALL APIs
+## **WARNING**! This is a barebone version, for a "working" version, check out [the stream version ↗](https://github.com/TheFox580/TheBot580/tree/stream)
 
 ### If you plan on using this version, make sure all plugins (TwitchIO, Azure, PyGame, OBS Websockets, and requests) are up to date (run `pip install -r requirements.txt` to install and update everything)
 
