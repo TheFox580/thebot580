@@ -98,6 +98,8 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 Example of `keys.py`:
 
-![12 lines, most of them having a key with an example of what is meant to be in it.](keys.png)
+![11 lines, most of them having a key with an example of what is meant to be in it.](keys.png)
+
+*(an example is also available [here↗](keys_example.py))*
 
 ## ALSO YOU NEED OBS TO BE OPEN FOR THE BOT TO WORK BECAUSE IT CONNECTS TO OBS THROUGH WEBSOCKETS
