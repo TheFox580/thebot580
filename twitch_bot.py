@@ -1,14 +1,14 @@
 import asyncio
-import json
 import logging
-import math
 import sqlite3
 from datetime import datetime, timezone
 
 import asqlite
-import mcci
-import requests
 import twitchio
+from twitchio import eventsub
+from twitchio.ext import commands
+
+from audio_player import AudioManager
 from keys import (
     AZURE_TTS_VOICE,
     BOT_ID,
@@ -17,10 +17,6 @@ from keys import (
     TWITCH_BOT_CLIENT_ID,
     TWITCH_BOT_CLIENT_SECRET,
 )
-from twitchio import eventsub
-from twitchio.ext import commands
-
-from audio_player import AudioManager
 from obs_websockets import OBSWebsocketsManager
 from tts import TTSManager
 
