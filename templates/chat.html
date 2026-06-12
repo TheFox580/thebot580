@@ -34,7 +34,9 @@
 
             document.addEventListener("DOMContentLoaded", async () => {
                 const all_pronouns = await getPronouns();
-                console.log(all_pronouns);
+
+                const badgeSize = 28;
+                const emoteSize = 36;
 
                 const socket = io();
 
@@ -75,8 +77,6 @@
                         "justify-center",
                     );
 
-                    const badgeSize = 24;
-
                     const chatMessageBadges = document.createElement("div");
                     chatMessageBadges.classList.add(
                         "flex",
@@ -89,10 +89,7 @@
                     for (const badgeURL of msg.badges) {
                         const badge = document.createElement("img");
                         badge.src = badgeURL + "/2";
-                        badge.classList.add(
-                            `w-[${badgeSize}px]`,
-                            `h-[${badgeSize}px]`,
-                        );
+                        badge.classList.add(`h-[${badgeSize}px]`);
 
                         chatMessageBadges.appendChild(badge);
                     }
@@ -118,7 +115,7 @@
                                 : "/" + correct_pronouns[1].object);
                         chatMessagePronouns.classList.add(
                             "text-white",
-                            msg.chatter.length < 12 ? "border-5" : "border-3",
+                            msg.chatter.length < 12 ? "border-4" : "border-2",
                             "rounded-xl",
                             "px-2",
                             "mx-2",
@@ -151,18 +148,48 @@
                         "items-center",
                         "justify-center",
                         "w-auto",
-                    );
-
-                    const chatMessageContent = document.createElement("p");
-                    chatMessageContent.textContent = msg.message;
-                    chatMessageContent.classList.add(
-                        "text-white",
-                        "messageContent",
-                        bottomSize,
                         "mt-2.5",
                     );
 
-                    chatMessageComponent.appendChild(chatMessageContent);
+                    const splitMessages = msg.message.split(" ");
+
+                    for (const word of splitMessages) {
+                        let generated = false;
+                        if (msg.emotes) {
+                            if (Object.keys(msg.emotes).includes(word)) {
+                                const chatMessageContent =
+                                    document.createElement("img");
+                                chatMessageContent.src = msg.emotes[word];
+                                chatMessageContent.classList.add(
+                                    "messageContent",
+                                    "mr-1",
+                                    `h-[${emoteSize}px]`,
+                                );
+
+                                chatMessageComponent.appendChild(
+                                    chatMessageContent,
+                                );
+
+                                generated = true;
+                            }
+                        }
+
+                        if (!generated) {
+                            const chatMessageContent =
+                                document.createElement("span");
+                            chatMessageContent.textContent = word;
+                            chatMessageContent.classList.add(
+                                "text-white",
+                                "messageContent",
+                                "mr-1",
+                                bottomSize,
+                            );
+
+                            chatMessageComponent.appendChild(
+                                chatMessageContent,
+                            );
+                        }
+                    }
 
                     chatMessage.appendChild(chatMessageComponent);
 

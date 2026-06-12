@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 import asqlite
 import requests
 import twitchio
-from twitchio import eventsub
+from twitchio import ChatMessageEmote, ChatMessageFragment, eventsub
 from twitchio.ext import commands
 
 import mcci
@@ -285,22 +285,18 @@ class MyComponent(commands.Component):
 
         self.getAccessToken()
 
-        twitchEmotes = self.getTwitchEmotes(OWNER_ID)
-
         self.emotes_dict: dict[
-            str, list[str]
-        ] = {  # Replace with your own BTTV, 7TV, FFZ and/or Twitch Emotes | Format : {"Platform":(["emote", "emote", "emote", ...], "prefix")}
+            str, dict[str, str]
+        ] = {  # Format : {"platform": {"emote_name": "emote_url"}}
             "7TV":  # 7TV Emotes
             self.get7TVEmotes(OWNER_ID),
             "BTTV":  # BTTV Emotes
             self.getBTTVEmotes(OWNER_ID),
             "FFZ":  # FFZ Emotes
             self.getFFZEmotes(OWNER_ID),
-            "TwitchChannel":  # Your Twitch Channel Emotes
-            twitchEmotes[0],
-            "Others":  # Any other emotes that I don't know / Couldn't be bother to list (i.e. : Twitch Global Emotes or someone's Twitch Channel's Emotes)
-            twitchEmotes[1],
+            "Twitch": self.getTwitchEmotes(OWNER_ID),
         }
+        self.emotes_list = self.getEmoteList()
 
         self.badges_dict: dict[str, dict[str, str]] = self.getTwitchBadges(OWNER_ID)
 
@@ -324,25 +320,34 @@ class MyComponent(commands.Component):
         #    {"$set": {"user_id": OWNER_ID, "messages": []}},
         # )
 
-    def getBTTVEmotes(self, broadcaster_id: str) -> list[str]:
-        emotes: list[str] = []
+    def getBTTVEmotes(self, broadcaster_id: str) -> dict[str, str]:
+        emotes: dict[str, str] = {}
         req = requests.get(
             f"https://api.betterttv.net/3/cached/users/twitch/{broadcaster_id}"
         )
-        if req.ok:
-            res = req.json()
-            for emote in res["sharedEmotes"]:
-                emotes.append(emote["code"])
+        if not req.ok:
             return emotes
-        return []
+        res = req.json()
 
-    def get7TVEmotes(self, broadcaster_id: str) -> list[str]:
-        emotes: list[str] = []
+        emotes_list = res["sharedEmotes"]
+        for emote in emotes_list:
+            emotes[emote["code"]] = (
+                "https://cdn.betterttv.net/emote/" + emote["id"] + "/2x"
+            )
+        return emotes
+
+    def get7TVEmotes(self, broadcaster_id: str) -> dict[str, str]:
+        emotes: dict[str, str] = {}
 
         req = requests.get("https://api.7tv.app/v3/emote-sets/global")
         res = req.json()
         for emote in res["emotes"]:
-            emotes.append(emote["name"])
+            emotes[emote["data"]["name"]] = (
+                "https:"
+                + emote["data"]["host"]["url"]
+                + "/"
+                + emote["data"]["host"]["files"][0]["name"]
+            )
 
         req = requests.get(f"https://api.7tv.app/v3/users/twitch/{broadcaster_id}")
         if req.ok:
@@ -352,22 +357,28 @@ class MyComponent(commands.Component):
             req = requests.get(f"https://api.7tv.app/v3/emote-sets/{emote_set}")
             res = req.json()
             for emote in res["emotes"]:
-                emotes.append(emote["name"])
+                emotes[emote["data"]["name"]] = (
+                    "https:"
+                    + emote["data"]["host"]["url"]
+                    + "/"
+                    + emote["data"]["host"]["files"][0]["name"]
+                )
         return emotes
 
-    def getFFZEmotes(self, broadcaster_id: str) -> list[str]:
-        emotes: list[str] = []
+    def getFFZEmotes(self, broadcaster_id: str) -> dict[str, str]:
+        emotes: dict[str, str] = {}
 
         req = requests.get(f"https://api.frankerfacez.com/v1/room/id/{broadcaster_id}")
 
-        if req.ok:
-            res = req.json()
-            emoteSet = res["room"]["set"]
-            currentSet = res["sets"][str(emoteSet)]
-            for emote in currentSet["emoticons"]:
-                emotes.append(emote["name"])
+        if not req.ok:
             return emotes
-        return []
+
+        res = req.json()
+        emoteSet = res["room"]["set"]
+        currentSet = res["sets"][str(emoteSet)]
+        for emote in currentSet["emoticons"]:
+            emotes[emote["name"]] = emote["urls"]["2"]
+        return emotes
 
     def getAccessToken(self):
         params = {
@@ -379,13 +390,14 @@ class MyComponent(commands.Component):
         req = requests.post("https://id.twitch.tv/oauth2/token", params=params)
 
         if not req.ok:
-            return ([], [])
+            print("WARNING!! COULDN'T GET THE TOKEN")
+            return
 
         res = req.json()
         self.access_token = res["access_token"]
 
-    def getTwitchEmotes(self, broadcaster_id: str) -> tuple[list[str], list[str]]:
-        emotes: tuple[list[str], list[str]] = ([], [])  # type: ignore
+    def getTwitchEmotes(self, broadcaster_id: str) -> dict[str, str]:
+        emotes: dict[str, str] = {}
 
         headers = {
             "Authorization": f"Bearer {self.access_token}",
@@ -398,26 +410,29 @@ class MyComponent(commands.Component):
         )
 
         if not req.ok:
-            return ([], [])
+            return emotes
 
         res = req.json()
-        emote1 = []
         for emote in res["data"]:
-            emote1.append(emote["name"])
+            link = emote["images"]["url_2x"]
+            if "animated" in emote["format"]:
+                link = link.replace("/static/", "/animated/")
+            emotes[emote["name"]] = link
 
         req = requests.get(
             "https://api.twitch.tv/helix/chat/emotes/global", headers=headers
         )
 
         if not req.ok:
-            return ([], [])
+            return emotes
 
         res = req.json()
-        emote2 = []
         for emote in res["data"]:
-            emote2.append(emote["name"])
-
-        emotes: tuple[list[str], list[str]] = (emote1, emote2)
+            link = emote["images"]["url_2x"]
+            if "animated" in emote["format"]:
+                link = link.replace("/static/", "/animated/")
+            link = link.replace("/light/", "/dark/")
+            emotes[emote["name"]] = link
 
         return emotes
 
@@ -463,6 +478,14 @@ class MyComponent(commands.Component):
 
         return badges
 
+    def getEmoteList(self) -> list[str]:
+        emotes_list: list[str] = []
+        for value in self.emotes_dict.values():
+            for key in value.keys():
+                emotes_list.append(key)
+
+        return emotes_list
+
     def treat_message(self, message: str) -> str:
         final_message = ""
         if "Cheer" in message:  # We don't want it to say the bits amount!
@@ -482,7 +505,7 @@ class MyComponent(commands.Component):
                 final_message += "don't love "
             elif "https" in word:
                 pass
-            elif self.message_has_an_emote(word, self.emotes_dict):
+            elif self.message_has_an_emote(word):
                 pass
             else:
                 final_message += word + " "
@@ -495,35 +518,32 @@ class MyComponent(commands.Component):
                 return "1 or Prime"
         return tier[0]
 
-    def message_has_an_emote(
-        self, message: str, emote_dict: dict[str, list[str]]
-    ) -> bool:
+    def message_has_an_emote(self, message: str) -> bool:
         messageList = message.split()
         for word in messageList:
-            for key in emote_dict.keys():
-                emotes_looked_at = emote_dict[key]
-                if word in emotes_looked_at:
-                    return True
+            if word in self.emotes_list:
+                return True
         return False
 
-    def message_has_emote(
-        self, message: str, emote: str, emote_dict: dict[str, list[str]]
-    ) -> bool:
-        if self.message_has_an_emote(message, emote_dict):
+    def message_has_emote(self, message: str, emote: str) -> bool:
+        if self.message_has_an_emote(message):
             messageList = message.split()
             return emote in messageList
         return False
 
-    def get_first_emote_in_message(
-        self, message: str, emote_dict: dict[str, list[str]]
-    ) -> str:
-        if self.message_has_an_emote(message, emote_dict):
+    def get_emotes_in_message(self, message: str) -> list[str]:
+        emotes: list[str] = []
+        if self.message_has_an_emote(message):
             messageList = message.split()
             for word in messageList:
-                for key in emote_dict.keys():
-                    emotes_looked_at = emote_dict[key]
-                    if word in emotes_looked_at:
-                        return word
+                if word in self.emotes_list:
+                    emotes.append(word)
+        return emotes
+
+    def get_first_emote_in_message(self, message: str) -> str:
+        emotes = self.get_emotes_in_message(message)
+        if len(emotes) > 0:
+            return emotes[0]
         raise ValueError
 
     def format_time_since(
@@ -600,7 +620,7 @@ class MyComponent(commands.Component):
         twitchChatMessage = payload.text
         if payload.type == "user_intro":
             command_message = True
-            twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : "
+            twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : {twitchChatMessage}"
 
         blocked_terms: list[str] = []
         async for blocked_term in payload.broadcaster.fetch_blocked_terms(
@@ -646,21 +666,36 @@ class MyComponent(commands.Component):
         if not (banned_message or command_message):
             # Send new message to server
 
+            emote_urls = {}
+
+            for messageFragment in payload.fragments:
+                if messageFragment.type == "emote":
+                    emote_urls[messageFragment.text] = (
+                        f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/{'animated' if 'animated' in messageFragment.emote.format else 'static'}/dark/2.0"
+                    )
+
+            emotes = self.get_emotes_in_message(twitchChatMessage)
+
+            for emote in emotes:
+                for emotes_platform in self.emotes_dict.values():
+                    if emote in emotes_platform.keys():
+                        emote_urls[emote] = emotes_platform[emote]
+
             color = (
                 payload.chatter.color.html
                 if payload.chatter.color is not None
                 else "#%06x" % random.randint(0, 0xFFFFFF)
             )
-            print(color)
 
             message = {
                 "badges": [
                     self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
                 ],
                 "chatter": payload.chatter.display_name,
-                "username": payload.chatter.name,
                 "color": color,
+                "emotes": emote_urls,
                 "message": payload.text,
+                "username": payload.chatter.name,
             }
 
             self.socket.send("new_message_bot", message)
@@ -668,7 +703,7 @@ class MyComponent(commands.Component):
             self.message_sent += 1
             if self.chat_emotes_combo != ["", 0]:  # If we currently have a combo
                 if self.message_has_emote(
-                    twitchChatMessage, self.chat_emotes_combo[0], self.emotes_dict
+                    twitchChatMessage, self.chat_emotes_combo[0]
                 ):  # If it is the right emote
                     self.chat_emotes_combo[1] += 1
                     print(
@@ -689,11 +724,9 @@ class MyComponent(commands.Component):
                     ]  # Resetting Emotes Combo, because the emote we were looking for wasn't sent
             else:
                 if self.message_has_an_emote(
-                    twitchChatMessage, self.emotes_dict
+                    twitchChatMessage
                 ):  # If the message has at least an emote
-                    emote: str = self.get_first_emote_in_message(
-                        twitchChatMessage, self.emotes_dict
-                    )
+                    emote: str = self.get_first_emote_in_message(twitchChatMessage)
                     self.chat_emotes_combo: list = [emote, 1]
                     print(
                         f"New combo emote : {self.chat_emotes_combo[0]}. Started by {payload.chatter.display_name}"
