@@ -660,7 +660,7 @@ class MyComponent(commands.Component):
             command_message = True
         elif payload.text[0] == "!" or payload.text[0] == "-":
             command_message = True
-        elif payload.source_broadcaster is not None:
+        elif payload.source_broadcaster is not None and self.activate_tts is True:
             command_message = True
 
         if not (banned_message or command_message):

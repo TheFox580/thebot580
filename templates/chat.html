@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
             html {
-                background-color: rgba(0, 0, 0, 0);
+                background-color: rgba(0, 0, 0, 1);
             }
 
             .messageContent {
@@ -58,7 +58,6 @@
 
                     const chatMessage = document.createElement("div");
                     chatMessage.classList.add(
-                        "w-auto",
                         "flex",
                         "flex-col",
                         "mb-5",
@@ -84,6 +83,7 @@
                         "items-center",
                         "justify-center",
                         `w-[${badgeSize * msg.badges.length}px]`,
+                        "mr-2",
                     );
 
                     for (const badgeURL of msg.badges) {
@@ -118,12 +118,12 @@
                             msg.chatter.length < 12 ? "border-4" : "border-2",
                             "rounded-xl",
                             "px-2",
-                            "mx-2",
+                            "py-1",
+                            "mr-2",
                             msg.chatter.length < 12 ? bottomSize : topSize,
                             "text-center",
                             "items-center",
                             "justify-center",
-                            `w-${(msg.chatter.length < 12 ? 4.5 : 3.75) * chatMessagePronouns.textContent.length}`,
                         );
 
                         chatMessageAuthor.appendChild(chatMessagePronouns);
@@ -141,57 +141,45 @@
 
                     chatMessage.appendChild(chatMessageAuthor);
 
-                    const chatMessageComponent = document.createElement("div");
-                    chatMessageComponent.classList.add(
+                    const chatMessagetText = document.createElement("div");
+                    chatMessagetText.classList.add(
                         "flex",
-                        "flex-row",
                         "items-center",
                         "justify-center",
-                        "w-auto",
                         "mt-2.5",
                     );
 
+                    const chatMessageContent = document.createElement("span");
+
+                    chatMessageContent.classList.add(
+                        "text-white",
+                        "mr-1",
+                        bottomSize,
+                    );
                     const splitMessages = msg.message.split(" ");
 
                     for (const word of splitMessages) {
-                        let generated = false;
-                        if (msg.emotes) {
-                            if (Object.keys(msg.emotes).includes(word)) {
-                                const chatMessageContent =
-                                    document.createElement("img");
-                                chatMessageContent.src = msg.emotes[word];
-                                chatMessageContent.classList.add(
-                                    "messageContent",
-                                    "mr-1",
-                                    `h-[${emoteSize}px]`,
-                                );
-
-                                chatMessageComponent.appendChild(
-                                    chatMessageContent,
-                                );
-
-                                generated = true;
-                            }
-                        }
-
-                        if (!generated) {
-                            const chatMessageContent =
-                                document.createElement("span");
-                            chatMessageContent.textContent = word;
-                            chatMessageContent.classList.add(
-                                "text-white",
-                                "messageContent",
-                                "mr-1",
-                                bottomSize,
+                        if (Object.keys(msg.emotes).includes(word)) {
+                            const chatMessageFragment =
+                                document.createElement("img");
+                            chatMessageFragment.src = msg.emotes[word];
+                            chatMessageFragment.classList.add(
+                                "inline-grid",
+                                "mr-2",
+                                `h-[${emoteSize}px]`,
+                                "align-middle",
                             );
-
-                            chatMessageComponent.appendChild(
-                                chatMessageContent,
+                            chatMessageContent.appendChild(chatMessageFragment);
+                        } else {
+                            chatMessageContent.appendChild(
+                                document.createTextNode(word + " "),
                             );
                         }
                     }
 
-                    chatMessage.appendChild(chatMessageComponent);
+                    chatMessagetText.appendChild(chatMessageContent);
+
+                    chatMessage.appendChild(chatMessagetText);
 
                     chatbox.appendChild(chatMessage);
                 });
