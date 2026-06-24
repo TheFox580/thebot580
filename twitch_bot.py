@@ -1121,11 +1121,37 @@ class MyComponent(commands.Component):
             message=f"Thank you {payload.user.display_name} for the follow! thefox91Hi",
         )
 
+        color = self.getChatterColor(payload.user.id)
+
+        alert_message = {
+            "type": "follow",
+            "username": payload.user.display_name,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+        }
+
+        self.socket.send("new_alert_bot", alert_message)
+
     @commands.Component.listener()
     async def event_subscription(self, payload: twitchio.ChannelSubscribe) -> None:
         print("Received event : 'New User Subscription'")
         channel = payload.broadcaster
         sub_tier = self.format_tier(payload.tier)
+
+        color = self.getChatterColor(payload.user.id)
+
+        alert_message = {
+            "type": "first_year",
+            "username": payload.user.display_name,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "sub_type": sub_tier,
+        }
+
+        self.socket.send("new_alert_bot", alert_message)
+
         if not payload.gift:
             await channel.send_message(
                 sender=BOT_ID,
@@ -1142,13 +1168,41 @@ class MyComponent(commands.Component):
         streak = ""
         if payload.streak_months is not None and payload.streak_months > 0:
             streak = f" They've subscribed for {payload.streak_months} months in a row!"
+
         await channel.send_message(
             sender=BOT_ID,
             message=f"thefox91Stonks {payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak}",
         )
+
         message = f'{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak} They said: "{self.treat_message(payload.text)}"'
         output = tts_manager.text_to_speech(message)
-        audio_manager.play_audio(output, True, True, True)
+
+        color = self.getChatterColor(payload.user.id)
+
+        emote_urls = {}
+
+        for emote in payload.emotes:
+            emote_urls[payload.text[emote.begin : emote.end]] = (
+                f"https://static-cdn.jtvnw.net/emoticons/v2/{emote.id}/default/dark/2.0"
+            )
+
+        alert_message = {
+            "type": "resub_year" if payload.months % 12 == 0 else "resub_not_year",
+            "username": payload.user.display_name,
+            "message": payload.text,
+            "amount": payload.months // 12
+            if payload.months % 12 == 0
+            else payload.months,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "emotes": emote_urls,
+            "sub_type": sub_tier,
+            "tts_loc": output,
+        }
+
+        self.socket.send("new_alert_bot", alert_message)
+        # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
 
     @commands.Component.listener()
     async def event_subscription_gift(
@@ -1161,6 +1215,7 @@ class MyComponent(commands.Component):
         display_name = "An anonymous user"
         if type(payload.user.display_name) is str:  # type: ignore
             display_name = payload.user.display_name  # type: ignore
+
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
@@ -1174,7 +1229,27 @@ class MyComponent(commands.Component):
             )
             message = f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!"
         output = tts_manager.text_to_speech(message)
-        audio_manager.play_audio(output, True, True, True)
+
+        color = (
+            self.getChatterColor(payload.user.id) if payload.user is not None else None
+        )
+
+        alert_message = {
+            "type": "gift_sub",
+            "username": payload.user.display_name
+            if payload.user is not None
+            else "Anonymous",
+            "amount": payload.total,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "sub_type": sub_tier,
+            "total_amount": payload.cumulative_total,
+            "tts_loc": output,
+        }
+
+        self.socket.send("new_alert_bot", alert_message)
+        # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
 
     @commands.Component.listener()
     async def event_cheer(self, payload: twitchio.ChannelCheer) -> None:
@@ -1197,7 +1272,36 @@ class MyComponent(commands.Component):
             )
             message = f"{display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
         output = tts_manager.text_to_speech(message)
-        audio_manager.play_audio(output, True, True, True)
+
+        color = (
+            self.getChatterColor(payload.user.id) if payload.user is not None else None
+        )
+
+        emote_urls = {}
+
+        for emote in self.get_emotes_in_message(payload.message):
+            for emotes in self.emotes_dict.values():
+                if emote in emotes.keys():
+                    emote_urls[emote] = emotes[emote]
+                    break
+
+        alert_message = {
+            "type": "cheer",
+            "username": payload.user.display_name
+            if payload.user is not None
+            else "Anonymous",
+            "message": self.treat_message(payload.message),
+            "amount": payload.bits,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "emotes": emote_urls,
+            "tts_loc": output,
+        }
+
+        self.socket.send("new_alert_bot", alert_message)
+
+        # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
 
     @commands.Component.listener()
     async def event_prediction_start(
@@ -1364,6 +1468,8 @@ class MyComponent(commands.Component):
             special_text = "Golden Kappa "
         elif payload.type == "treasure":
             special_text = "Treasure "
+        elif payload.type == "mythic":
+            special_text = "Mythic "
         train_goal = payload.goal
         train_progress = payload.progress
         train_level_complete = round(
@@ -1373,6 +1479,14 @@ class MyComponent(commands.Component):
             sender=BOT_ID,
             message=f"thefox91Stonks A {shared_text}{special_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!",
         )
+
+        alert_message = {
+            "type": "hype_train_start",
+            "is_shared": is_shared,
+            "train_type": payload.type,
+        }
+
+        self.socket.send("new_alert_bot", alert_message)
 
     @commands.Component.listener()
     async def event_hype_train_progress(
@@ -1392,6 +1506,8 @@ class MyComponent(commands.Component):
                 special_text = "Golden Kappa "
             elif payload.type == "treasure":
                 special_text = "Treasure "
+            elif payload.type == "mythic":
+                special_text = "Mythic "
             train_goal = payload.goal
             train_progress = payload.progress
             self.hype_train_level_complete = round(
@@ -1401,6 +1517,15 @@ class MyComponent(commands.Component):
                 sender=BOT_ID,
                 message=f"thefox91Stonks The {shared_text}{special_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!",
             )
+
+            alert_message = {
+                "type": "hype_train_start",
+                "is_shared": is_shared,
+                "train_type": payload.type,
+                "level": train_level,
+            }
+
+            self.socket.send("new_alert_bot", alert_message)
 
     @commands.Component.listener()
     async def event_hype_train_end(self, payload: twitchio.HypeTrainEnd) -> None:
@@ -1565,6 +1690,15 @@ class MyComponent(commands.Component):
             to_broadcaster=raider,
             moderator=BOT_ID,
         )
+
+        alert_message = {
+            "type": "raid",
+            "color": self.getChatterColor(raider.id),
+            "username": raider.display_name,
+            "viewers": payload.viewer_count,
+        }
+
+        self.socket.send("new_alert_bot", alert_message)
 
     @commands.Component.listener()
     async def event_channel_update(self, payload: twitchio.ChannelUpdate) -> None:
