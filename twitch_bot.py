@@ -671,7 +671,7 @@ class MyComponent(commands.Component):
             for messageFragment in payload.fragments:
                 if messageFragment.type == "emote":
                     emote_urls[messageFragment.text] = (
-                        f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/{'animated' if 'animated' in messageFragment.emote.format else 'static'}/dark/2.0"
+                        f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0"
                     )
 
             emotes = self.get_emotes_in_message(twitchChatMessage)
