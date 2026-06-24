@@ -1,6 +1,9 @@
-from keys import NOXCREW_API_KEY
+import json
+
+import requests
+
 from formatted_int import fullFormatInt
-import requests, json
+from keys import NOXCREW_API_KEY
 
 RANKS = {
     "NONE": "None",
@@ -11,7 +14,7 @@ RANKS = {
     "CREATOR": "Content Creator",
     "CONTESTANT": "MCC Contestant",
     "MODERATOR": "MCCI Moderator",
-    "NOXCREW": "Noxcrew Staff"
+    "NOXCREW": "Noxcrew Staff",
 }
 
 FACTIONS = {
@@ -25,20 +28,19 @@ FACTIONS = {
     "BLUE_BATS": "Blue Bats",
     "PURPLE_PANDAS": "Purple Pandas",
     "PINK_PARROTS": "Pink Parrots",
-    "NONE": "None"
+    "NONE": "None",
 }
 
 MAX_ROYAL_REP = 22380
 
-class MCCI_STATS:
 
-    def __init__(self, username:str):
+class MCCI_STATS:
+    def __init__(self, username: str):
         self.__data = self.getMCCIInfos(username)
         mcci_requests[username] = self
 
-    def getMCCIInfos(self, username:str) -> dict:
-
-        query = '''{
+    def getMCCIInfos(self, username: str) -> dict:
+        query = """{
                 playerByUsername(username:\"USERNAME_HERE\") {
                 uuid
                 username
@@ -229,180 +231,197 @@ class MCCI_STATS:
                     }
                 }
             }
-        }'''
+        }"""
 
         query = query.replace("USERNAME_HERE", username)
 
-        req = requests.post("https://api.mccisland.net/graphql", headers={"X-API-Key": NOXCREW_API_KEY}, json={'query': query})
-        data = json.loads(req.text)['data']
+        req = requests.post(
+            "https://api.mccisland.net/graphql",
+            headers={"X-API-Key": NOXCREW_API_KEY},
+            json={"query": query},
+        )
+        data = json.loads(req.text)["data"]
 
         if data == {}:
             return {}
 
-        return data['playerByUsername']
-    
+        return data["playerByUsername"]
+
     def getSimpleInfos(self) -> str:
-        return f"Infos for {self.__data["username"]} | Rank: {self.getUserRank()} | {self.getUserCrownLevel()} | {self.getUserFactionLevel()}"
-    
+        return f"Infos for {self.__data['username']} | Rank: {self.getUserRank()} | {self.getUserCrownLevel()} | {self.getUserFactionLevel()}"
+
     def getDetailedInfos(self) -> str:
-        return f"Infos for {self.__data["username"]} | {self.getUserOnline()} | {self.getUserFriendCount()} | {self.getUserPartyStatus()} | Rank: {self.getUserRank()} | {self.getUserCoins()} | {self.getUserAnglrTokens()} | {self.getUserRoyalReputation()} | {self.getUserMCCPlus()} | {self.getUserCrownLevel()} | {self.getUserTotalTrophies()} | {self.getUserStyleLevel()} | {self.getUserStyleTrophies()} | {self.getUserSkillTrophies()} | {self.getUserFishingLevel()} | {self.getUserFishingTrophies()} | {self.getUserFactionLevel()}"
-    
+        return f"Infos for {self.__data['username']} | {self.getUserOnline()} | {self.getUserFriendCount()} | {self.getUserPartyStatus()} | Rank: {self.getUserRank()} | {self.getUserCoins()} | {self.getUserAnglrTokens()} | {self.getUserRoyalReputation()} | {self.getUserMCCPlus()} | {self.getUserCrownLevel()} | {self.getUserTotalTrophies()} | {self.getUserStyleLevel()} | {self.getUserStyleTrophies()} | {self.getUserSkillTrophies()} | {self.getUserFishingLevel()} | {self.getUserFishingTrophies()} | {self.getUserFactionLevel()}"
+
     def getRawData(self) -> dict:
         return self.__data
-    
+
     def saveAsJSON(self) -> bool:
         json_str = json.dumps(self.getRawData(), indent=4, ensure_ascii=False)
         try:
-            with open(f"MCCI_Data_{self.__data["username"]}.json", "w", encoding="utf-8") as file:
+            with open(
+                f"MCCI_Data_{self.__data['username']}.json", "w", encoding="utf-8"
+            ) as file:
                 file.write(json_str)
         except:
             return False
         return True
-    
+
     def isFound(self) -> bool:
         return self.__data != {}
-    
+
     def hasRanks(self) -> bool:
         if self.isFound():
-            return self.__data['ranks'] != []
+            return self.__data["ranks"] != []
         return False
 
     def getUserRank(self) -> str:
         if self.hasRanks():
             return f"{RANKS[self.__data['ranks'][0]]}."
         return f"{RANKS['NONE']}."
-    
+
     def hasMCCPlus(self) -> bool:
         if self.isFound():
-            return 'mccPlusStatus' in self.__data.keys()
+            return "mccPlusStatus" in self.__data.keys()
         return False
-    
+
     def getUserMCCPlus(self) -> str:
         if self.hasMCCPlus():
             return f"Subscribed to MCC+ for {self.__data['mccPlusStatus']['totalDays']} days."
         return "Not subscribed to MCC+."
-    
+
     def getUserCrownLevel(self) -> str:
         if self.isFound():
-            level = self.__data['crownLevel']['levelData']['level']
-            obtained = self.__data['crownLevel']['levelData']['nextLevelProgress']['obtained']
-            obtainable = self.__data['crownLevel']['levelData']['nextLevelProgress']['obtainable']
-            return f"Crown level {level} ({round(obtained/obtainable*100, 2)}% to level {level+1})."
+            level = self.__data["crownLevel"]["levelData"]["level"]
+            obtained = self.__data["crownLevel"]["levelData"]["nextLevelProgress"][
+                "obtained"
+            ]
+            obtainable = self.__data["crownLevel"]["levelData"]["nextLevelProgress"][
+                "obtainable"
+            ]
+            return f"Crown level {level} ({round(obtained / obtainable * 100, 2)}% to level {level + 1})."
         return "Crown level 0."
-    
+
     def getUserStyleLevel(self) -> str:
         if self.isFound():
-            level = self.__data['crownLevel']['styleLevelData']['level']
-            obtained = self.__data['crownLevel']['styleLevelData']['nextLevelProgress']['obtained']
-            obtainable = self.__data['crownLevel']['styleLevelData']['nextLevelProgress']['obtainable']
-            return f"Style level {level} ({round(obtained/obtainable*100, 2)}% to level {level+1})."
+            level = self.__data["crownLevel"]["styleLevelData"]["level"]
+            obtained = self.__data["crownLevel"]["styleLevelData"]["nextLevelProgress"][
+                "obtained"
+            ]
+            obtainable = self.__data["crownLevel"]["styleLevelData"][
+                "nextLevelProgress"
+            ]["obtainable"]
+            return f"Style level {level} ({round(obtained / obtainable * 100, 2)}% to level {level + 1})."
         return "Style level 0."
-    
+
     def getUserFishingLevel(self) -> str:
         if self.isFound():
-            level = self.__data['crownLevel']['fishingLevelData']['level']
-            obtained = self.__data['crownLevel']['fishingLevelData']['nextLevelProgress']['obtained']
-            obtainable = self.__data['crownLevel']['fishingLevelData']['nextLevelProgress']['obtainable']
-            return f"Fishing level {level} ({round(obtained/obtainable*100, 2)}% to level {level+1})."
+            level = self.__data["crownLevel"]["fishingLevelData"]["level"]
+            obtained = self.__data["crownLevel"]["fishingLevelData"][
+                "nextLevelProgress"
+            ]["obtained"]
+            obtainable = self.__data["crownLevel"]["fishingLevelData"][
+                "nextLevelProgress"
+            ]["obtainable"]
+            return f"Fishing level {level} ({round(obtained / obtainable * 100, 2)}% to level {level + 1})."
         return "Fishing level 0."
-    
+
     def getUserTotalTrophies(self) -> str:
         if self.isFound():
-            obtained = self.__data['crownLevel']['overall_trophies']['obtained']
-            obtainable = self.__data['crownLevel']['overall_trophies']['obtainable']
-            bonus = self.__data['crownLevel']['overall_trophies']['bonus']
-            return f"{fullFormatInt(obtained)} trophies ({round(obtained/obtainable*100, 2)}%) +{fullFormatInt(bonus)} bonus trophies."
+            obtained = self.__data["crownLevel"]["overall_trophies"]["obtained"]
+            obtainable = self.__data["crownLevel"]["overall_trophies"]["obtainable"]
+            bonus = self.__data["crownLevel"]["overall_trophies"]["bonus"]
+            return f"{fullFormatInt(obtained)} trophies ({round(obtained / obtainable * 100, 2)}%) +{fullFormatInt(bonus)} bonus trophies."
         return "0 Trophies."
-    
+
     def getUserStyleTrophies(self) -> str:
         if self.isFound():
-            obtained = self.__data['crownLevel']['style_trophies']['obtained']
-            obtainable = self.__data['crownLevel']['style_trophies']['obtainable']
-            bonus = self.__data['crownLevel']['style_trophies']['bonus']
-            return f"{fullFormatInt(obtained)} style trophies ({round(obtained/obtainable*100, 2)}%) +{fullFormatInt(bonus)} bonus trophies."
+            obtained = self.__data["crownLevel"]["style_trophies"]["obtained"]
+            obtainable = self.__data["crownLevel"]["style_trophies"]["obtainable"]
+            bonus = self.__data["crownLevel"]["style_trophies"]["bonus"]
+            return f"{fullFormatInt(obtained)} style trophies ({round(obtained / obtainable * 100, 2)}%) +{fullFormatInt(bonus)} bonus trophies."
         return "0 style trophies."
-    
+
     def getUserSkillTrophies(self) -> str:
         if self.isFound():
-            obtained = self.__data['crownLevel']['skill_trophies']['obtained']
-            obtainable = self.__data['crownLevel']['skill_trophies']['obtainable']
-            bonus = self.__data['crownLevel']['skill_trophies']['bonus']
-            return f"{fullFormatInt(obtained)} skill trophies ({round(obtained/obtainable*100, 2)}%) +{fullFormatInt(bonus)} bonus trophies."
+            obtained = self.__data["crownLevel"]["skill_trophies"]["obtained"]
+            obtainable = self.__data["crownLevel"]["skill_trophies"]["obtainable"]
+            bonus = self.__data["crownLevel"]["skill_trophies"]["bonus"]
+            return f"{fullFormatInt(obtained)} skill trophies ({round(obtained / obtainable * 100, 2)}%) +{fullFormatInt(bonus)} bonus trophies."
         return "0 skill trophies."
-    
+
     def getUserFishingTrophies(self) -> str:
         if self.isFound():
-            obtained = self.__data['crownLevel']['angler_trophies']['obtained']
-            obtainable = self.__data['crownLevel']['angler_trophies']['obtainable']
-            #bonus = self.__data['crownLevel']['angler_trophies']['bonus'] For a potential future where you can have bounus angler trophies
-            return f"{fullFormatInt(obtained)} angler trophies ({round(obtained/obtainable*100, 2)}%)."
+            obtained = self.__data["crownLevel"]["angler_trophies"]["obtained"]
+            obtainable = self.__data["crownLevel"]["angler_trophies"]["obtainable"]
+            # bonus = self.__data['crownLevel']['angler_trophies']['bonus'] For a potential future where you can have bounus angler trophies
+            return f"{fullFormatInt(obtained)} angler trophies ({round(obtained / obtainable * 100, 2)}%)."
         return "0 angler trophies."
-    
-    
+
     def hasEnabledStatus(self) -> bool:
         if self.isFound():
-            return 'status' in self.__data.keys()
+            return "status" in self.__data.keys()
         return False
-    
+
     def isOnline(self) -> bool:
         if self.hasEnabledStatus():
-            return self.__data['status']['online']
+            return self.__data["status"]["online"]
         return False
-    
+
     def getUserOnline(self) -> str:
         if not self.hasEnabledStatus():
             return "Status settings are off."
         if self.isOnline():
             return "Online."
         return "Offline."
-    
+
     def hasEnabledCollections(self) -> bool:
         if self.isFound():
-            return 'collections' in self.__data.keys()
+            return "collections" in self.__data.keys()
         return False
-    
+
     def getUserCoins(self) -> str:
         if self.hasEnabledCollections():
             return f"{fullFormatInt(self.__data['collections']['currency']['coins'])} coins."
         return "Collections settings are off."
-    
+
     def getUserRoyalReputation(self) -> str:
         if self.hasEnabledCollections():
-            rr = self.__data['collections']['currency']['royalReputation']
-            return f"{fullFormatInt(rr)} royal reputation. ({round(rr/MAX_ROYAL_REP*100, 2)} %)"
+            rr = self.__data["collections"]["currency"]["royalReputation"]
+            return f"{fullFormatInt(rr)} royal reputation. ({round(rr / MAX_ROYAL_REP * 100, 2)} %)"
         return "Collections settings are off."
-    
+
     def getUserAnglrTokens(self) -> str:
         if self.hasEnabledCollections():
             return f"{fullFormatInt(self.__data['collections']['currency']['anglrTokens'])} A.N.G.L.R. tokens."
         return "Collections settings are off."
-    
+
     def hasEnabledSocial(self) -> bool:
         if self.isFound():
-            return 'social' in self.__data.keys()
+            return "social" in self.__data.keys()
         return False
-    
+
     def getUserFriendCount(self) -> str:
         if self.hasEnabledSocial():
             return f"{len(self.__data['social']['friends'])} friends."
         return "Social settings are off."
-    
+
     def isInParty(self) -> bool:
         if self.hasEnabledSocial():
-            return self.__data['social']['party']['active']
+            return self.__data["social"]["party"]["active"]
         return False
-    
+
     def getUserPartyStatus(self) -> str:
         if not self.hasEnabledSocial():
             return "Social settings are off."
         if self.isInParty():
-            members : list= self.__data['social']['party']['members']
-            members.remove({'username': self.__data['username']})
+            members: list = self.__data["social"]["party"]["members"]
+            members.remove({"username": self.__data["username"]})
 
-            if (len(members) > 0):
+            if len(members) > 0:
                 res = "In a party with "
                 for index in range(len(members)):
-                    if index == len(members) -1:
+                    if index == len(members) - 1:
                         res += f"{members[index]['username']}."
                     else:
                         res += f"{members[index]['username']}, "
@@ -410,27 +429,39 @@ class MCCI_STATS:
                 return res
             return "In a party."
         return "Not in a party."
-    
+
     def getUserFaction(self) -> dict:
         if self.isFound():
-            for faction in self.__data['factions']:
-                if faction['selected']:
+            for faction in self.__data["factions"]:
+                if faction["selected"]:
                     return faction
-        return {"name": "NONE", "selected": True, 'levelData': {'level': 0, 'nextLevelProgress': {'obtained': 0, 'obtainable': 1000}}, 'totalExperience': 0}
-    
+        return {
+            "name": "NONE",
+            "selected": True,
+            "levelData": {
+                "level": 0,
+                "nextLevelProgress": {"obtained": 0, "obtainable": 1000},
+            },
+            "totalExperience": 0,
+        }
+
     def getUserFactionName(self) -> str:
         return FACTIONS[self.getUserFaction()["name"]]
-    
+
     def getUserFactionLevel(self) -> str:
         level = self.getUserFaction()["levelData"]["level"]
         obtained = self.getUserFaction()["levelData"]["nextLevelProgress"]["obtained"]
-        obtainable = self.getUserFaction()["levelData"]["nextLevelProgress"]["obtainable"]
+        obtainable = self.getUserFaction()["levelData"]["nextLevelProgress"][
+            "obtainable"
+        ]
         totalExperience = self.getUserFaction()["totalExperience"]
-        return f"{self.getUserFactionName()} level {level} ({round(obtained/obtainable*100, 2)}% to level {level+1}). Collected {fullFormatInt(totalExperience)} experience for this faction. "
-    
-mcci_requests : dict[str, MCCI_STATS] = {}
+        return f"{self.getUserFactionName()} level {level} ({round(obtained / obtainable * 100, 2)}% to level {level + 1}). Collected {fullFormatInt(totalExperience)} experience for this faction. "
 
-def getMCCIInfo(username:str) -> MCCI_STATS:
+
+mcci_requests: dict[str, MCCI_STATS] = {}
+
+
+def getMCCIInfo(username: str) -> MCCI_STATS:
     if not username in mcci_requests.keys():
         return MCCI_STATS(username)
     return mcci_requests[username]
