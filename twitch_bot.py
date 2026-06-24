@@ -478,6 +478,31 @@ class MyComponent(commands.Component):
 
         return badges
 
+    def getChatterColor(self, user_id: str) -> str | None:
+        color: str | None = None
+
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Client-Id": TWITCH_BOT_CLIENT_ID,
+        }
+
+        params = {"user_id": user_id}
+
+        req = requests.get(
+            "https://api.twitch.tv/helix/chat/color", headers=headers, params=params
+        )
+
+        if not req.ok:
+            return color
+
+        res = req.json()
+
+        for user in res["data"]:
+            color = user["color"] if user["color"] != "" else None
+            break
+
+        return color
+
     def getEmoteList(self) -> list[str]:
         emotes_list: list[str] = []
         for value in self.emotes_dict.values():
