@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 import asqlite
 import requests
 import twitchio
-from twitchio import ChatMessageEmote, ChatMessageFragment, eventsub, user
+from twitchio import eventsub, user
 from twitchio.ext import commands
 
 import mcci
@@ -522,7 +522,7 @@ class MyComponent(commands.Component):
         for word in messageList:
             word = word.replace("_", " ")
             if ("🫡" == word) or ("o7" == word):
-                final_message += "oh 7 "
+                final_message += "eau 7 "
             elif "D:" == word:
                 final_message += "D face "
             elif "<3" == word:
@@ -596,7 +596,7 @@ class MyComponent(commands.Component):
         )
         days -= int(years * 365.2242 + months * 30.436875)
 
-        seconds_text = "second"
+        seconds_text = "seconde"
         minutes_text = "minute"
         if secs != 1:
             seconds_text += "s"
@@ -606,28 +606,27 @@ class MyComponent(commands.Component):
         time_text = f"{mins} {minutes_text} and {secs} {seconds_text}"  # I'm always including the minutes just so that I don't have to handle the "and". Big Brain
 
         if leap_year_warning:
-            time_text += " (Time might be offset by a few days due to leap years.)"
+            time_text += (
+                " (Le temps peut être imparfait à cause des années bisextiles.)"
+            )
 
         if hours > 0:
             if hours == 1:
-                time_text = f"{hours} hour, {time_text}"
+                time_text = f"{hours} heure, {time_text}"
             else:
-                time_text = f"{hours} hours, {time_text}"
+                time_text = f"{hours} heures, {time_text}"
         if days > 0:
             if days == 1:
-                time_text = f"{days} day, {time_text}"
+                time_text = f"{days} jour, {time_text}"
             else:
-                time_text = f"{days} days, {time_text}"
+                time_text = f"{days} jours, {time_text}"
         if months > 0:
-            if months == 1:
-                time_text = f"{months} month, {time_text}"
-            else:
-                time_text = f"{months} months, {time_text}"
+            time_text = f"{months} mois, {time_text}"
         if years > 0:
             if years == 1:
-                time_text = f"{years} year, {time_text}"
+                time_text = f"{years} année, {time_text}"
             else:
-                time_text = f"{years} years, {time_text}"
+                time_text = f"{years} années, {time_text}"
 
         return time_text
 
@@ -641,7 +640,7 @@ class MyComponent(commands.Component):
         command_message = False
 
         print(
-            f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text} {f'(From {payload.source_broadcaster.display_name})' if payload.source_broadcaster is not None else ''}"
+            f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text} {f'(De {payload.source_broadcaster.display_name})' if payload.source_broadcaster is not None else ''}"
         )
 
         # Setup what will be translated as a variable
@@ -742,16 +741,16 @@ class MyComponent(commands.Component):
                 ):  # If it is the right emote
                     self.chat_emotes_combo[1] += 1
                     print(
-                        f"+1 to the {self.chat_emotes_combo[0]} combo by {payload.chatter.display_name} (Now {self.chat_emotes_combo[1]}) "
+                        f"+1 au combo {self.chat_emotes_combo[0]} de {payload.chatter.display_name} (Maintenant {self.chat_emotes_combo[1]}) "
                     )
                 else:
                     print(
-                        f"{self.chat_emotes_combo[1]}x {self.chat_emotes_combo[0]} combo was ended by {payload.chatter.display_name}"
+                        f"Le combo de {self.chat_emotes_combo[1]}x {self.chat_emotes_combo[0]} a été arrêté par {payload.chatter.display_name}"
                     )
                     if self.chat_emotes_combo[1] >= 5:
                         await payload.broadcaster.send_message(
                             sender=BOT_ID,
-                            message=f"{self.chat_emotes_combo[1]}x {self.chat_emotes_combo[0]} combo! POGGIES",
+                            message=f"Combo {self.chat_emotes_combo[1]}x de {self.chat_emotes_combo[0]} ! POGGIES",
                         )
                     self.chat_emotes_combo: list = [  # type: ignore
                         "",
@@ -764,7 +763,7 @@ class MyComponent(commands.Component):
                     emote: str = self.get_first_emote_in_message(twitchChatMessage)
                     self.chat_emotes_combo: list = [emote, 1]
                     print(
-                        f"New combo emote : {self.chat_emotes_combo[0]}. Started by {payload.chatter.display_name}"
+                        f"Nouveau combo : {self.chat_emotes_combo[0]}. Commencé par {payload.chatter.display_name}"
                     )
 
             twitchChatMessage = self.treat_message(twitchChatMessage)
@@ -786,61 +785,9 @@ class MyComponent(commands.Component):
                     # Play the file
                     audio_manager.play_audio(output, True, True, True)
 
-                if payload.broadcaster.name == "thefox580":
-                    # THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
-
-                    posY = obswebsockets_manager.get_source_transform(
-                        "Bots", "TwitchChat"
-                    )["positionY"]
-                    while posY > 693:
-                        posY -= 1
-                        new_transform = {"positionY": posY}
-                        obswebsockets_manager.set_source_transform(
-                            "Bots", "TwitchChat", new_transform
-                        )
-
-                    # Play the file
-                    audio_manager.play_audio(output, True, True, True)
-
-                    posY = obswebsockets_manager.get_source_transform(
-                        "Bots", "TwitchChat"
-                    )["positionY"]
-                    while posY < 1080:
-                        posY += 1
-                        new_transform = {"positionY": posY}
-                        obswebsockets_manager.set_source_transform(
-                            "Bots", "TwitchChat", new_transform
-                        )
-
-                elif payload.broadcaster.name == "thealt580":
-                    # THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
-
-                    posY = obswebsockets_manager.get_source_transform(
-                        "Bots", "TwitchChat"
-                    )["positionY"]
-                    while posY > 693:
-                        posY -= 1
-                        new_transform = {"positionY": posY}
-                        obswebsockets_manager.set_source_transform(
-                            "Bots", "TwitchChat", new_transform
-                        )
-
-                    # Play the file
-                    audio_manager.play_audio(output, True, True, True)
-
-                    posY = obswebsockets_manager.get_source_transform(
-                        "Bots", "TwitchChat"
-                    )["positionY"]
-                    while posY < 1080:
-                        posY += 1
-                        new_transform = {"positionY": posY}
-                        obswebsockets_manager.set_source_transform(
-                            "Bots", "TwitchChat", new_transform
-                        )
-
         if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
-            await payload.chatter.ban(moderator=BOT_ID, reason="INVALID MESSAGE")
+            await payload.chatter.ban(moderator=BOT_ID, reason="MESSAGE INVALIDE")
             banMessage = "BANNED MESSAGE DETECTED : MESSAGE WILL NOT BE SAID"
             print(banMessage)
 
@@ -852,12 +799,12 @@ class MyComponent(commands.Component):
 
         !hi, !hello, !howdy, !hey
         """
-        await ctx.reply(f"Hello {ctx.chatter.mention}!")
+        await ctx.reply(f"Salut {ctx.chatter.mention}!")
 
     @commands.command()
     async def emotes(self, ctx: commands.Context) -> None:
         await ctx.reply(
-            "To have acces to a lot of new emotes, install the BetterTTV (https://betterttv.com) or 7TV (https://7tv.app/) extension on your navigator"
+            "Pour avoir accès a plus d'emotes, installez l'extension 7TV (https://7tv.app/) sur votre navigateur."
         )
 
     @commands.group(invoke_fallback=True)
@@ -867,7 +814,7 @@ class MyComponent(commands.Component):
         !socials
         """
         await ctx.reply(
-            "https://www.discord.gg/9tmdgHWaMU, https://www.youtube.com/@thefox580"
+            "https://www.discord.gg/9tmdgHWaMU, https://www.youtube.com/@lerenard580"
         )
 
     @socials.command(name="discord")
@@ -876,7 +823,7 @@ class MyComponent(commands.Component):
 
         !socials discord
         """
-        await ctx.reply("The discord : https://www.discord.gg/9tmdgHWaMU")
+        await ctx.reply("Le discord : https://www.discord.gg/9tmdgHWaMU")
 
     @socials.command(name="youtube")
     async def socials_youtube(self, ctx: commands.Context) -> None:
@@ -884,7 +831,7 @@ class MyComponent(commands.Component):
 
         !socials discord
         """
-        await ctx.reply("The Youtube channel : https://www.youtube.com/@thefox580")
+        await ctx.reply("La chaine Youtube : https://www.youtube.com/@lerenard580")
 
     @commands.command(aliases=["follow", "followsince"])
     async def followage(self, ctx: commands.Context):
@@ -894,57 +841,56 @@ class MyComponent(commands.Component):
             print(follow_info)
             if follow_info is None:
                 await ctx.reply(
-                    f"Sorry {ctx.chatter.display_name}, but you are not following the channel..."
+                    f"Désolé {ctx.chatter.display_name}, mais tu ne follow pas la chaîne..."
                 )
             else:
                 follow_time = follow_info.followed_at
                 await ctx.reply(
-                    f"{ctx.chatter.display_name}, you've been following for {self.format_time_since(datetime.now(timezone.utc), follow_time, True)}. (Followed on {follow_time.strftime('%d/%m/%Y at %H:%M:%S %Z')})"
+                    f"{ctx.chatter.display_name}, tu a follow la chaîne depuis {self.format_time_since(datetime.now(timezone.utc), follow_time, True)}. (Follow le {follow_time.strftime('%d/%m/%Y at %H:%M:%S %Z')})"
                 )
 
     @commands.command()
     async def uptime(self, ctx: commands.Context):
         await ctx.reply(
-            f"Fox has been live for {self.format_time_since(datetime.now(timezone.utc), self.start_time)} (Stream started at {self.start_time.strftime('%d/%m/%Y at %H:%M:%S %Z')})."
+            f"Fox est en live depuis {self.format_time_since(datetime.now(timezone.utc), self.start_time)} (Stream commencé le {self.start_time.strftime('%d/%m/%Y at %H:%M:%S %Z')})."
         )
 
     @commands.command()
     async def lurk(self, ctx: commands.Context):
         if ctx.chatter.name not in self.lurkers:
             self.lurkers.append(ctx.chatter.name)
-            await ctx.reply(
-                f"You just started lurking {ctx.chatter.display_name}, see ya soon!"
-            )
+            await ctx.reply(f"Tu viens de lurk {ctx.chatter.display_name}, à plus !")
         else:
             await ctx.reply(
-                f"You were already lurking! But see you later {ctx.chatter.display_name}."
+                f"Tu étais déjà en train de lurk! Mais à plus {ctx.chatter.display_name}."
             )
 
     @commands.command()
     async def unlurk(self, ctx: commands.Context):
         if ctx.chatter.name in self.lurkers:
             self.lurkers.remove(ctx.chatter.name)
-            await ctx.reply(f"Welcome back {ctx.chatter.display_name}!")
+            await ctx.reply(f"Re-bienvenue {ctx.chatter.display_name}!")
         else:
             await ctx.reply(
-                f"You weren't lurking! But welcome back {ctx.chatter.display_name}."
+                f"Tu n'étais pas en train de lurk! Mais re-bienvenue {ctx.chatter.display_name}."
             )
 
     @commands.command()
     async def time(self, ctx: commands.Context):
         await ctx.reply(
-            f"It is currently {datetime.now().strftime('%B %d %Y, %H:%M:%S')} for Fox."
+            f"Il est actuellement {datetime.now().strftime('%B %d %Y, %H:%M:%S')} pour Fox."
         )
 
     @commands.command()
     async def today(self, ctx: commands.Context):
-        channelInfo: twitchio.ChannelInfo = await ctx.broadcaster.fetch_channel_info()
-        await ctx.send(channelInfo.title.split("} ")[1])
+        await ctx.send(
+            "Le titre du stream explique surement extremement bien le stream du jour"
+        )
 
     @commands.command()
     async def ai(self, ctx: commands.Context):
         await ctx.reply(
-            "I don't use AI for anything, coding, art, ... I believe anyone can do anything with enough will, make whatever you want by yourself and have fun!"
+            "Je n'utilise l'IA pour rien (ni le code, ni l'art, ...) Je pense que n'importe qui peut faire n'importe quoi avec un peu d'effort. Fait ce qu'il te fait par tot même et surtout, amuse toi !"
         )
 
     @commands.command()
@@ -952,38 +898,38 @@ class MyComponent(commands.Component):
         if ctx.chatter.moderator or ctx.chatter.broadcaster:  # type: ignore # type: ignore
             self.activate_tts = not self.activate_tts
             if self.activate_tts:
-                await ctx.reply("TTS has been turned on.")
+                await ctx.reply("TTS à été activé.")
                 return
-            await ctx.reply("TTS has been turned off.")
+            await ctx.reply("TTS à été désactivé.")
             return
 
         if self.activate_tts:
-            await ctx.reply("TTS is currently turned on.")
+            await ctx.reply("TTS est actuellement activé.")
             return
-        await ctx.reply("TTS is currently turned off.")
+        await ctx.reply("TTS est actuellement désactivé.")
 
     # @commands.command()
     # async def subtember(self, ctx: commands.Context):
     #    await ctx.send(f"For the next {self.format_time_since(datetime.fromtimestamp(1759338000), datetime.now())}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to https://www.twitch.tv/subs/thefox580 !")
 
-    @commands.command(aliases=["donate"])
-    async def charity(self, ctx: commands.Context):
-        await ctx.send_announcement(
-            "We're raising money for the Sarcoma Foundation of America initiative! Donate here: https://thewebsite580.vercel.app/donate",
-            color="green",
-        )
+    # @commands.command(aliases=["donate"])
+    # async def charity(self, ctx: commands.Context):
+    #    await ctx.send_announcement(
+    #        "We're raising money for the Sarcoma Foundation of America initiative! Donate here: https://thewebsite580.vercel.app/donate",
+    #        color="green",
+    #    )
 
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
         await ctx.reply(
-            "I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.2.0 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580",
+            'Je suis un bot custom en Python, basé sur l\'application "Babagaboosh" de DougDoug. Je tourne actuellement sur la version 580.FR (En utilisant TwitchIO 3.2.0 & Python 3.13.12). Vous pouvez aller voir par vous même à https://github.com/TheFox580/thebot580',
             me=True,
         )
 
     @commands.command()
     async def age(self, ctx: commands.Context):
         await ctx.send(
-            f"Fox is {self.format_time_since(datetime.now(), datetime.fromtimestamp(1139072400), True)} old."
+            f"Fox à {self.format_time_since(datetime.now(), datetime.fromtimestamp(1139072400), True)} ans."
         )
 
     @commands.command()
@@ -1010,11 +956,11 @@ class MyComponent(commands.Component):
                 )
             ffRate = round(stats["forfeits"]["ranked"] / totalGamesPlayed * 100, 2)
             await ctx.reply(
-                f"{username} | Elo: {data['eloRate']} (High/Low: {data['seasonResult']['highest']}/{data['seasonResult']['lowest']}) | #{data['eloRank']} === Played {totalGamesPlayed} games | W/D/L {gamesWon}/{gamesTied}/{gamesLost} === PB: {pb[0]}:{pb[1]}.{pb[2]} === {ffRate}% Forfeit Rate",
+                f"{username} | Elo: {data['eloRate']} (High/Low: {data['seasonResult']['highest']}/{data['seasonResult']['lowest']}) | #{data['eloRank']} === {totalGamesPlayed} parties jouées | W/D/L {gamesWon}/{gamesTied}/{gamesLost} === PB: {pb[0]}:{pb[1]}.{pb[2]} === {ffRate}% Taux d'Abandon",
                 me=True,
             )
             return
-        await ctx.reply(f'No player with the username "{username}" found')
+        await ctx.reply(f'Aucun utilisateur avec le pseudo "{username}" à été trouvé')
 
     @commands.command()
     async def mccilook(self, ctx: commands.Context, *, content: str):
@@ -1023,7 +969,9 @@ class MyComponent(commands.Component):
         mcci_data = mcci.MCCI_STATS(username)
 
         if not mcci_data.isFound():
-            await ctx.reply(f'No player with the username "{username}" found')
+            await ctx.reply(
+                f'Aucun utilisateur avec le pseudo "{username}" à été trouvé'
+            )
             return
 
         await ctx.reply(mcci_data.getSimpleInfos())
@@ -1032,11 +980,11 @@ class MyComponent(commands.Component):
     # async def coding(self, ctx: commands.Context):
     #    await ctx.reply(f"Fox is coding for WubDub_'s upcoming Minecraft Event, \"Goofy Games\". I wrote this command in advance so idk what I'm working on right now, but maybe it's written on screen.")
 
-    @commands.command()
-    async def team(self, ctx: commands.Context):
-        await ctx.reply(
-            "In this event, Fox is in a team with KaNukei, Ceeps & DaHouse_Panda!"
-        )
+    # @commands.command()
+    # async def team(self, ctx: commands.Context):
+    #    await ctx.reply(
+    #        "In this event, Fox is in a team with KaNukei, Ceeps & DaHouse_Panda!"
+    #    )
 
     @commands.command()
     @commands.is_broadcaster()
@@ -1049,7 +997,7 @@ class MyComponent(commands.Component):
 
         self.socket.send(channel, json.loads(message))
 
-        await ctx.reply("Sent custom trigger")
+        await ctx.reply("Trigger custom envoté")
 
     @commands.command()
     @commands.is_lead_moderator()
@@ -1057,10 +1005,10 @@ class MyComponent(commands.Component):
     async def color(self, ctx: commands.Context):
         if ctx.chatter is user.Chatter:
             await ctx.reply(
-                f"Your color is: {ctx.chatter.color.html if ctx.chatter.color is not None else None}"
+                f"Votre couleur est: {ctx.chatter.color.html if ctx.chatter.color is not None else None}"
             )
             await ctx.reply(
-                f"Your color is probably: {self.getChatterColor(ctx.chatter.id)}"
+                f"Votre couleur est probablement: {self.getChatterColor(ctx.chatter.id)}"
             )
 
     # @commands.command()
@@ -1087,14 +1035,14 @@ class MyComponent(commands.Component):
     #         f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
     #     )
 
-    @commands.command(aliases=["sludgineers"])
-    @commands.cooldown(
-        rate=1, per=60 * 10, key=commands.BucketType.chatter
-    )  # Cooldown for 1 / 10mins
-    async def sludge(self, ctx: commands.Context):
-        await ctx.send_announcement(
-            "Thanks to Funk Games for the key! The game comes out on June 1st, and you can buy it there: https://lurk.ly/pJVjlz"
-        )
+    # @commands.command(aliases=["sludgineers"])
+    # @commands.cooldown(
+    #    rate=1, per=60 * 10, key=commands.BucketType.chatter
+    # )  # Cooldown for 1 / 10mins
+    # async def sludge(self, ctx: commands.Context):
+    #    await ctx.send_announcement(
+    #        "Thanks to Funk Games for the key! The game comes out on June 1st, and you can buy it there: https://lurk.ly/pJVjlz"
+    #    )
 
     @commands.command()
     @commands.is_moderator()
@@ -1103,7 +1051,7 @@ class MyComponent(commands.Component):
         print(game)
         if game is None:
             await ctx.reply(
-                "Failed to update the category, please enter a valid category name"
+                "La catégorie n'a pas pu être mise a jour, veuillez rentrer un nom de jeu correct."
             )
         else:
             await ctx.broadcaster.modify_channel(game_id=game.id)
@@ -1121,7 +1069,7 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         await channel.send_message(
             sender=BOT_ID,
-            message=f"Thank you {payload.user.display_name} for the follow! thefox91Hi",
+            message=f"Merci {payload.user.display_name} pour le follow!",
         )
 
         color = self.getChatterColor(payload.user.id)
@@ -1158,7 +1106,7 @@ class MyComponent(commands.Component):
         if not payload.gift:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{payload.user.display_name} subscribed with a Tier {sub_tier} subscription!",
+                message=f"{payload.user.display_name} s'est abonné en Tier {sub_tier} !",
             )
 
     @commands.Component.listener()
@@ -1170,14 +1118,16 @@ class MyComponent(commands.Component):
         sub_tier = self.format_tier(payload.tier)
         streak = ""
         if payload.streak_months is not None and payload.streak_months > 0:
-            streak = f" They've subscribed for {payload.streak_months} months in a row!"
+            streak = (
+                f" Iel est abonné depuis {payload.streak_months} months à la suite !"
+            )
 
         await channel.send_message(
             sender=BOT_ID,
-            message=f"thefox91Stonks {payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak}",
+            message=f"{payload.user.display_name} s'est réabonné en Tier {sub_tier} depuis {payload.months} mois !{streak}",
         )
 
-        message = f'{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak} They said: "{self.treat_message(payload.text)}"'
+        message = f'{payload.user.display_name} s\'est réabonné en Tier {sub_tier} depuis {payload.months} mois !{streak} Iel a dit: "{self.treat_message(payload.text)}"'
         output = tts_manager.text_to_speech(message)
 
         color = self.getChatterColor(payload.user.id)
@@ -1215,22 +1165,22 @@ class MyComponent(commands.Component):
         channel = payload.broadcaster
         sub_tier = self.format_tier(payload.tier, True)
         message = ""
-        display_name = "An anonymous user"
+        display_name = "Un utilisateur anonyme"
         if type(payload.user.display_name) is str:  # type: ignore
             display_name = payload.user.display_name  # type: ignore
 
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!",
+                message=f"{display_name} à donné {payload.total} subs de Tier {sub_tier} à la communauté ! Au total, il y a eu {payload.cumulative_total} sub gifts d'utilisateurs anonymes dans la communauté !",
             )
-            message = f"An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!"
+            message = f"{display_name} à donné {payload.total} subs de Tier {sub_tier} à la communauté ! Au total, il y a eu {payload.cumulative_total} sub gifts d'utilisateurs anonymes dans la communauté !"
         else:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks {display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!",
+                message=f"{display_name} à donné {payload.total} subs de Tier {sub_tier} à la communauté ! Au total, {display_name} à donné {payload.cumulative_total} subs à la communauté !",
             )
-            message = f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!"
+            message = f"{display_name} à donné {payload.total} subs de Tier {sub_tier} à la communauté ! Au total, {display_name} à donné {payload.cumulative_total} subs à la communauté !"
         output = tts_manager.text_to_speech(message)
 
         color = (
@@ -1259,21 +1209,21 @@ class MyComponent(commands.Component):
         print("Received event : 'User Cheer'")
         channel = payload.broadcaster
         message = ""
-        display_name = "An anonymous user"
+        display_name = "Un utilisateur anonyme"
         if type(payload.user.display_name) is str:  # type: ignore
             display_name = payload.user.display_name  # type: ignore
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks An anonymous user cheered {payload.bits} bits!",
+                message=f"Un utilisateur anonyme à donné {payload.bits} bits!",
             )
-            message = f"An anonymous user cheered {payload.bits} bits! They said: {self.treat_message(payload.message, True)}"
+            message = f"Un utilisateur anonyme à donné {payload.bits} bits! Iel a dit: {self.treat_message(payload.message, True)}"
         else:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks {display_name} cheered {payload.bits} bits!",
+                message=f"{display_name} à donné {payload.bits} bits!",
             )
-            message = f"{display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message, True)}"
+            message = f"{display_name} à donné {payload.bits} bits! Iel a dit: {self.treat_message(payload.message, True)}"
         output = tts_manager.text_to_speech(message)
 
         color = (
@@ -1323,7 +1273,7 @@ class MyComponent(commands.Component):
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=f'A new prediction has been started ! "{prediction_title}" | Outcomes are : {prediction_outcomes_str}. This prediction locks in {mins} minute(s).',
+            message=f'Une nouvelle prédiction a commencé ! "{prediction_title}" | Les choix sont : {prediction_outcomes_str}. Cette prédiction se ferme dans {mins} minute(s).',
         )
 
     @commands.Component.listener()
@@ -1353,7 +1303,7 @@ class MyComponent(commands.Component):
             channel_points = prediction_highest.channel_points
         await channel.send_message(
             sender=BOT_ID,
-            message=f'The "{prediction_title}" prediction has been locked! "{prediction_highest.title}" is the highest outcome with {round(channel_points / prediction_total * 100, 2)}% | Outcomes are : {prediction_outcomes_str}.',
+            message=f'La prédiction "{prediction_title}" est maintenant fermée ! "{prediction_highest.title}" est le choix le plus choisi avec {round(channel_points / prediction_total * 100, 2)}% | Les choix sont : {prediction_outcomes_str}.',
         )
 
     @commands.Component.listener()
@@ -1366,7 +1316,7 @@ class MyComponent(commands.Component):
         if payload.status == "canceled":
             await channel.send_message(
                 sender=BOT_ID,
-                message=f'The "{prediction_title}" prediction has been canceled! All channel points will be refunded.',
+                message=f'La prédiction "{prediction_title}" a été annulé! Tout les points de chaînes seront rendus.',
             )
         else:
             prediction_winner = payload.winning_outcome
@@ -1390,7 +1340,7 @@ class MyComponent(commands.Component):
                 channel_points = prediction_winner.channel_points  # type: ignore
             await channel.send_message(
                 sender=BOT_ID,
-                message=f'The "{prediction_title}" prediction has been ended! "{prediction_winner.title}" is the winning outcome with {round(channel_points / prediction_total * 100, 2)}% (That\'s {prediction_total} TheDollar580 for {len(prediction_winner.users)} chatters thefox91Stonks) | Outcomes were : {prediction_outcomes_str}.',  # type: ignore
+                message=f'La prédiction "{prediction_title}" est terminée! "{prediction_winner.title}" est le choix gagnant avec {round(channel_points / prediction_total * 100, 2)}% (C\'est {prediction_total} Chockbars pour {len(prediction_winner.users)} chatteurs) | Les choix étaient : {prediction_outcomes_str}.',  # type: ignore
             )
 
     @commands.Component.listener()
@@ -1408,7 +1358,7 @@ class MyComponent(commands.Component):
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=f'A new poll has been started ! "{poll_title}" | Choices are : {poll_choices_str}. This poll ends in {mins} minute(s).',
+            message=f'Un nouveau sondage a démarré ! "{poll_title}" | Les choix sont : {poll_choices_str}. Ce sondage se termine dans {mins} minute(s).',
         )
 
     @commands.Component.listener()
@@ -1429,7 +1379,7 @@ class MyComponent(commands.Component):
                 poll_winner = choice
         await channel.send_message(
             sender=BOT_ID,
-            message=f'Anwsers are in! {poll_winner.title} won "{poll_title}" with {poll_winner.votes} votes | Choices were : {poll_choices_str}.',
+            message=f'Nous avons les résultats! {poll_winner.title} à gagné "{poll_title}" avec {poll_winner.votes} votes | Les choix étaient : {poll_choices_str}.',
         )
 
     @commands.Component.listener()
@@ -1441,7 +1391,7 @@ class MyComponent(commands.Component):
         self.start_time = datetime.now()
         await payload.broadcaster.send_message(
             sender=BOT_ID,
-            message=f"{payload.broadcaster.display_name} is now live",
+            message=f"{payload.broadcaster.display_name} est maintenant en live.",
         )
 
     @commands.Component.listener()
@@ -1453,7 +1403,7 @@ class MyComponent(commands.Component):
         stream_time_diff = self.format_time_since(datetime.now(), self.start_time)
         await payload.broadcaster.send_message(
             sender=BOT_ID,
-            message=f"The stream is now offline. {payload.broadcaster.display_name} has been live for the past {stream_time_diff}",
+            message=f"Le stream est maintenant terminé. {payload.broadcaster.display_name} était en live pendant {stream_time_diff}.",
         )
 
     @commands.Component.listener()
@@ -1465,14 +1415,14 @@ class MyComponent(commands.Component):
         shared_text = ""
         is_shared = payload.shared_train
         if is_shared:
-            shared_text = "Shared "
+            shared_text = "Pargagé "
         special_text = ""
         if payload.type == "golden_kappa":
-            special_text = "Golden Kappa "
+            special_text = "Kappa Doré "
         elif payload.type == "treasure":
-            special_text = "Treasure "
+            special_text = "Trésor "
         elif payload.type == "mythic":
-            special_text = "Mythic "
+            special_text = "Mythique "
         train_goal = payload.goal
         train_progress = payload.progress
         train_level_complete = round(
@@ -1480,7 +1430,7 @@ class MyComponent(commands.Component):
         )  # A percentage of level completion
         await channel.send_message(
             sender=BOT_ID,
-            message=f"thefox91Stonks A {shared_text}{special_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!",
+            message=f"Un Train de la Hype {special_text}{shared_text}viens de commencer! Nous sommes à {train_level_complete}% dans le niveau {train_level}!",
         )
 
         alert_message = {
@@ -1503,14 +1453,14 @@ class MyComponent(commands.Component):
             shared_text = ""
             is_shared = payload.shared_train
             if is_shared:
-                shared_text = "Shared "
+                shared_text = "Pargagé "
             special_text = ""
             if payload.type == "golden_kappa":
-                special_text = "Golden Kappa "
+                special_text = "Kappa Doré "
             elif payload.type == "treasure":
-                special_text = "Treasure "
+                special_text = "Trésor "
             elif payload.type == "mythic":
-                special_text = "Mythic "
+                special_text = "Mythique "
             train_goal = payload.goal
             train_progress = payload.progress
             self.hype_train_level_complete = round(
@@ -1518,7 +1468,7 @@ class MyComponent(commands.Component):
             )  # A percentage of level completion
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks The {shared_text}{special_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!",
+                message=f"Le Train de la Hype {special_text}{shared_text}à évolué! Nous sommes à {self.hype_train_level_complete}% dans le niveau {train_level}!",
             )
 
             alert_message = {
@@ -1539,12 +1489,14 @@ class MyComponent(commands.Component):
         shared_text = ""
         is_shared = payload.shared_train
         if is_shared:
-            shared_text = "Shared "
+            shared_text = "Partagé "
         special_text = ""
         if payload.type == "golden_kappa":
-            special_text = "Golden Kappa "
+            special_text = "Kappa Doré "
         elif payload.type == "treasure":
-            special_text = "Treasure "
+            special_text = "Trésor "
+        elif payload.type == "mythic":
+            special_text = "Mythique "
         train_countdown_until = payload.cooldown_until
         diff = (
             datetime.fromtimestamp(train_countdown_until.timestamp()) - datetime.now()
@@ -1553,7 +1505,7 @@ class MyComponent(commands.Component):
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=f"thefox91Stonks The {shared_text}{special_text}Hype Train has left the chat... We reached {self.hype_train_level_complete}% of level {train_level}! The next Hype Train can come back in {mins} minutes.",
+            message=f"Le Train de la Hype {special_text}{shared_text}à quitté le chat... Nous avons atteint {self.hype_train_level_complete}% du niveau {train_level}! Le prochain Train de la Hype peut revenir dans {mins} minutes.",
         )
 
     @commands.Component.listener()
@@ -1574,7 +1526,7 @@ class MyComponent(commands.Component):
                 )
         await channel.send_message(
             sender=BOT_ID,
-            message=f"{host.display_name} has started a shared chat session with {participants_str}.",
+            message=f"{host.display_name} à commencé une session de Chat Partagé avec {participants_str}.",
         )
 
     @commands.Component.listener()
@@ -1597,7 +1549,7 @@ class MyComponent(commands.Component):
                 )
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{host.name} has added {abs(diff)} users to the shared chat. The participants now are {participants_str}.",
+                message=f"{host.name} à ajouté {abs(diff)} utilisateur dans le Chat Partagé. Les participants sont maintenant {participants_str}.",
             )
         else:  # If a user was removed
             self.shared_chat_users = []
@@ -1609,7 +1561,7 @@ class MyComponent(commands.Component):
                 )
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{host.name} has removed {diff} users to the shared chat. The participants now are {participants_str}.",
+                message=f"{host.name} à retiré {diff} utilisateurs du Chat Partagé. Les participants sont maintenant {participants_str}.",
             )
 
     @commands.Component.listener()
@@ -1622,7 +1574,7 @@ class MyComponent(commands.Component):
         self.shared_chat_users = []
         await channel.send_message(
             sender=BOT_ID,
-            message=f"{host.name} has ended the shared chat session.",
+            message=f"{host.name} à terminé la session de Chat Partagé.",
         )
 
     @commands.Component.listener()
@@ -1687,7 +1639,7 @@ class MyComponent(commands.Component):
         raider = payload.from_broadcaster
         await channel.send_message(
             sender=BOT_ID,
-            message=f"Thank you so much {raider.display_name} for the raid with {payload.viewer_count} viewers!",
+            message=f"Merci beaucoup {raider.display_name} pour le raid de {payload.viewer_count} viewers !",
         )
         await channel.send_shoutout(
             to_broadcaster=raider,
@@ -1724,12 +1676,12 @@ class MyComponent(commands.Component):
         if game is not None:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f'{shoutout_receiver.display_name} was streaming "{game.name}"! If you enjoy it, you should go check it out!',
+                message=f'{shoutout_receiver.display_name} était en train de stream "{game.name}"! Si vous appréciez, vou devriez aller voir !',
             )
             return
         await channel.send_message(
             sender=BOT_ID,
-            message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!",
+            message=f"{shoutout_receiver.display_name} streamait pour {payload.viewer_count} viewers ! Bienvenue !",
         )
 
     @commands.Component.listener()
@@ -1796,40 +1748,6 @@ class MyComponent(commands.Component):
 
         # While most attributes won't be used, it's always good to have them down for later.
 
-        if reward_id == "6fb34032-e66f-4e4a-a390-8a0f092323e0":  # Self-Timeout reward
-            await channel.timeout_user(
-                moderator=BOT_ID, user=user, reason="Self-Timeout reward", duration=600
-            )
-            await channel.send_message(
-                sender=BOT_ID,
-                message=f"{user.display_name} timed themselves out for 10 minutes, good luck out there!",
-            )
-
-        if reward_id == "d5f04aa1-7abc-4244-83f3-d141970bb9d3":  # Timeout Other reward
-            targetted_user = await self.bot.fetch_user(login=user_input)
-
-            if type(targetted_user) is twitchio.User:
-                await channel.timeout_user(
-                    moderator=BOT_ID,
-                    user=targetted_user,
-                    reason="Timeout Other reward",
-                    duration=600,
-                )
-                await channel.send_message(
-                    sender=BOT_ID,
-                    message=f"{user.display_name} timed {targetted_user.display_name} out for 10 minutes, good luck out there!",
-                )
-
-            else:
-                await payload.refund(token_for=channel)
-                await channel.send_whisper(
-                    to_user=user,
-                    message=f'The user "{user_input}" does not exist. Please try again with a correct username only.',
-                )
-                print(
-                    f'{user.display_name} tried to timeout "{user_input}", but this User ID doesn\'t exist. Warned them in whisper with account "TheFox580"'
-                )
-
     @commands.Component.listener()
     async def event_ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:
         print("Received event : Ad Break Starts")
@@ -1840,7 +1758,7 @@ class MyComponent(commands.Component):
         if self.message_sent >= 5:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"⚠️ An {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
+                message=f"⚠️ Une pub de {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} à commencé. ⚠️",
             )
             self.message_sent = 0
 
