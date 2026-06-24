@@ -782,10 +782,6 @@ class MyComponent(commands.Component):
                 # Send Twitch message to Azure to turn into cool audio
                 output = tts_manager.text_to_speech(twitchChatMessage)
 
-                if payload.broadcaster.name == "lerenard580":
-                    # Play the file
-                    audio_manager.play_audio(output, True, True, True)
-
                 if payload.broadcaster.name == "thefox580":
                     # THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
 
@@ -813,30 +809,8 @@ class MyComponent(commands.Component):
                         )
 
                 elif payload.broadcaster.name == "thealt580":
-                    # THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
-
-                    posY = obswebsockets_manager.get_source_transform(
-                        "Bots", "TwitchChat"
-                    )["positionY"]
-                    while posY > 693:
-                        posY -= 1
-                        new_transform = {"positionY": posY}
-                        obswebsockets_manager.set_source_transform(
-                            "Bots", "TwitchChat", new_transform
-                        )
-
                     # Play the file
                     audio_manager.play_audio(output, True, True, True)
-
-                    posY = obswebsockets_manager.get_source_transform(
-                        "Bots", "TwitchChat"
-                    )["positionY"]
-                    while posY < 1080:
-                        posY += 1
-                        new_transform = {"positionY": posY}
-                        obswebsockets_manager.set_source_transform(
-                            "Bots", "TwitchChat", new_transform
-                        )
 
         if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
