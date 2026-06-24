@@ -511,10 +511,13 @@ class MyComponent(commands.Component):
 
         return emotes_list
 
-    def treat_message(self, message: str) -> str:
+    def treat_message(self, message: str, cheer: bool = False) -> str:
         final_message = ""
-        if "Cheer" in message:  # We don't want it to say the bits amount!
-            return ""
+        if not cheer:
+            if (
+                "Cheer" in message
+            ):  # If the message is being treated as a non cheer message and has "Cheer" in it, just don't read it
+                return ""
         messageList = message.split()
         for word in messageList:
             word = word.replace("_", " ")
@@ -522,13 +525,13 @@ class MyComponent(commands.Component):
                 final_message += "oh 7 "
             elif "D:" == word:
                 final_message += "D face "
-            elif "D:" == word:
-                final_message += "D face "
             elif "<3" == word:
                 final_message += "love "
             elif "</3" == word:
                 final_message += "don't love "
             elif "https" in word:
+                pass
+            elif "Cheer" in word:  # We don't want it to say the bits amount!
                 pass
             elif self.message_has_an_emote(word):
                 pass
@@ -1264,13 +1267,13 @@ class MyComponent(commands.Component):
                 sender=BOT_ID,
                 message=f"thefox91Stonks An anonymous user cheered {payload.bits} bits!",
             )
-            message = f"An anonymous user cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
+            message = f"An anonymous user cheered {payload.bits} bits! They said: {self.treat_message(payload.message, True)}"
         else:
             await channel.send_message(
                 sender=BOT_ID,
                 message=f"thefox91Stonks {display_name} cheered {payload.bits} bits!",
             )
-            message = f"{display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message)}"
+            message = f"{display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message, True)}"
         output = tts_manager.text_to_speech(message)
 
         color = (
