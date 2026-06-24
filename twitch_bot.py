@@ -681,6 +681,12 @@ class MyComponent(commands.Component):
                     if emote in emotes_platform.keys():
                         emote_urls[emote] = emotes_platform[emote]
 
+            source_broadcaster_pfp_url = ""
+
+            if payload.source_broadcaster != None:
+                source_broadcaster = await payload.source_broadcaster.user()
+                source_broadcaster_pfp_url = source_broadcaster.profile_image.url
+
             color = (
                 payload.chatter.color.html
                 if payload.chatter.color is not None
@@ -696,6 +702,7 @@ class MyComponent(commands.Component):
                 "emotes": emote_urls,
                 "message": payload.text,
                 "username": payload.chatter.name,
+                "shared_chat_pfp": source_broadcaster_pfp_url,
             }
 
             self.socket.send("new_message_bot", message)

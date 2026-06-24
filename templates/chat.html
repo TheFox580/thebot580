@@ -5,10 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
             html {
-                background-color: rgba(0, 0, 0, 1);
+                background-color: rgba(0, 0, 0, 0);
             }
 
-            .messageContent {
+            .bigChatMessage {
+                background-color: rgba(0, 0, 0, 1);
             }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -50,9 +51,9 @@
 
                     const chatbox = document.getElementById("chatbox");
 
-                    //Max 50 message
+                    //Max 20 message
 
-                    if (chatbox.children.length >= 50) {
+                    if (chatbox.children.length >= 20) {
                         chatbox.firstElementChild.remove();
                     }
 
@@ -64,6 +65,7 @@
                         "border-4",
                         "p-2.5",
                         "rounded-2xl",
+                        "bigChatMessage",
                     );
                     chatMessage.style.borderColor = msg.color;
 
@@ -82,14 +84,26 @@
                         "flex-row",
                         "items-center",
                         "justify-center",
-                        `w-[${badgeSize * msg.badges.length}px]`,
+                        `w-[${(badgeSize + 2) * msg.badges.length + (msg.shared_chat_pfp.length > 0 ? badgeSize + 4 : 0)}px]`,
                         "mr-2",
                     );
+
+                    if (msg.shared_chat_pfp.length > 0) {
+                        const badge = document.createElement("img");
+                        badge.src = msg.shared_chat_pfp;
+                        badge.classList.add(
+                            `h-[${badgeSize + 2}px]`,
+                            "mr-1",
+                            "rounded",
+                        );
+
+                        chatMessageBadges.appendChild(badge);
+                    }
 
                     for (const badgeURL of msg.badges) {
                         const badge = document.createElement("img");
                         badge.src = badgeURL + "/2";
-                        badge.classList.add(`h-[${badgeSize}px]`);
+                        badge.classList.add(`h-[${badgeSize}px]`, "mr-1");
 
                         chatMessageBadges.appendChild(badge);
                     }
@@ -157,6 +171,10 @@
                         bottomSize,
                     );
                     const splitMessages = msg.message.split(" ");
+                    const lastWord = ("" + msg.message)
+                        .replace(/[\s-]+$/, "")
+                        .split(/[\s-]/)
+                        .pop();
 
                     for (const word of splitMessages) {
                         if (Object.keys(msg.emotes).includes(word)) {
@@ -172,7 +190,9 @@
                             chatMessageContent.appendChild(chatMessageFragment);
                         } else {
                             chatMessageContent.appendChild(
-                                document.createTextNode(word + " "),
+                                document.createTextNode(
+                                    word + (lastWord === word ? "" : " "),
+                                ),
                             );
                         }
                     }
