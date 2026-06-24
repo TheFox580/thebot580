@@ -15,6 +15,14 @@ class Website:
         def chat():
             return render_template("chat.html")
 
+        @self.app.route("/alert_box")
+        def alert_box_en():
+            return render_template("alert_box.html")
+
+        @self.app.route("/alert_box/fr")
+        def alert_box_fr():
+            return render_template("alert_box_fr.html")
+
         @self.socketio.event
         def connect():
             self.socketio.emit("message_send", {"message": "Connected sucessfully"})
@@ -22,6 +30,10 @@ class Website:
         @self.socketio.on("new_message_bot")
         def new_message(data):
             self.socketio.emit("new_message_chat", data)
+
+        @self.socketio.on("new_alert_bot")
+        def new_alert(data):
+            self.socketio.emit("new_alert", data)
 
         @self.socketio.on("*")
         def any_event(event, data):
