@@ -310,7 +310,7 @@ class MyComponent(commands.Component):
         self.hype_train_level_complete: float = 0
         self.start_time: datetime = datetime.now()
         self.lurkers = []
-        self.activate_tts = False
+        self.activate_tts = True
         self.message_sent = 0
         self.db = mongo.Database(MONGODB_URL)
         # self.db.update(
