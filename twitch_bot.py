@@ -515,7 +515,7 @@ class MyComponent(commands.Component):
     def format_tier(self, tier: str, is_gift: bool = False) -> str:
         if not is_gift:
             if tier == "1000":
-                return "1 or Prime"
+                return "1 / Prime"
         return tier[0]
 
     def message_has_an_emote(self, message: str) -> bool:
