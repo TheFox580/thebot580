@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 import asqlite
 import requests
 import twitchio
-from twitchio import ChatMessageEmote, ChatMessageFragment, eventsub
+from twitchio import ChatMessageEmote, ChatMessageFragment, eventsub, user
 from twitchio.ext import commands
 
 import mcci
@@ -1034,6 +1034,31 @@ class MyComponent(commands.Component):
         await ctx.reply(
             "In this event, Fox is in a team with KaNukei, Ceeps & DaHouse_Panda!"
         )
+
+    @commands.command()
+    @commands.is_broadcaster()
+    async def trigger(self, ctx: commands.Context, *, content: str):
+        # !trigger alert {"type": "follow", "username": "thefox580"}
+        # self.socket.send("alert", {"type": "follow", "username": "thefox580"})
+
+        channel = content.split()[0]
+        message = content.split(channel + " ")[1]
+
+        self.socket.send(channel, json.loads(message))
+
+        await ctx.reply("Sent custom trigger")
+
+    @commands.command()
+    @commands.is_lead_moderator()
+    @commands.is_broadcaster()
+    async def color(self, ctx: commands.Context):
+        if ctx.chatter is user.Chatter:
+            await ctx.reply(
+                f"Your color is: {ctx.chatter.color.html if ctx.chatter.color is not None else None}"
+            )
+            await ctx.reply(
+                f"Your color is probably: {self.getChatterColor(ctx.chatter.id)}"
+            )
 
     # @commands.command()
     # async def backseat(self, ctx: commands.Context):
