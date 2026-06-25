@@ -122,11 +122,13 @@
                                 : all_pronouns[pronouns.alt_pronoun_id],
                         ];
                         const chatMessagePronouns = document.createElement("p");
+                        console.log();
                         chatMessagePronouns.textContent =
                             correct_pronouns[0].subject +
-                            (correct_pronouns[0].singular
-                                ? ""
-                                : "/" + correct_pronouns[1].object);
+                            "/" +
+                            (correct_pronouns[1] === undefined
+                                ? correct_pronouns[0].object
+                                : correct_pronouns[1].subject);
                         chatMessagePronouns.classList.add(
                             "text-white",
                             msg.chatter.length < 12 ? "border-4" : "border-2",
