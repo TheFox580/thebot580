@@ -8,7 +8,9 @@ from simpleobsws import Request, WebSocketClient
 
 
 class TiltifyTracker:
-    def __init__(self):
+    def __init__(self, campaign_type: str, id: str):
+        self.__type = campaign_type
+        self.__id = id
         self.websocket = WebSocketClient(
             f"ws://{websockets_auth_alt.WEBSOCKET_HOST_OBS}:{websockets_auth_alt.WEBSOCKET_PORT_OBS}",
             websockets_auth_alt.WEBSOCKET_PASSWORD_OBS,
@@ -30,7 +32,7 @@ class TiltifyTracker:
                 {
                     "inputName": "Infos",
                     "inputSettings": {
-                        "text": f">>> !donate <<< | Total Raised: ${raised}"
+                        "text": f"Watch in Horizontal mode for a better experience\n\n>>> !donate <<< | Total Raised: ${raised}"
                     },
                 },
             )
@@ -40,7 +42,7 @@ class TiltifyTracker:
         if self.end_time < datetime.datetime.now():
             await self.request_token()
         req = requests.get(
-            "https://v5api.tiltify.com/api/public/team_campaigns/c045b9c5-426c-4853-a388-b91a3d599a69",
+            f"https://v5api.tiltify.com/api/public/{self.__type}/{self.__id}",
             headers={"Authorization": f"Bearer {self.token}"},
         )
         if req.ok:
@@ -77,7 +79,9 @@ class TiltifyTracker:
 
 
 async def main():
-    tiltifyTrack = TiltifyTracker()
+    tiltifyTrack = TiltifyTracker(  # "types": ["campaigns", "team_campaigns"]
+        "campaigns", "554ca6b6-5254-405e-b3c6-e46129df0194"
+    )
     await tiltifyTrack.connect()
 
 
