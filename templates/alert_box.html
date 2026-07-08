@@ -35,6 +35,8 @@
                 hype_train_level_up:
                     "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_e03c942f8fa640b0b384474f3ebdf295/default/dark/3.0", // thefox91Stonks
                 raid: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_c647c365c0674050bf12c1c666243628/default/dark/3.0", // thefox91Stare
+                channel_points:
+                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_ad7e8ae6e14e4ccaa59d46a436719736/default/dark/3.0", // thefox91Chat
             };
 
             document.addEventListener("DOMContentLoaded", async () => {
@@ -56,6 +58,7 @@
                 }
 
                 const alert_queue = [];
+                const emoteSize = 36;
 
                 let isAlertPlaying = false;
 
@@ -334,6 +337,19 @@
                                 ` viewer${alert.viewers > 1 ? "s" : ""}!`,
                             ),
                         );
+                    } else if (alert.type === "channel_points") {
+                        alert_box_text.appendChild(user);
+
+                        alert_box_text.appendChild(
+                            document.createTextNode(" redeemed "),
+                        );
+
+                        const channel_points_reward_title =
+                            document.createElement("span");
+                        channel_points_reward_title.textContent = alert.title;
+                        channel_points_reward_title.style.color = alert.color;
+
+                        alert_box_text.appendChild(channel_points_reward_title);
                     }
 
                     if (alert.message) {
@@ -348,7 +364,10 @@
                             .pop();
 
                         for (const word of splitMessages) {
-                            if (Object.keys(alert.emotes).includes(word)) {
+                            if (
+                                alert.emotes &&
+                                Object.keys(alert.emotes).includes(word)
+                            ) {
                                 const chatMessageFragment =
                                     document.createElement("img");
                                 chatMessageFragment.src = alert.emotes[word];
@@ -404,7 +423,7 @@
                         ? new Audio(alert.tts_loc).duration
                         : 5; // Make the alert at least as long as the TTS message if there's one, otherwise 5s
 
-                    time_for_alerts += alert_queue < 20 ? 2 : 0.25; // Add 2s if less than 20 alerts in the queue, 0.25s otherwise
+                    time_for_alerts += alert_queue < 20 ? 2 : 0.5; // Add 2s if less than 20 alerts in the queue, 0.5s otherwise
 
                     setTimeout(() => {
                         resetAlert();
@@ -413,17 +432,13 @@
                                 () => {
                                     triggerAlert();
                                 },
-                                alert_queue.length < 20
-                                    ? 1 * 1000
-                                    : 0.25 * 1000,
+                                (time_for_alerts / 2) * 1000,
                             ); //1s timeout in-between alerts if less than 20 alerts, 0.25s otherwise
                         } else {
                             isAlertPlaying = false;
                         }
                     }, time_for_alerts * 1000);
                 }
-
-                const emoteSize = 36;
 
                 const socket = io();
 

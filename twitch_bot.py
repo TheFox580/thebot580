@@ -257,7 +257,11 @@ class MyComponent(commands.Component):
         # We pass bot here as an example...
         self.banned_words = [
             "dogehype",
+            "viewers.shop",
             "viewers. shop",
+            "viewers .shop",
+            "viewers . shop",
+            "viewers shop",
             "dghype",
             "add me on",
             "graphic designer",
@@ -265,19 +269,51 @@ class MyComponent(commands.Component):
             "Cheap viewers on",
             "streamrise",
             "add me up on",
+            "nezhna.com",
+            "nezhna. com",
             "nezhna .com",
+            "nezhna . com",
+            "nezhna com",
+            "streamviewers.org",
+            "streamviewers. org",
+            "streamviewers .org",
+            "streamviewers . org",
             "streamviewers org",
+            "streamboo.com",
             "streamboo .com",
+            "streamboo. com",
+            "streamboo . com",
+            "streamboo com",
             "i am a commission artist",
             "Cheap V̐iewers",
             "creativefollowers.online",
+            "creativefollowers. online",
+            "creativefollowers .online",
+            "creativefollowers . online",
+            "creativefollowers online",
             "telegram:",
             "adding me up on",
             "Best view͙e̤rs",
             "smmtop11.online",
+            "smmtop11. online",
+            "smmtop11 .online",
+            "smmtop11 . online",
+            "smmtop11 online",
+            "streamboo.live",
             "streamboo .live",
+            "streamboo. live",
+            "streamboo . live",
+            "streamboo live",
             "smmtask.ru",
+            "smmtask. ru",
+            "smmtask .ru",
+            "smmtask . ru",
+            "smmtask ru",
             "maxexposure.online",
+            "maxexposure. online",
+            "maxexposure .online",
+            "maxexposure . online",
+            "maxexposure online",
         ]
         self.bot = bot
 
@@ -711,7 +747,7 @@ class MyComponent(commands.Component):
 
             source_broadcaster_pfp_url = ""
 
-            if payload.source_broadcaster != None:
+            if payload.source_broadcaster is not None:
                 source_broadcaster = await payload.source_broadcaster.user()
                 source_broadcaster_pfp_url = source_broadcaster.profile_image.url
 
@@ -943,7 +979,7 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["donate"])
     async def charity(self, ctx: commands.Context):
         await ctx.send_announcement(
-            "We're raising money for the Sarcoma Foundation of America initiative! Donate here: https://thewebsite580.vercel.app/donate",
+            "We're raising money for Stonewall! Donate here: https://thewebsite580.vercel.app/donate",
             color="green",
         )
 
@@ -1006,11 +1042,11 @@ class MyComponent(commands.Component):
     # async def coding(self, ctx: commands.Context):
     #    await ctx.reply(f"Fox is coding for WubDub_'s upcoming Minecraft Event, \"Goofy Games\". I wrote this command in advance so idk what I'm working on right now, but maybe it's written on screen.")
 
-    @commands.command()
-    async def team(self, ctx: commands.Context):
-        await ctx.reply(
-            "In this event, Fox is in a team with KaNukei, Ceeps & DaHouse_Panda!"
-        )
+    # @commands.command()
+    # async def team(self, ctx: commands.Context):
+    #     await ctx.reply(
+    #         "In this event, Fox is in a team with Dolpheney, Ninji, obbiseus & Zenllow!"
+    #     )
 
     @commands.command()
     @commands.is_broadcaster()
@@ -1037,9 +1073,9 @@ class MyComponent(commands.Component):
                 f"Your color is probably: {self.getChatterColor(ctx.chatter.id)}"
             )
 
-    # @commands.command()
-    # async def backseat(self, ctx: commands.Context):
-    #    await ctx.send_announcement(f"No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating.", color="green")
+    @commands.command()
+    async def backseat(self, ctx: commands.Context):
+       await ctx.send_announcement(f"No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating.", color="green")
 
     # @commands.command()
     # async def pb(self, ctx: commands.Context):
@@ -1061,13 +1097,13 @@ class MyComponent(commands.Component):
     #         f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
     #     )
 
-    @commands.command(aliases=["sludgineers"])
+    @commands.command()
     @commands.cooldown(
         rate=1, per=60 * 10, key=commands.BucketType.chatter
     )  # Cooldown for 1 / 10mins
-    async def sludge(self, ctx: commands.Context):
+    async def detroit(self, ctx: commands.Context):
         await ctx.send_announcement(
-            "Thanks to Funk Games for the key! The game comes out on June 1st, and you can buy it there: https://lurk.ly/pJVjlz"
+            "Thanks to Quantic Dream (???) for the key! You can get a badge by watching my stream for 1 hour and another one by subscribing / gifting a sub! You can also go get the game here: https://lurk.ly/Wv2t7n"
         )
 
     @commands.command()
@@ -1713,7 +1749,7 @@ class MyComponent(commands.Component):
         print("Received event : Auto Channel Point Redeemed")
         # channel = payload.broadcaster  # The channel it happened on
         # user = payload.user  # The user who redeemed this reward
-        # reward = payload.reward  # The reward object
+        reward = payload.reward  # The reward object
         # reward_type = reward.type  # The type of reward
         # reward_cost = (
         #    reward.channel_points
@@ -1779,7 +1815,9 @@ class MyComponent(commands.Component):
                 message=f"{user.display_name} timed themselves out for 10 minutes, good luck out there!",
             )
 
-        if reward_id == "d5f04aa1-7abc-4244-83f3-d141970bb9d3":  # Timeout Other reward
+        elif (
+            reward_id == "d5f04aa1-7abc-4244-83f3-d141970bb9d3"
+        ):  # Timeout Other reward
             targetted_user = await self.bot.fetch_user(login=user_input)
 
             if type(targetted_user) is twitchio.User:
@@ -1803,6 +1841,38 @@ class MyComponent(commands.Component):
                 print(
                     f'{user.display_name} tried to timeout "{user_input}", but this User ID doesn\'t exist. Warned them in whisper with account "TheFox580"'
                 )
+
+        elif reward_title == "First" or reward_title == "Also First":
+            color = self.getChatterColor(user.id)
+
+            alert_message = {
+                "type": "channel_points",
+                "username": user.display_name,
+                "amount": reward_cost,
+                "message": "They are the 1st (frfr) to join the stream.",
+                "title": reward_title,
+                "color": color
+                if color is not None
+                else "#%06x" % random.randint(0, 0xFFFFFF),
+            }
+
+            self.socket.send("new_alert_bot", alert_message)
+
+        elif reward_title == "Water":
+            color = self.getChatterColor(user.id)
+
+            alert_message = {
+                "type": "channel_points",
+                "username": user.display_name,
+                "amount": reward_cost,
+                "message": "It's time to drink some water!",
+                "title": reward_title,
+                "color": color
+                if color is not None
+                else "#%06x" % random.randint(0, 0xFFFFFF),
+            }
+
+            self.socket.send("new_alert_bot", alert_message)
 
     @commands.Component.listener()
     async def event_ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:

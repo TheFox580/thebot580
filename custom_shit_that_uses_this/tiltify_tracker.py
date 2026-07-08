@@ -32,7 +32,7 @@ class TiltifyTracker:
                 {
                     "inputName": "Infos",
                     "inputSettings": {
-                        "text": f"Watch in Horizontal mode for a better experience\n\n>>> !donate <<< | Total Raised: ${raised}"
+                        "text": f">>> !donate <<< | Total Raised: £{raised}"
                     },
                 },
             )
