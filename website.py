@@ -16,7 +16,7 @@ class Website:
             return render_template("chat.html")
 
         @self.app.route("/alert_box")
-        def alert_box_en():
+        def alert_box():
             return render_template("alert_box.html")
 
         @self.socketio.event
