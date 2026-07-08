@@ -30,6 +30,8 @@
                 }
             }
 
+            const PRONOUNS_TRAD = {"She": "Elle", "Her": "Elle", "They": "Iel", "Them": "Iel", "He": "Il", "Him": "Il", "Any": "Tous", "All": "Tous"}
+
             const topSize = "text-xl";
             const bottomSize = "text-2xl";
 
@@ -123,10 +125,10 @@
                         ];
                         const chatMessagePronouns = document.createElement("p");
                         chatMessagePronouns.textContent =
-                            correct_pronouns[0].subject +
+                            PRONOUNS_TRAD[correct_pronouns[0].subject] +
                             (correct_pronouns[0].singular
                                 ? ""
-                                : "/" + correct_pronouns[1].object);
+                                : "/" + PRONOUNS_TRAD[correct_pronouns[1].subject]);
                         chatMessagePronouns.classList.add(
                             "text-white",
                             msg.chatter.length < 12 ? "border-4" : "border-2",
