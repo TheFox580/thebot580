@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 
 
 class Website:
@@ -16,12 +16,8 @@ class Website:
             return render_template("chat.html")
 
         @self.app.route("/alert_box")
-        def alert_box_en():
+        def alert_box():
             return render_template("alert_box.html")
-
-        @self.app.route("/alert_box/fr")
-        def alert_box_fr():
-            return render_template("alert_box_fr.html")
 
         @self.socketio.event
         def connect():
