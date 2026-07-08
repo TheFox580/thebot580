@@ -710,7 +710,7 @@ class MyComponent(commands.Component):
 
             source_broadcaster_pfp_url = ""
 
-            if payload.source_broadcaster != None:
+            if payload.source_broadcaster is not None:
                 source_broadcaster = await payload.source_broadcaster.user()
                 source_broadcaster_pfp_url = source_broadcaster.profile_image.url
 
@@ -1191,7 +1191,7 @@ class MyComponent(commands.Component):
             "type": "gift_sub",
             "username": payload.user.display_name
             if payload.user is not None
-            else "Anonymous",
+            else "Un utilisateur anonyme",
             "amount": payload.total,
             "color": color
             if color is not None
@@ -1242,7 +1242,7 @@ class MyComponent(commands.Component):
             "type": "cheer",
             "username": payload.user.display_name
             if payload.user is not None
-            else "Anonymous",
+            else "Un utilisateur anonyme",
             "message": self.treat_message(payload.message),
             "amount": payload.bits,
             "color": color
