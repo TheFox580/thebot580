@@ -135,7 +135,7 @@
                         const chatMessagePronouns = document.createElement("p");
                         chatMessagePronouns.textContent =
                           PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject +
-                            (correct_pronouns[0].singular
+                            (correct_pronouns[1] === undefined || correct_pronouns[0].singular
                                 ? ""
                                 : "/" + PRONOUNS_TRAD[correct_pronouns[1].subject]) ?? correct_pronouns[1].subject;
                         chatMessagePronouns.classList.add(
