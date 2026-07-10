@@ -516,8 +516,8 @@ class MyComponent(commands.Component):
 
         return badges
 
-    def getChatterColor(self, user_id: str) -> str | None:
-        color: str | None = None
+    def getChatterColor(self, user_id: str) -> str:
+        color: str = "#%06x" % random.randint(0, 0xFFFFFF)
 
         headers = {
             "Authorization": f"Bearer {self.access_token}",
@@ -536,8 +536,7 @@ class MyComponent(commands.Component):
         res = req.json()
 
         for user in res["data"]:
-            color = user["color"] if user["color"] != "" else None
-            break
+            return user["color"] if user["color"] != "" else color
 
         return color
 
@@ -1156,9 +1155,7 @@ class MyComponent(commands.Component):
         alert_message = {
             "type": "follow",
             "username": payload.user.display_name,
-            "color": color
-            if color is not None
-            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "color": color,
         }
 
         self.socket.send("new_alert_bot", alert_message)
@@ -1174,9 +1171,7 @@ class MyComponent(commands.Component):
         alert_message = {
             "type": "first_year",
             "username": payload.user.display_name,
-            "color": color
-            if color is not None
-            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "color": color,
             "sub_type": sub_tier,
         }
 
@@ -1223,9 +1218,7 @@ class MyComponent(commands.Component):
             "amount": payload.months // 12
             if payload.months % 12 == 0
             else payload.months,
-            "color": color
-            if color is not None
-            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "color": color,
             "emotes": emote_urls,
             "sub_type": sub_tier,
             "tts_loc": output,
@@ -1270,9 +1263,7 @@ class MyComponent(commands.Component):
             if payload.user is not None
             else "Anonymous",
             "amount": payload.total,
-            "color": color
-            if color is not None
-            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "color": color,
             "sub_type": sub_tier,
             "total_amount": payload.cumulative_total,
             "tts_loc": output,
@@ -1322,9 +1313,7 @@ class MyComponent(commands.Component):
             else "Anonymous",
             "message": self.treat_message(payload.message),
             "amount": payload.bits,
-            "color": color
-            if color is not None
-            else "#%06x" % random.randint(0, 0xFFFFFF),
+            "color": color,
             "emotes": emote_urls,
             "tts_loc": output,
         }
@@ -1884,9 +1873,7 @@ class MyComponent(commands.Component):
                 "amount": reward_cost,
                 "message": "It's time to drink some water!",
                 "title": reward_title,
-                "color": color
-                if color is not None
-                else "#%06x" % random.randint(0, 0xFFFFFF),
+                "color": color,
             }
 
             self.socket.send("new_alert_bot", alert_message)
