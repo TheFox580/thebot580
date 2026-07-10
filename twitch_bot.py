@@ -1120,7 +1120,7 @@ class MyComponent(commands.Component):
 
         await channel.send_message(
             sender=BOT_ID,
-            message=f"⚠️ An {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
+            message=f"⚠️ A {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
         )
 
 
