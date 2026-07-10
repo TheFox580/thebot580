@@ -172,6 +172,11 @@ class Bot(commands.AutoBot):
                 )
             )
             subscriptions.append(
+                eventsub.ChannelPollProgressSubscription(
+                    broadcaster_user_id=payload.user_id
+                )
+            )
+            subscriptions.append(
                 eventsub.ChannelPollEndSubscription(broadcaster_user_id=payload.user_id)
             )
 
@@ -1427,7 +1432,14 @@ class MyComponent(commands.Component):
             message=f'A new poll has been started ! "{poll_title}" | Choices are : {poll_choices_str}. This poll ends in {mins} minute(s).',
         )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_poll_progress")
+    async def event_poll_progress(self, payload: twitchio.ChannelPollBegin) -> None:
+        print("Received event : Poll progressed")
+        channel = payload.broadcaster
+        poll_title = payload.title
+        poll_choices = payload.choices
+
+    @commands.Component.listener("event_poll_end")
     async def event_poll_end(self, payload: twitchio.ChannelPollEnd) -> None:
         print("Received event : Poll ended")
         channel = payload.broadcaster
