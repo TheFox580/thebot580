@@ -18,7 +18,7 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 
 ### Support for TTS message
 
-**TheBot580 will by default enable Text-To-Speech messages, meaning that any safe messages will be read out loud by the progam!**
+**TheBot580 will by default enable Text-To-Speech messages, meaning that any safe messages will be read out loud by the program!**
 
 > *Note* : This setting can be disabled by putting `self.tts = False`
 
