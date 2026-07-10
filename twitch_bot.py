@@ -1883,7 +1883,7 @@ class MyComponent(commands.Component):
         print("Received event : Ad Break Starts")
         channel = payload.broadcaster
         started_at = payload.started_at
-        duration = payload.duration
+        duration = self.roundToNNearest(payload.duration, 15)
 
         if self.message_sent >= 5:
             await channel.send_message(
