@@ -1935,7 +1935,7 @@ class MyComponent(commands.Component):
         if self.message_sent >= 5:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"⚠️ An {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
+                message=f"⚠️ A {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
             )
             self.message_sent = 0
 
