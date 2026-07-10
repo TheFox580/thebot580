@@ -1168,7 +1168,7 @@ class MyComponent(commands.Component):
 
     # CHANNEL INTERACTIONS
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_follow")
     async def event_follow(self, payload: twitchio.ChannelFollow) -> None:
         print("Received event : User Follow")
         channel = payload.broadcaster
@@ -1187,7 +1187,7 @@ class MyComponent(commands.Component):
 
         self.socket.send("new_alert_bot", alert_message)
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_subscription")
     async def event_subscription(self, payload: twitchio.ChannelSubscribe) -> None:
         print("Received event : 'New User Subscription'")
         channel = payload.broadcaster
@@ -1210,7 +1210,7 @@ class MyComponent(commands.Component):
                 message=f"{payload.user.display_name} subscribed with a Tier {sub_tier} subscription!",
             )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_subscription_message")
     async def event_subscription_message(
         self, payload: twitchio.ChannelSubscriptionMessage
     ) -> None:
@@ -1254,7 +1254,7 @@ class MyComponent(commands.Component):
         self.socket.send("new_alert_bot", alert_message)
         # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_subscription_gift")
     async def event_subscription_gift(
         self, payload: twitchio.ChannelSubscriptionGift
     ) -> None:
@@ -1299,7 +1299,7 @@ class MyComponent(commands.Component):
         self.socket.send("new_alert_bot", alert_message)
         # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_cheer")
     async def event_cheer(self, payload: twitchio.ChannelCheer) -> None:
         print("Received event : 'User Cheer'")
         channel = payload.broadcaster
@@ -1349,7 +1349,7 @@ class MyComponent(commands.Component):
 
         # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_prediction_start")
     async def event_prediction_start(
         self, payload: twitchio.ChannelPredictionBegin
     ) -> None:
@@ -1399,7 +1399,7 @@ class MyComponent(commands.Component):
             message=f'The "{prediction_title}" prediction has been locked! "{prediction_highest.title}" is the highest outcome with {round(channel_points / prediction_total * 100, 2)}% | Outcomes are : {prediction_outcomes_str}.',
         )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_prediction_end")
     async def event_prediction_end(
         self, payload: twitchio.ChannelPredictionEnd
     ) -> None:
@@ -1436,7 +1436,7 @@ class MyComponent(commands.Component):
                 message=f'The "{prediction_title}" prediction has been ended! "{prediction_winner.title}" is the winning outcome with {round(channel_points / prediction_total * 100, 2)}% (That\'s {prediction_total} TheDollar580 for {len(prediction_winner.users)} chatters thefox91Stonks) | Outcomes were : {prediction_outcomes_str}.',  # type: ignore
             )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_poll_begin")
     async def event_poll_begin(self, payload: twitchio.ChannelPollBegin) -> None:
         print("Received event : Poll started")
         channel = payload.broadcaster
@@ -1482,7 +1482,7 @@ class MyComponent(commands.Component):
             message=f'Anwsers are in! {poll_winner.title} won "{poll_title}" with {poll_winner.votes} votes | Choices were : {poll_choices_str}.',
         )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_stream_online")
     async def event_stream_online(self, payload: twitchio.StreamOnline) -> None:
         # Event dispatched when a user goes live from the subscription we made above...
 
@@ -1494,7 +1494,7 @@ class MyComponent(commands.Component):
             message=f"{payload.broadcaster.display_name} is now live",
         )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_stream_offline")
     async def event_stream_offline(self, payload: twitchio.StreamOffline) -> None:
         # Event dispatched when a user goes live from the subscription we made above...
 
@@ -1506,7 +1506,7 @@ class MyComponent(commands.Component):
             message=f"The stream is now offline. {payload.broadcaster.display_name} has been live for the past {stream_time_diff}",
         )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_hype_train")
     async def event_hype_train(self, payload: twitchio.HypeTrainBegin) -> None:
         print("Received event : Hype Train started")
         channel = payload.broadcaster
@@ -1541,7 +1541,7 @@ class MyComponent(commands.Component):
 
         self.socket.send("new_alert_bot", alert_message)
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_hype_train_progress")
     async def event_hype_train_progress(
         self, payload: twitchio.HypeTrainProgress
     ) -> None:
@@ -1580,7 +1580,7 @@ class MyComponent(commands.Component):
 
             self.socket.send("new_alert_bot", alert_message)
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_hype_train_end")
     async def event_hype_train_end(self, payload: twitchio.HypeTrainEnd) -> None:
         print("Received event : Hype Train ended")
         channel = payload.broadcaster
@@ -1627,7 +1627,7 @@ class MyComponent(commands.Component):
             message=f"{host.display_name} has started a shared chat session with {participants_str}.",
         )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_shared_chat_update")
     async def event_shared_chat_update(
         self, payload: twitchio.SharedChatSessionUpdate
     ) -> None:
@@ -1662,7 +1662,7 @@ class MyComponent(commands.Component):
                 message=f"{host.name} has removed {diff} users to the shared chat. The participants now are {participants_str}.",
             )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_shared_chat_end")
     async def event_shared_chat_end(
         self, payload: twitchio.SharedChatSessionEnd
     ) -> None:
@@ -1696,7 +1696,7 @@ class MyComponent(commands.Component):
         #    message=f"A new {goal_type} goal has begun! {goal_name} ({goal_amount}/{goal_end_amount})",
         # )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_goal_progress")
     async def event_goal_progress(self, payload: twitchio.GoalProgress) -> None:
         print("Received event : Goal Begin")
         channel = payload.broadcaster
@@ -1708,7 +1708,7 @@ class MyComponent(commands.Component):
         #    message=f"{goal_name} updated! ({goal_amount}/{goal_end_amount})",
         # )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_goal_end")
     async def event_goal_end(self, payload: twitchio.GoalEnd) -> None:
         print("Received event : Goal Begin")
         channel = payload.broadcaster
@@ -1753,7 +1753,7 @@ class MyComponent(commands.Component):
 
         self.socket.send("new_alert_bot", alert_message)
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_channel_update")
     async def event_channel_update(self, payload: twitchio.ChannelUpdate) -> None:
         print("Received event : Channel Update")
         channel = payload.broadcaster
@@ -1764,7 +1764,7 @@ class MyComponent(commands.Component):
         #    message=f"Updated title to \"{title}\" and category to \"{category}\"."
         # )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_shoutout_create")
     async def event_shoutout_create(self, payload: twitchio.ShoutoutCreate) -> None:
         print("Received event : Created Shoutout")
         channel = payload.broadcaster
@@ -1782,7 +1782,7 @@ class MyComponent(commands.Component):
             message=f"{shoutout_receiver.display_name} was streaming to {payload.viewer_count} viewers! Welcome in!",
         )
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_automatic_redemption_add")
     async def event_automatic_redemption_add(
         self, payload: twitchio.ChannelPointsAutoRedeemAdd
     ) -> None:
@@ -1804,7 +1804,7 @@ class MyComponent(commands.Component):
 
         # While most attributes won't be used, it's always good to have them down for later.
 
-    @commands.Component.listener()
+    @commands.Component.listener("event_custom_redemption_add")
     async def event_custom_redemption_add(
         self, payload: twitchio.ChannelPointsRedemptionAdd
     ) -> None:
