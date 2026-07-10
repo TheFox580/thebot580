@@ -57,9 +57,9 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 * [ ] Stream **Starts** and **Ends**
 * [ ] **Raid** *(Gives an automatic shoutout)*
 * [ ] **Title & Category Update**
-* [ ] **Shared Chat Collaboration Begins** *🆙 Fixed!*
-* [ ] **Shared Chat Collaboration Updates (User join / left)** *🆙 Fixed!*
-* [ ] **Shared Chat Collaboration Ends** *🆙 Fixed!*
+* [ ] **Shared Chat Collaboration Begins**
+* [ ] **Shared Chat Collaboration Updates (User join / left)**
+* [ ] **Shared Chat Collaboration Ends**
 * [x] **New Subscriber**
 * [x] **Resubscriptions**
 * [x] **Normal / Anonymous Gifted Subscriptions**
