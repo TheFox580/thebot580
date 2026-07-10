@@ -68,6 +68,7 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 * [x] **Prediction Locks**
 * [x] **Prediction Ends**
 * [x] **Poll Begins**
+* [x] **Poll Progresses** *🆕 Added*
 * [x] **Poll Ends**
 * [x] **Golden / Treasure / Normal (Shared) Hype Train Begins**
 * [x] **Golden / Treasure / Normal (Shared) Hype Train Progress**
@@ -75,6 +76,7 @@ This code uses the TwitchIO **3.1.0** Library, Azure's Text-To-Speech fonctionna
 * [x] **Follower / Subcription / Cheer Goal Begins**
 * [x] **Follower / Subcription / Cheer Goal Progress**
 * [x] **Follower / Subcription / Cheer Goal Reached**
+* [x] **Ad starts** *🆕 Added*
 * More to come...
 
 > *Note* : If you don't know how to start TheBot580 (especially for the 1st time), read the [*TwitchIO tutorial ↗*](https://twitchio.dev/en/latest/getting-started/quickstart.html) on how to start the bot!
