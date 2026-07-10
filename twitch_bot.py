@@ -165,7 +165,7 @@ class Bot(commands.AutoBot):
                 )
             )
 
-            # Subscribe and listen to when poll starts or ends..
+            # Subscribe and listen to when poll starts, updates or ends..
             subscriptions.append(
                 eventsub.ChannelPollBeginSubscription(
                     broadcaster_user_id=payload.user_id
