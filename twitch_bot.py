@@ -157,9 +157,14 @@ class Bot(commands.AutoBot):
                 )
             )
 
-            # Subscribe and listen to when poll starts or ends..
+            # Subscribe and listen to when poll starts, updates or ends..
             subscriptions.append(
                 eventsub.ChannelPollBeginSubscription(
+                    broadcaster_user_id=payload.user_id
+                )
+            )
+            subscriptions.append(
+                eventsub.ChannelPollProgressSubscription(
                     broadcaster_user_id=payload.user_id
                 )
             )
@@ -746,6 +751,13 @@ class MyComponent(commands.Component):
         )
 
     @commands.Component.listener()
+    async def event_poll_progress(self, payload: twitchio.ChannelPollProgress) -> None:
+        print("Received event : Poll progress")
+        channel = payload.broadcaster
+        poll_title = payload.title
+        poll_choices = payload.choices
+
+    @commands.Component.listener()
     async def event_poll_end(self, payload: twitchio.ChannelPollEnd) -> None:
         print("Received event : Poll ended")
         channel = payload.broadcaster
@@ -1187,6 +1199,23 @@ async def setup_database(
                         eventsub.ChannelPollEndSubscription(
                             broadcaster_user_id=OWNER_ID
                         ),
+                        eventsub.ChannelCheerSubscription(broadcaster_user_id=OWNER_ID),
+                        eventsub.ChannelPredictionBeginSubscription(
+                            broadcaster_user_id=OWNER_ID
+                        ),
+                        eventsub.ChannelPredictionLockSubscription(
+                            broadcaster_user_id=OWNER_ID
+                        ),
+                        eventsub.ChannelPredictionEndSubscription(
+                            broadcaster_user_id=OWNER_ID
+                        ),
+                        eventsub.ChannelPollBeginSubscription(
+                            broadcaster_user_id=OWNER_ID
+                        ),
+                        eventsub.ChannelPollProgressSubscription(
+                            broadcaster_user_id=OWNER_ID
+                        ),
+                        eventsub.ChannelPollEndSubscription(broadcaster_user_id=OWNER_ID),
                         eventsub.HypeTrainBeginSubscription(
                             broadcaster_user_id=OWNER_ID
                         ),
