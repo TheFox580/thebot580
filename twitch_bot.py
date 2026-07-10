@@ -1878,7 +1878,20 @@ class MyComponent(commands.Component):
 
             self.socket.send("new_alert_bot", alert_message)
 
-    @commands.Component.listener()
+        else:
+            color = self.getChatterColor(user.id)
+
+            alert_message = {
+                "type": "channel_points",
+                "username": user.display_name,
+                "amount": reward_cost,
+                "title": reward_title,
+                "color": color,
+            }
+
+            self.socket.send("new_alert_bot", alert_message)
+
+    @commands.Component.listener("event_ad_break")
     async def event_ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:
         print("Received event : Ad Break Starts")
         channel = payload.broadcaster
