@@ -547,6 +547,21 @@ class MyComponent(commands.Component):
 
         return emotes_list
 
+    def readCommandTextFile(self, command: str) -> str:
+        text: str = ""
+        with open("custom_shit_that_uses_this/"+command+".txt", "r", encoding="utf8") as file:
+            lines = file.readlines()
+            for line in lines:
+                text += line.replace("\n", " ")
+
+            file.close()
+
+        return text
+
+    def roundToNNearest(self, time: int, n: int):
+        time = round(time/n)
+        return time*n
+
     def treat_message(self, message: str, cheer: bool = False) -> str:
         final_message = ""
         if not cheer:
@@ -979,7 +994,7 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["donate"])
     async def charity(self, ctx: commands.Context):
         await ctx.send_announcement(
-            "We're raising money for Stonewall! Donate here: https://thewebsite580.vercel.app/donate",
+            self.readCommandTextFile("charity"),
             color="green",
         )
 
@@ -1103,7 +1118,7 @@ class MyComponent(commands.Component):
     )  # Cooldown for 1 / 10mins
     async def detroit(self, ctx: commands.Context):
         await ctx.send_announcement(
-            "Thanks to Quantic Dream (???) for the key! You can get a badge by watching my stream for 1 hour and another one by subscribing / gifting a sub! You can also go get the game here: https://lurk.ly/Wv2t7n"
+            self.readCommandTextFile("ad")
         )
 
     @commands.command()
