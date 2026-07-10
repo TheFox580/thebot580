@@ -2012,6 +2012,9 @@ async def setup_database(
                         eventsub.ChannelPollBeginSubscription(
                             broadcaster_user_id=OWNER_ID
                         ),
+                        eventsub.ChannelPollProgressSubscription(
+                            broadcaster_user_id=OWNER_ID
+                        ),
                         eventsub.ChannelPollEndSubscription(
                             broadcaster_user_id=OWNER_ID
                         ),
