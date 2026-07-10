@@ -31,9 +31,13 @@ class Website:
         def new_alert(data):
             self.socketio.emit("new_alert", data)
 
+        @self.socketio.on("start")
+        def something_started(data):
+            print("Something started!")
+
         @self.socketio.on("*")
         def any_event(event, data):
-            print(f"Message lost to {event}, data was:")
+            print(f"Message lost in {event}, data was:")
             print(data)
 
     def start(self):
