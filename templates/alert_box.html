@@ -39,23 +39,24 @@
                     "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_ad7e8ae6e14e4ccaa59d46a436719736/default/dark/3.0", // thefox91Chat
             };
 
+            function deleteFile(file_name) {
+                $.ajax({
+                    url: "{{ url_for('static', filename='delete.php') }}", //ngl idk if it works
+                    data: {
+                        file:
+                            "<?php echo dirname(__FILE__) . '/uploads/'?>" +
+                            file_name,
+                    },
+                    success: function (response) {
+                        console.log("File was sucessfully deleted.");
+                    },
+                    error: function () {
+                        console.log("The file could not be deleted.");
+                    },
+                });
+            }
+
             document.addEventListener("DOMContentLoaded", async () => {
-                function deleteFile(file_name) {
-                    $.ajax({
-                        url: "{{ url_for('static', filename='delete.php') }}", //ngl idk if it works
-                        data: {
-                            file:
-                                "<?php echo dirname(__FILE__) . '/uploads/'?>" +
-                                file_name,
-                        },
-                        success: function (response) {
-                            console.log("File was sucessfully deleted.");
-                        },
-                        error: function () {
-                            console.log("The file could not be deleted.");
-                        },
-                    });
-                }
 
                 const alert_queue = [];
                 const emoteSize = 36;
@@ -411,7 +412,7 @@
                     }
 
                     if (alert.tts_loc) {
-                        let tts = new Audio(alert.tts_loc);
+                        const tts = new Audio(alert.tts_loc);
                         tts.play();
 
                         tts.addEventListener("ended", (event) => {
