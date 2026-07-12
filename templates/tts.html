@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            html {
+                background-color: rgba(0, 0, 0, 0);
+            }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+            integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+            crossorigin="anonymous"
+        ></script>
+        <script type="text/javascript" charset="utf-8">
+            document.addEventListener("DOMContentLoaded", async () => {
+
+                const socket = io();
+
+                socket.on("message_send", (msg, cb) => {
+                    console.log("Got data: " + msg.message);
+                });
+
+                socket.on("new_tts", async (msg, cb) => {
+                    console.log("Got a new message: ");
+                    console.log(msg);
+
+                    const tts = document.getElementById("tts");
+
+                    tts.src = msg.tts_loc;
+                    tts.load();
+
+                    console.log(tts);
+                    console.log(tts.src);
+                    console.log(tts.error);
+
+                    tts.play();
+                });
+            });
+        </script>
+    </head>
+    <body class="w-screen h-screen">
+        <button class="cursor-pointer" onclick="console.log('Started TTS')">Start TTS</button>
+        <audio src="" preload="auto" id="tts"></audio>
+    </body>
+</html>

@@ -15,6 +15,10 @@ class Website:
         def chat():
             return render_template("chat.html")
 
+        @self.app.route("/tts")
+        def tts():
+            return render_template("tts.html")
+
         @self.app.route("/alert_box")
         def alert_box():
             return render_template("alert_box.html")
@@ -30,6 +34,10 @@ class Website:
         @self.socketio.on("new_alert_bot")
         def new_alert(data):
             self.socketio.emit("new_alert", data)
+
+        @self.socketio.on("new_tts_bot")
+        def new_tts(data):
+            self.socketio.emit("new_tts", data)
 
         @self.socketio.on("start")
         def something_started(data):
