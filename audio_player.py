@@ -10,7 +10,14 @@ class AudioManager:
     def __init__(self):
         # Use higher frequency to prevent audio glitching noises
         # Use higher buffer because why not (default is 512)
-        pygame.mixer.init(frequency=48000, buffer=1024) 
+        pygame.mixer.init(frequency=48000, buffer=1024)
+
+    def get_audio_length(self, file_path):
+        wav_file = sf.SoundFile(file_path)
+        file_length = wav_file.frames / wav_file.samplerate
+        wav_file.close()
+        return file_length
+
 
     def play_audio(self, file_path, sleep_during_playback=True, delete_file=False, play_using_music=True):
         """
@@ -22,14 +29,14 @@ class AudioManager:
         """
         print(f"Playing file with pygame: {file_path}")
         if not pygame.mixer.get_init(): # Reinitialize mixer if needed
-            pygame.mixer.init(frequency=48000, buffer=1024) 
+            pygame.mixer.init(frequency=48000, buffer=1024)
         if play_using_music:
             # Pygame Music can only play one file at a time
             pygame.mixer.music.load(file_path)
             pygame.mixer.music.play()
         else:
             # Pygame Sound lets you play multiple sounds simultaneously
-            pygame_sound = pygame.mixer.Sound(file_path) 
+            pygame_sound = pygame.mixer.Sound(file_path)
             pygame_sound.play()
 
         if sleep_during_playback:
@@ -55,7 +62,7 @@ class AudioManager:
                 # Note: this will stop the audio on other threads as well, so it's not good if you're playing multiple sounds at once
                 pygame.mixer.music.stop()
                 pygame.mixer.quit()
-                try:  
+                try:
                     os.remove(file_path)
                     print(f"Deleted the audio file.")
                 except PermissionError:
@@ -68,8 +75,8 @@ class AudioManager:
         """
         print(f"Playing file with asynchronously with pygame: {file_path}")
         if not pygame.mixer.get_init(): # Reinitialize mixer if needed
-            pygame.mixer.init(frequency=48000, buffer=1024) 
-        pygame_sound = pygame.mixer.Sound(file_path) 
+            pygame.mixer.init(frequency=48000, buffer=1024)
+        pygame_sound = pygame.mixer.Sound(file_path)
         pygame_sound.play()
 
         # Calculate length of the file, based on the file format
@@ -97,7 +104,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(MP3_FILEPATH) or not os.path.exists(WAV_FILEPATH):
         exit("Missing test audio")
-    
+
     # MP3 Test
     audio_manager.play_audio(MP3_FILEPATH)
     print("Sleeping until next file")
@@ -142,4 +149,3 @@ if __name__ == '__main__':
     # audio_manager.play_audio(WAV_FILEPATH, True, True)
     # print("Sleeping until next file")
     # time.sleep(3)
-    
