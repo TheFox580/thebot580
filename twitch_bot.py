@@ -24,6 +24,7 @@ from keys import (
     OWNER_ID,
     TWITCH_BOT_CLIENT_ID,
     TWITCH_BOT_CLIENT_SECRET,
+    BANNED_WORD_LIST,
 )
 from obs_websockets import OBSWebsocketsManager
 from tts import TTSManager
@@ -255,30 +256,7 @@ class MyComponent(commands.Component):
     def __init__(self, bot: Bot):
         # Passing args is not required...
         # We pass bot here as an example...
-        self.banned_words = [
-            "dogehype",
-            "viewers. shop",
-            "dghype",
-            "add me on",
-            "graphic designer",
-            "Best viewers on",
-            "Cheap viewers on",
-            "streamrise",
-            "add me up on",
-            "nezhna .com",
-            "streamviewers org",
-            "streamboo .com",
-            "i am a commission artist",
-            "Cheap V̐iewers",
-            "creativefollowers.online",
-            "telegram:",
-            "adding me up on",
-            "Best view͙e̤rs",
-            "smmtop11.online",
-            "streamboo .live",
-            "smmtask.ru",
-            "maxexposure.online",
-        ]
+        self.banned_words = BANNED_WORD_LIST
         self.bot = bot
 
         self.socket = socket_client.SocketClient()
@@ -310,7 +288,6 @@ class MyComponent(commands.Component):
         self.hype_train_level_complete: float = 0
         self.start_time: datetime = datetime.now()
         self.lurkers = []
-        self.activate_tts = True
         self.message_sent = 0
         self.db = mongo.Database(MONGODB_URL)
         # self.db.update(
@@ -633,9 +610,6 @@ class MyComponent(commands.Component):
     # We use a listener in our Component to display the messages received.
     @commands.Component.listener()
     async def event_message(self, payload: twitchio.ChatMessage) -> None:
-        tts_event = False
-        play_audio = False
-
         banned_message = False
         command_message = False
 
@@ -647,7 +621,7 @@ class MyComponent(commands.Component):
         twitchChatMessage = payload.text
         if payload.type == "user_intro":
             command_message = True
-            twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : {twitchChatMessage}"
+            twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} a dit : {twitchChatMessage}"
 
         blocked_terms: list[str] = []
         async for blocked_term in payload.broadcaster.fetch_blocked_terms(
@@ -663,20 +637,8 @@ class MyComponent(commands.Component):
                     await payload.broadcaster.add_blocked_term(
                         moderator=BOT_ID, text=word.lower()
                     )
-                    print(f"{word} has been added as a blocked term on your channel.")
+                    print(f"{word} a été ajouté en tant que terme bloqué sur la chaine.")
                     await payload.delete(moderator=BOT_ID)
-
-        if self.activate_tts:
-            if tts_event:
-                if (
-                    payload.chatter.subscriber
-                    or payload.chatter.vip
-                    or payload.chatter.moderator
-                ):
-                    if not payload.chatter.broadcaster:
-                        play_audio = True
-            else:
-                play_audio = True
 
         if payload.chatter.name in [
             "fossabot",
@@ -693,6 +655,7 @@ class MyComponent(commands.Component):
         if not (banned_message or command_message):
             # Send new message to server
 
+            twitchChatMessage = ""
             emote_urls = {}
 
             for messageFragment in payload.fragments:
@@ -700,6 +663,9 @@ class MyComponent(commands.Component):
                     emote_urls[messageFragment.text] = (
                         f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0"
                     )
+                    twitchChatMessage += messageFragment.text + " "
+                elif messageFragment.type == "text":
+                    twitchChatMessage += messageFragment.text + " "
 
             emotes = self.get_emotes_in_message(twitchChatMessage)
 
@@ -708,7 +674,7 @@ class MyComponent(commands.Component):
                     if emote in emotes_platform.keys():
                         emote_urls[emote] = emotes_platform[emote]
 
-            source_broadcaster_pfp_url = ""
+            source_broadcaster_pfp_url: str | None = None
 
             if payload.source_broadcaster is not None:
                 source_broadcaster = await payload.source_broadcaster.user()
@@ -719,20 +685,6 @@ class MyComponent(commands.Component):
                 if payload.chatter.color is not None
                 else "#%06x" % random.randint(0, 0xFFFFFF)
             )
-
-            message = {
-                "badges": [
-                    self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
-                ],
-                "chatter": payload.chatter.display_name,
-                "color": color,
-                "emotes": emote_urls,
-                "message": payload.text,
-                "username": payload.chatter.name,
-                "shared_chat_pfp": source_broadcaster_pfp_url,
-            }
-
-            self.socket.send("new_message_bot", message)
 
             self.message_sent += 1
             if self.chat_emotes_combo != ["", 0]:  # If we currently have a combo
@@ -766,29 +718,34 @@ class MyComponent(commands.Component):
                         f"Nouveau combo : {self.chat_emotes_combo[0]}. Commencé par {payload.chatter.display_name}"
                     )
 
-            twitchChatMessage = self.treat_message(twitchChatMessage)
+            message = {
+                "badges": [
+                    self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
+                ],
+                "reply": {
+                    "id": payload.reply.parent_message_id,
+                    "username": payload.reply.parent_user.display_name,
+                    "color": self.getChatterColor(payload.reply.parent_user.id)
+                } if payload.reply is not None else None,
+                "chatter": payload.chatter.display_name,
+                "color": color,
+                "emotes": emote_urls,
+                "message": {
+                    "text": twitchChatMessage,
+                    "id": payload.id
+                },
+                "username": payload.chatter.name,
+                "shared_chat_pfp": source_broadcaster_pfp_url,
+            }
 
-            if twitchChatMessage.split() == []:
-                play_audio = False
+            self.socket.send("new_message_bot", message)
 
-            elif twitchChatMessage.split(".") == []:
-                play_audio = False
-
-            if payload.broadcaster.id != OWNER_ID:  # Only play TTS from my chat
-                play_audio = False
-
-            if play_audio and not (command_message or banned_message):
-                # Send Twitch message to Azure to turn into cool audio
-                output = tts_manager.text_to_speech(twitchChatMessage)
-
-                if payload.broadcaster.name == "lerenard580":
-                    # Play the file
-                    audio_manager.play_audio(output, True, True, True)
+            if not (command_message or banned_message):
 
         if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
             await payload.chatter.ban(moderator=BOT_ID, reason="MESSAGE INVALIDE")
-            banMessage = "BANNED MESSAGE DETECTED : MESSAGE WILL NOT BE SAID"
+            banMessage = "MESSAGE BANNI DETECTE : LE MESSAGE NE SERA PAS TRAITE"
             print(banMessage)
 
     # CHANNEL COMMANDS

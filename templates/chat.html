@@ -19,6 +19,15 @@
             crossorigin="anonymous"
         ></script>
         <script type="text/javascript" charset="utf-8">
+            function hexToRgb(hex) {
+              var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+              return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+              } : null;
+            }
+
             async function getPronouns() {
                 const all_pronouns_req = await fetch(
                     `https://api.pronouns.alejo.io/v1/pronouns`,
@@ -41,6 +50,8 @@
               "All": "Tous
             }
 
+            const savedPronouns = {}
+
             const topSize = "text-xl";
             const bottomSize = "text-2xl";
 
@@ -49,16 +60,27 @@
 
                 const badgeSize = 28;
                 const emoteSize = 36;
+                const timeBeforeDisappear = 30;
 
                 const socket = io();
 
-                socket.on("message_send", (msg, cb) => {
-                    console.log("Got data: " + msg.message);
+                socket.on("message_send", (payload, cb) => {
+                    console.log("Got data: " + payload.message);
                 });
 
-                socket.on("new_message_chat", async (msg, cb) => {
+                socket.on("new_message_chat", async (payload, cb) => {
                     console.log("Got a new message: ");
-                    console.log(msg);
+
+                    const newColor = hexToRgb(payload.color);
+                    let newColorReply = null;
+
+                    payload.color = `rgba(${newColor.r}, ${newColor.g}, ${newColor.b}, 1)`
+                    if (payload.reply){
+                      newColorReply = hexToRgb(payload.reply.color);
+                      payload.reply.color = `rgba(${newColorReply.r}, ${newColorReply.g}, ${newColorReply.b}, 1)`;
+                    }
+
+                    console.log(payload);
 
                     const chatbox = document.getElementById("chatbox");
 
@@ -69,6 +91,7 @@
                     }
 
                     const chatMessage = document.createElement("div");
+                    chatMessage.id = payload.message.id
                     chatMessage.classList.add(
                         "flex",
                         "flex-col",
@@ -78,7 +101,7 @@
                         "rounded-2xl",
                         "bigChatMessage",
                     );
-                    chatMessage.style.borderColor = msg.color;
+                    chatMessage.style.borderColor = payload.color;
 
                     const chatMessageAuthor = document.createElement("div");
                     chatMessageAuthor.classList.add(
@@ -95,13 +118,13 @@
                         "flex-row",
                         "items-center",
                         "justify-center",
-                        `w-[${(badgeSize + 2) * msg.badges.length + (msg.shared_chat_pfp.length > 0 ? badgeSize + 4 : 0)}px]`,
+                        `w-[${(badgeSize + 2) * payload.badges.length + (payload.shared_chat_pfp > 0 ? badgeSize + 4 : 0)}px]`,
                         "mr-2",
                     );
 
-                    if (msg.shared_chat_pfp.length > 0) {
+                    if (payload.shared_chat_pfp.length > 0) {
                         const badge = document.createElement("img");
-                        badge.src = msg.shared_chat_pfp;
+                        badge.src = payload.shared_chat_pfp;
                         badge.classList.add(
                             `h-[${badgeSize + 2}px]`,
                             "mr-1",
@@ -111,7 +134,7 @@
                         chatMessageBadges.appendChild(badge);
                     }
 
-                    for (const badgeURL of msg.badges) {
+                    for (const badgeURL of payload.badges) {
                         const badge = document.createElement("img");
                         badge.src = badgeURL + "/2";
                         badge.classList.add(`h-[${badgeSize}px]`, "mr-1");
@@ -121,50 +144,119 @@
 
                     chatMessageAuthor.appendChild(chatMessageBadges);
 
-                    const pronouns_req = await fetch(
-                        `https://api.pronouns.alejo.io/v1/users/${msg.username}`,
-                    );
-                    if (pronouns_req.ok) {
-                        const pronouns = await pronouns_req.json();
-                        const correct_pronouns = [
-                            all_pronouns[pronouns.pronoun_id],
-                            all_pronouns[pronouns.pronoun_id].singular
-                                ? all_pronouns[pronouns.pronoun_id]
-                                : all_pronouns[pronouns.alt_pronoun_id],
-                        ];
+                    let chatMessagePronouns = null;
+
+                    if (savedPronouns[payload.username]){
+                      if (savedPronouns[payload.username] !== null){
+                        const correct_pronouns = savedPronouns[payload.username];
                         const chatMessagePronouns = document.createElement("p");
                         chatMessagePronouns.textContent =
                           PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject +
-                            (correct_pronouns[1] === undefined || correct_pronouns[0].singular
+                            (correct_pronouns[1] === undefined || correct_pronouns[0].singular || correct_pronouns[0] === "All"
                                 ? ""
-                                : "/" + PRONOUNS_TRAD[correct_pronouns[1].subject]) ?? correct_pronouns[1].subject;
+                                : "/" + correct_pronouns[1] === undefined ? PRONOUNS_TRAD[correct_pronouns[0].object]) ?? correct_pronouns[0].object : PRONOUNS_TRAD[correct_pronouns[1].subject]) ?? correct_pronouns[1].subject;
+
                         chatMessagePronouns.classList.add(
                             "text-white",
-                            msg.chatter.length < 12 ? "border-4" : "border-2",
+                            payload.chatter.length < 12 ? "border-4" : "border-2",
                             "rounded-xl",
                             "px-2",
                             "py-1",
                             "mr-2",
-                            msg.chatter.length < 12 ? bottomSize : topSize,
+                            payload.chatter.length < 12 ? bottomSize : topSize,
                             "text-center",
                             "items-center",
                             "justify-center",
                         );
+                      }
+                    } else {
+
+                        const pronouns_req = await fetch(
+                            `https://api.pronouns.alejo.io/v1/users/${payload.username}`,
+                        );
+                        if (pronouns_req.ok) {
+                            const pronouns = await pronouns_req.json();
+                            const correct_pronouns = [
+                                all_pronouns[pronouns.pronoun_id],
+                                all_pronouns[pronouns.pronoun_id].singular
+                                    ? all_pronouns[pronouns.pronoun_id]
+                                    : all_pronouns[pronouns.alt_pronoun_id],
+                            ];
+
+                            savedPronouns[payload.username] = correct_pronouns;
+                    }
+                        const chatMessagePronouns = document.createElement("p");
+                        chatMessagePronouns.textContent =
+                          PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject +
+                            (correct_pronouns[1] === undefined || correct_pronouns[0].singular || correct_pronouns[0] === "All"
+                                ? ""
+                                : "/" + correct_pronouns[1] === undefined ? PRONOUNS_TRAD[correct_pronouns[0].object]) ?? correct_pronouns[0].object : PRONOUNS_TRAD[correct_pronouns[1].subject]) ?? correct_pronouns[1].subject;
+
+                        chatMessagePronouns.classList.add(
+                            "text-white",
+                            payload.chatter.length < 12 ? "border-4" : "border-2",
+                            "rounded-xl",
+                            "px-2",
+                            "py-1",
+                            "mr-2",
+                            payload.chatter.length < 12 ? bottomSize : topSize,
+                            "text-center",
+                            "items-center",
+                            "justify-center",
+                        );
+                      }
 
                         chatMessageAuthor.appendChild(chatMessagePronouns);
                     }
 
                     const chatMessageAuthorName = document.createElement("p");
-                    chatMessageAuthorName.textContent = msg.chatter;
-                    chatMessageAuthorName.style.color = msg.color;
+                    chatMessageAuthorName.textContent = payload.chatter;
+                    chatMessageAuthorName.style.color = payload.color;
                     chatMessageAuthorName.classList.add(
                         "font-bold",
-                        msg.chatter.length < 12 ? bottomSize : topSize,
+                        payload.chatter.length < 12 ? bottomSize : topSize,
                     );
 
                     chatMessageAuthor.appendChild(chatMessageAuthorName);
 
                     chatMessage.appendChild(chatMessageAuthor);
+
+                    let chatMessageReplyContent = null;
+                    let chatMessageReplyUsername = null;
+
+                    if (payload.reply){
+                        const chatMessageReply = document.createElement("div");
+                        chatMessageReply.classList.add(
+                            "flex",
+                            "items-center",
+                            "justify-center",
+                            "text-center",
+                            "mt-2.5",
+                        );
+
+                        chatMessageReplyContent = document.createElement("span");
+                        chatMessageReplyContent.classList.add(
+                            "text-center",
+                            "text-neutral-600",
+                            "mr-1",
+                            topSize,
+                        );
+
+                        chatMessageReplyContent.textContent = "⤷ Réponds à";
+
+                        chatMessageReplyUsername = document.createElement("span");
+                        chatMessageReplyUsername.classList.add(
+                            "text-center",
+                            topSize,
+                        );
+
+                        chatMessageReplyUsername.textContent = "@"+ payload.reply.username;
+                        chatMessageReplyUsername.style.color = payload.reply.color;
+
+                        chatMessageReply.appendChild(chatMessageReplyContent);
+                        chatMessageReply.appendChild(chatMessageReplyUsername);
+                        chatMessage.appendChild(chatMessageReply);
+                    }
 
                     const chatMessagetText = document.createElement("div");
                     chatMessagetText.classList.add(
@@ -181,17 +273,17 @@
                         "mr-1",
                         bottomSize,
                     );
-                    const splitMessages = msg.message.split(" ");
-                    const lastWord = ("" + msg.message)
+                    const splitMessages = payload.message.split(" ");
+                    const lastWord = ("" + payload.message)
                         .replace(/[\s-]+$/, "")
                         .split(/[\s-]/)
                         .pop();
 
                     for (const word of splitMessages) {
-                        if (Object.keys(msg.emotes).includes(word)) {
+                        if (Object.keys(payload.emotes).includes(word)) {
                             const chatMessageFragment =
                                 document.createElement("img");
-                            chatMessageFragment.src = msg.emotes[word];
+                            chatMessageFragment.src = payload.emotes[word];
                             chatMessageFragment.classList.add(
                                 "inline-grid",
                                 "mr-2",
@@ -213,6 +305,41 @@
                     chatMessage.appendChild(chatMessagetText);
 
                     chatbox.appendChild(chatMessage);
+
+                    setTimeout(() => {
+                      let transparancy = 1;
+                      const transparent = setInterval(() => {
+                        if (transparancy <= 0){
+                          clearInterval(transparent);
+                          chatMessage.remove();
+                        }
+                        chatMessage.style.backgroundColor = `rgba(0, 0, 0, ${transparancy})`;
+                        chatMessage.style.borderColor = `rgba(${newColor.r}, ${newColor.g}, ${newColor.b}, ${transparancy})`;
+                        for (const badge of chatMessageBadges.children){
+                          badge.style.opacity = transparancy;
+                        }
+
+                        if (chatMessagePronouns !== null){
+                          chatMessagePronouns.style.borderColor = `rgba(255, 255, 255, ${transparancy})`;
+                          chatMessagePronouns.style.color = `rgba(255, 255, 255, ${transparancy})`;
+                        }
+                        chatMessageAuthorName.style.color = `rgba(${newColor.r}, ${newColor.g}, ${newColor.b}, ${transparancy})`;
+
+                        if (chatMessageReplyContent !== null){
+                          chatMessageReplyContent.style.color = `rgba(82, 82, 82, ${transparancy})`;
+                          chatMessageReplyUsername.style.color = `rgba(${newColorReply.r}, ${newColorReply.g}, ${newColorReply.b}, ${transparancy})`;
+                        }
+
+                        for (const messageFragment of chatMessagetText.children){
+                          if (messageFragment.nodeType === messageFragment.TEXT_NODE){
+                            messageFragment.style.color = `rgba(255, 255, 255, ${transparancy})`;
+                          } else {
+                            messageFragment.style.opacity = transparancy;
+                          }
+                        }
+                        transparancy -= 0.01
+                      }, 10) // 10ms
+                    }, timeBeforeDisappear*1000)
                 });
             });
         </script>
