@@ -691,19 +691,16 @@ class MyComponent(commands.Component):
     @commands.Component.listener("event_message")
     async def event_message_tts(self, payload: twitchio.ChatMessage) -> None:
         tts_event = False
-        play_audio = False
+        play_audio = self.activate_tts
 
-        if self.activate_tts:
-            if tts_event:
-                if (
-                    payload.chatter.subscriber
-                    or payload.chatter.vip
-                    or payload.chatter.moderator
-                ):
-                    if not payload.chatter.broadcaster:
-                        play_audio = True
-            else:
-                play_audio = True
+        if tts_event:
+            if (
+                payload.chatter.subscriber
+                or payload.chatter.vip
+                or payload.chatter.moderator
+            ):
+                if not payload.chatter.broadcaster:
+                    play_audio = True and self.activate_tts
 
         if payload.chatter.name in [
             "fossabot",
@@ -712,14 +709,14 @@ class MyComponent(commands.Component):
             "nightbot",
         ]:  # Bots + broadcaster
             play_audio = False
+
         elif payload.text[0] == "!" or payload.text[0] == "-":
             play_audio = False
+
         elif payload.source_broadcaster is not None:
             play_audio = False
 
-        twitchChatMessage = payload.text
-
-        twitchChatMessage = self.treat_message(twitchChatMessage)
+        twitchChatMessage = self.treat_message(payload.text)
 
         if twitchChatMessage.split() == []:
             play_audio = False
@@ -735,12 +732,19 @@ class MyComponent(commands.Component):
             # Send Twitch message to Azure to turn into cool audio
             output = tts_manager.text_to_speech(twitchChatMessage)
 
+            self.socket.send("new_tts_bot", {
+                "tts_loc": output,
+                "text": twitchChatMessage,
+                "username": payload.chatter.name
+            })
+
             if payload.broadcaster.name == "thefox580":
 
                 # THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
                 posY = obswebsockets_manager.get_source_transform(
                     "Bots", "TwitchChat"
                 )["positionY"]
+
                 while posY > 693:
                     posY -= 1
                     new_transform = {"positionY": posY}
@@ -749,11 +753,12 @@ class MyComponent(commands.Component):
                     )
 
                 # Play the file
-                audio_manager.play_audio(output, True, True, True)
+                # audio_manager.play_audio(output, True, True, True)
 
                 posY = obswebsockets_manager.get_source_transform(
                     "Bots", "TwitchChat"
                 )["positionY"]
+
                 while posY < 1080:
                     posY += 1
                     new_transform = {"positionY": posY}
@@ -762,6 +767,7 @@ class MyComponent(commands.Component):
                     )
 
             elif payload.broadcaster.name == "thealt580":
+
                 # Play the file
                 audio_manager.play_audio(output, True, True, True)
 
