@@ -135,17 +135,19 @@
                     let chatMessagePronouns = null;
 
                     if (savedPronouns[payload.username]){
-                      console.log(savedPronouns);
-                      console.log(savedPronouns[payload.username]);
                       if (savedPronouns[payload.username] !== null){
                         const correct_pronouns = savedPronouns[payload.username];
                         chatMessagePronouns = document.createElement("p");
                         chatMessagePronouns.textContent =
-                            correct_pronouns[0].subject +
-                            "/" +
-                            (correct_pronouns[1] === undefined
+                            correct_pronouns[0].subject
+                            + (correct_pronouns[0].subject === "Any"
+                              ? ""
+                              : "/"
+                            + (correct_pronouns[1] === undefined
                                 ? correct_pronouns[0].object
-                                : correct_pronouns[1].subject);
+                                : correct_pronouns[1].subject
+                              )
+                            );
                         chatMessagePronouns.classList.add(
                             "text-white",
                             payload.chatter.length < 12 ? "border-4" : "border-2",
