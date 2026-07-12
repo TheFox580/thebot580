@@ -745,7 +745,7 @@ class MyComponent(commands.Component):
                         moderator=BOT_ID, text=word.lower()
                     )
                     print(f"{word} has been added as a blocked term on your channel.")
-                    await payload.delete(moderator=BOT_ID)
+                    await payload.chatter.timeout(moderator=BOT_ID, duration=120, reason="You used a banned term.")
                     return
 
         if payload.chatter.name in [
