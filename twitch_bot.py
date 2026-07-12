@@ -781,11 +781,9 @@ class MyComponent(commands.Component):
             f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text} {f'(From {payload.source_broadcaster.display_name})' if payload.source_broadcaster is not None else ''}"
         )
 
-        # Setup what will be translated as a variable
-        twitchChatMessage = payload.text
         if payload.type == "user_intro":
             command_message = True
-            twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : {twitchChatMessage}"
+            twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : {payload.text}"
 
         blocked_terms: list[str] = []
         async for blocked_term in payload.broadcaster.fetch_blocked_terms(
@@ -810,9 +808,11 @@ class MyComponent(commands.Component):
             "streamelements",
             "thebot580",
             "nightbot",
-        ]:  # Bots + broadcaster
+        ]:  # Bots
             command_message = True
         elif payload.text[0] == "!" or payload.text[0] == "-":
+            command_message = True
+        elif payload.source_broadcaster is not None and self.activate_tts is True:
             command_message = True
         elif payload.source_broadcaster is not None and self.activate_tts is True:
             command_message = True
@@ -820,6 +820,7 @@ class MyComponent(commands.Component):
         if not (banned_message or command_message):
             # Send new message to server
 
+            twitchChatMessage = ""
             emote_urls = {}
 
             for messageFragment in payload.fragments:
@@ -827,7 +828,11 @@ class MyComponent(commands.Component):
                     emote_urls[messageFragment.text] = (
                         f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0"
                     )
+                    twitchChatMessage += messageFragment.text + " "
+                elif messageFragment.type == "text":
+                    twitchChatMessage += messageFragment.text + " "
 
+            #Check for 7TV, BTTV & FFZ
             emotes = self.get_emotes_in_message(twitchChatMessage)
 
             for emote in emotes:
@@ -835,11 +840,13 @@ class MyComponent(commands.Component):
                     if emote in emotes_platform.keys():
                         emote_urls[emote] = emotes_platform[emote]
 
-            source_broadcaster_pfp_url = ""
+            source_broadcaster_pfp_url: str | None = None
 
             if payload.source_broadcaster is not None:
                 source_broadcaster = await payload.source_broadcaster.user()
                 source_broadcaster_pfp_url = source_broadcaster.profile_image.url
+
+            print(twitchChatMessage)
 
             color = (
                 payload.chatter.color.html
@@ -879,18 +886,24 @@ class MyComponent(commands.Component):
                         f"New combo emote : {self.chat_emotes_combo[0]}. Started by {payload.chatter.display_name}"
                     )
 
-            twitchChatMessage = self.treat_message(twitchChatMessage)
-
             if not (command_message or banned_message):
 
                 message = {
                     "badges": [
                         self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
                     ],
+                    "reply": {
+                        "id": payload.reply.parent_message_id,
+                        "username": payload.reply.parent_user.display_name,
+                        "color": self.getChatterColor(payload.reply.parent_user.id)
+                    } if payload.reply is not None else None,
                     "chatter": payload.chatter.display_name,
                     "color": color,
                     "emotes": emote_urls,
-                    "message": payload.text,
+                    "message": {
+                        "text": twitchChatMessage,
+                        "id": payload.id
+                    },
                     "username": payload.chatter.name,
                     "shared_chat_pfp": source_broadcaster_pfp_url,
                 }
