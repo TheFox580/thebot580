@@ -1,6 +1,5 @@
 import socketio
 
-
 class SocketClient:
     def __init__(self):
         self.client = socketio.Client()
@@ -17,7 +16,6 @@ class SocketClient:
             self.connect()
         print(f"sending {data} to {room}")
         self.client.emit(room, data)
-
 
 if __name__ == "__main__":
     client = SocketClient()
