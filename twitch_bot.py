@@ -767,14 +767,18 @@ class MyComponent(commands.Component):
             for messageFragment in payload.fragments:
                 if messageFragment.type == "emote":
                     emote_urls[messageFragment.text] = (
-                        f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0"
+                        f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0" #type: ignore
                     )
                     twitchChatMessage += messageFragment.text + " "
                 elif messageFragment.type == "text":
                     twitchChatMessage += messageFragment.text + " "
 
-            #Check for 7TV, BTTV & FFZ
+            #Check for 7TV, BTTV & FFZ (& how many emotes there are)
             emotes = self.get_emotes_in_message(twitchChatMessage)
+
+            if len(emotes) > 6:
+                await payload.chatter.timeout(moderator=BOT_ID, duration=5, reason="Messages can't have more than 6 emotes")
+                return
 
             for emote in emotes:
                 for emotes_platform in self.emotes_dict.values():
