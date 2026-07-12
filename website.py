@@ -41,7 +41,7 @@ class Website:
 
         @self.socketio.on("start")
         def something_started(data):
-            print("Something started!")
+            print(f"Something started! -> {data}")
 
         @self.socketio.on("*")
         def any_event(event, data):
