@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 import asqlite
 import requests
 import twitchio
-from twitchio import ChatMessageEmote, ChatMessageFragment, eventsub, user
+from twitchio import eventsub, user, web
 from twitchio.ext import commands
 
 import mcci
@@ -24,6 +24,7 @@ from keys import (
     OWNER_ID,
     TWITCH_BOT_CLIENT_ID,
     TWITCH_BOT_CLIENT_SECRET,
+    HTTP_PORT_MAIN
 )
 from obs_websockets import OBSWebsocketsManager
 from tts import TTSManager
@@ -45,6 +46,8 @@ class Bot(commands.AutoBot):
     ) -> None:
         self.token_database = token_database
 
+        adapter = web.AiohttpAdapter(port=HTTP_PORT_MAIN)
+
         super().__init__(
             client_id=TWITCH_BOT_CLIENT_ID,
             client_secret=TWITCH_BOT_CLIENT_SECRET,
@@ -53,6 +56,7 @@ class Bot(commands.AutoBot):
             prefix="!",
             subscriptions=subs,
             force_subscribe=True,
+            adapter=adapter
         )
 
     async def setup_hook(self) -> None:
@@ -810,14 +814,6 @@ class MyComponent(commands.Component):
         ]:  # Bots
             command_message = True
         elif payload.text[0] == "!" or payload.text[0] == "-":
-            command_message = True
-        elif payload.source_broadcaster is not None and self.activate_tts is True:
-            command_message = True
-        elif payload.source_broadcaster is not None and self.activate_tts is True:
-            command_message = True
-        elif payload.source_broadcaster is not None and self.activate_tts is True:
-            command_message = True
-        elif payload.source_broadcaster is not None and self.activate_tts is True:
             command_message = True
 
         if not (banned_message or command_message):
