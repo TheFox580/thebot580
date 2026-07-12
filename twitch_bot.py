@@ -346,14 +346,14 @@ class MyComponent(commands.Component):
             0,
         ]  # Holds a list like : [str("Emote Name"), int(number of instance of this emote in a row)]
 
-        self.shared_chat_users: list = []
+        self.shared_chat_users: list[user.PartialUser] = []
         self.hype_train_level: int = -1
         self.hype_train_level_complete: float = 0
         self.start_time: datetime = datetime.now()
-        self.lurkers = []
-        self.activate_tts = True
-        self.message_sent = 0
-        self.db = mongo.Database(MONGODB_URL)
+        self.lurkers: list[str] = []
+        self.activate_tts: bool = False #Desactivating until I find a workaround
+        self.message_sent: int = 0
+        self.db: mongo.Database = mongo.Database(MONGODB_URL)
         # self.db.update(
         #    "twitch_api",
         #    "messages",
@@ -751,7 +751,6 @@ class MyComponent(commands.Component):
                     obswebsockets_manager.set_source_transform(
                         "Bots", "TwitchChat", new_transform
                     )
-
                 # Play the file
                 # audio_manager.play_audio(output, True, True, True)
 
@@ -816,6 +815,10 @@ class MyComponent(commands.Component):
             command_message = True
         elif payload.source_broadcaster is not None and self.activate_tts is True:
             command_message = True
+        elif payload.source_broadcaster is not None and self.activate_tts is True:
+            command_message = True
+        elif payload.source_broadcaster is not None and self.activate_tts is True:
+            command_message = True
 
         if not (banned_message or command_message):
             # Send new message to server
@@ -845,8 +848,6 @@ class MyComponent(commands.Component):
             if payload.source_broadcaster is not None:
                 source_broadcaster = await payload.source_broadcaster.user()
                 source_broadcaster_pfp_url = source_broadcaster.profile_image.url
-
-            print(twitchChatMessage)
 
             color = (
                 payload.chatter.color.html
