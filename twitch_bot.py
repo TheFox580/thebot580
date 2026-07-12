@@ -11,6 +11,7 @@ from twitchio.ext import commands
 from audio_player import AudioManager
 from keys import (
     AZURE_TTS_VOICE,
+    BANNED_WORD_LIST,
     BOT_ID,
     HAS_ONBOARDED,
     OWNER_ID,
@@ -252,30 +253,7 @@ class MyComponent(commands.Component):
     def __init__(self, bot: Bot):
         # Passing args is not required...
         # We pass bot here as an example...
-        self.banned_words = [
-            "dogehype",
-            "viewers. shop",
-            "dghype",
-            "add me on",
-            "graphic designer",
-            "Best viewers on",
-            "Cheap viewers on",
-            "streamrise",
-            "add me up on",
-            "nezhna .com",
-            "streamviewers org",
-            "streamboo .com",
-            "i am a commission artist",
-            "Cheap V̐iewers",
-            "creativefollowers.online",
-            "telegram:",
-            "adding me up on",
-            "Best view͙e̤rs",
-            "smmtop11.online",
-            "streamboo .live",
-            "smmtask.ru",
-            "maxexposure.online",
-        ]
+        self.banned_words = BANNED_WORD_LIST
         self.bot = bot
 
         self.shared_chat_users: list = []
