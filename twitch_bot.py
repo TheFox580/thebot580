@@ -999,9 +999,7 @@ class MyComponent(commands.Component):
 
     @commands.command()
     async def ai(self, ctx: commands.Context):
-        await ctx.reply(
-            "I don't use AI for anything, coding, art, ... I believe anyone can do anything with enough will, make whatever you want by yourself and have fun!"
-        )
+        await ctx.reply(self.readCommandTextFile("ai"))
 
     @commands.command()
     async def tts(self, ctx: commands.Context):
@@ -1033,7 +1031,7 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
         await ctx.reply(
-            "I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.2.0 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580",
+            "I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.2.2 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580",
             me=True,
         )
 
