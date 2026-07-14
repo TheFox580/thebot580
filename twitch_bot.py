@@ -771,6 +771,9 @@ class MyComponent(commands.Component):
                         f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0" #type: ignore
                     )
                     twitchChatMessage += messageFragment.text + " "
+
+                    self.emotes_dict["Twitch"][messageFragment.text] = f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0" #type: ignore
+                    self.emotes_list.append(messageFragment.text)
                 elif messageFragment.type == "text":
                     twitchChatMessage += messageFragment.text + " "
 
