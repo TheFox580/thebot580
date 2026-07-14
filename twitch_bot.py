@@ -502,7 +502,7 @@ class MyComponent(commands.Component):
 
     def readCommandTextFile(self, command: str) -> str:
         text: str = ""
-        with open("custom_shit_that_uses_this/"+command+".txt", "r", encoding="utf8") as file:
+        with open("commands/"+command+".txt", "r", encoding="utf8") as file:
             lines = file.readlines()
             for line in lines:
                 text += line.replace("\n", " ")
