@@ -4,6 +4,7 @@ import logging
 import math
 import random
 import sqlite3
+import emoji
 from threading import Timer
 from datetime import datetime, timezone
 
@@ -12,6 +13,7 @@ import requests
 import twitchio
 from twitchio import eventsub, user
 from twitchio.ext import commands
+from twitchio.models.channel_points import CustomReward
 
 import mcci
 import mongo
@@ -691,13 +693,17 @@ class MyComponent(commands.Component):
             for messageFragment in payload.fragments:
                 if messageFragment.type == "emote":
                     emote_urls[messageFragment.text] = (
-                        f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0"
+                        f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0" #type: ignore
                     )
                     twitchChatMessage += messageFragment.text + " "
                 elif messageFragment.type == "text":
                     twitchChatMessage += messageFragment.text + " "
 
             emotes = self.get_emotes_in_message(twitchChatMessage)
+
+            if len(emotes) + emoji.emoji_count(twitchChatMessage) > 6:
+                await payload.chatter.timeout(moderator=BOT_ID, duration=5, reason="Les messages ne peuvent pas avoir une combinaison de 6 émotes / emojis")
+                return
 
             for emote in emotes:
                 for emotes_platform in self.emotes_dict.values():
@@ -1792,6 +1798,20 @@ class MyComponent(commands.Component):
         )  # The input provided by the user, "" if none was (/ was needed)
 
         # While most attributes won't be used, it's always good to have them down for later.
+        #
+        if reward_title == "fin du stream" or "Fin du stream":
+            obswebsockets_manager.stop_stream()
+
+        if reward_title == "VIP":
+            try:
+                await channel.add_vip(user.id)
+                reward_fetch: CustomReward = await reward.fetch_reward()
+                await reward_fetch.update(cost=reward_cost*2)
+                print("Le prix du VIP a doublé")
+                await channel.send_message(message=f"{user.display_name} est devenu VIP pour {reward_cost} Chockbars. Le prix vient de doubler", sender=BOT_ID)
+
+            except:
+                print("Y'a qqch qui a cassé")
 
     @commands.Component.listener()
     async def event_ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:
