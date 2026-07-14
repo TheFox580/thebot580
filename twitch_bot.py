@@ -637,7 +637,7 @@ class MyComponent(commands.Component):
         return time_text
 
     def play_tts_queue(self, has_png: bool) -> None:
-        if len(self.tts_queue) > 0: # If there's TTS in the queue
+        if len(self.tts_queue) > 0 and self.activate_tts: # If there's TTS in the queue
             if not self.currently_playing_tts:
                 self.currently_playing_tts = True
 
@@ -653,7 +653,10 @@ class MyComponent(commands.Component):
                             "Bots", "TwitchChat", new_transform
                         )
 
+                    obswebsockets_manager.set_source_visibility("Bots", "TTS Queue", True)
+
             tts_message: str = self.tts_queue.pop(0)
+            obswebsockets_manager.set_text("TTS Queue", f"TTS Queue: {len(self.tts_queue)}")
 
             # Send Twitch message to Azure to turn into cool audio
             tts_file = tts_manager.text_to_speech(tts_message)
@@ -679,6 +682,8 @@ class MyComponent(commands.Component):
 
         else:
             if has_png:
+
+                obswebsockets_manager.set_source_visibility("Bots", "TTS Queue", False)
 
                 posY = obswebsockets_manager.get_source_transform(
                     "Bots", "TwitchChat"
@@ -883,6 +888,7 @@ class MyComponent(commands.Component):
         if play_audio:
 
             self.tts_queue.append(twitchChatMessage) #Adding the TTS to the queue
+            obswebsockets_manager.set_text("TTS Queue", f"TTS Queue: {len(self.tts_queue)}")
 
             if payload.broadcaster.name == "thefox580":
                 if not self.currently_playing_tts:
@@ -1001,6 +1007,7 @@ class MyComponent(commands.Component):
             self.activate_tts = not self.activate_tts
             if self.activate_tts:
                 await ctx.reply("TTS has been turned on.")
+                self.play_tts_queue(obswebsockets_manager.is_connected() if ctx.broadcaster.name == "thefox580" else False)
                 return
             await ctx.reply("TTS has been turned off.")
             return
