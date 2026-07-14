@@ -227,6 +227,8 @@ class Bot(commands.AutoBot):
                 eventsub.AdBreakBeginSubscription(broadcaster_user_id=payload.user_id),
             )
 
+            eventsub.ChatNotificationSubscription(broadcaster_user_id=payload.user_id, user_id=BOT_ID)
+
         resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(subscriptions)
         if resp.errors:
             LOGGER.warning(
@@ -776,8 +778,8 @@ class MyComponent(commands.Component):
                 source_broadcaster_pfp_url = source_broadcaster.profile_image.url
 
             color = (
-                payload.chatter.color.html
-                if payload.chatter.color is not None
+                payload.color.html
+                if payload.color is not None
                 else "#%06x" % random.randint(0, 0xFFFFFF)
             )
 
@@ -1229,7 +1231,6 @@ class MyComponent(commands.Component):
         )
 
         message = f'{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak} They said: "{self.treat_message(payload.text)}"'
-        output = tts_manager.text_to_speech(message)
 
         color = self.getChatterColor(payload.user.id)
 
@@ -1250,7 +1251,6 @@ class MyComponent(commands.Component):
             "color": color,
             "emotes": emote_urls,
             "sub_type": sub_tier,
-            "tts_loc": output,
         }
 
         self.socket.send("new_alert_bot", alert_message)
@@ -1280,7 +1280,6 @@ class MyComponent(commands.Component):
                 message=f"thefox91Stonks {display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!",
             )
             message = f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!"
-        output = tts_manager.text_to_speech(message)
 
         color = (
             self.getChatterColor(payload.user.id) if payload.user is not None else None
@@ -1295,7 +1294,6 @@ class MyComponent(commands.Component):
             "color": color,
             "sub_type": sub_tier,
             "total_amount": payload.cumulative_total,
-            "tts_loc": output,
         }
 
         self.socket.send("new_alert_bot", alert_message)
@@ -1321,7 +1319,6 @@ class MyComponent(commands.Component):
                 message=f"thefox91Stonks {display_name} cheered {payload.bits} bits!",
             )
             message = f"{display_name} cheered {payload.bits} bits! They said: {self.treat_message(payload.message, True)}"
-        output = tts_manager.text_to_speech(message)
 
         color = (
             self.getChatterColor(payload.user.id) if payload.user is not None else None
@@ -1344,7 +1341,6 @@ class MyComponent(commands.Component):
             "amount": payload.bits,
             "color": color,
             "emotes": emote_urls,
-            "tts_loc": output,
         }
 
         self.socket.send("new_alert_bot", alert_message)
@@ -2037,6 +2033,7 @@ async def setup_database(
                             broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.AdBreakBeginSubscription(broadcaster_user_id=OWNER_ID),
+                        eventsub.ChatMessageSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID)
                     ]
                 )
 
