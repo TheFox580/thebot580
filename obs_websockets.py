@@ -15,16 +15,25 @@ class OBSWebsocketsManager:
     def __init__(self):
         # Connect to websockets
         self.ws = obsws(WEBSOCKET_HOST, WEBSOCKET_PORT, WEBSOCKET_PASSWORD)
+        self.connected = False
         try:
             self.ws.connect()
             print("Connected to OBS Websockets!\n")
+            self.connected = True
         except:
             print(
                 "\nPANIC!!\nCOULD NOT CONNECT TO OBS!\nDouble check that you have OBS open and that your websockets server is enabled in OBS."
             )
+            self.connected = False
+
+    def is_connected(self):
+        return self.connected
 
     def disconnect(self):
         self.ws.disconnect()
+
+    def stop_stream(self):
+        self.ws.call(requests.StopStream())
 
     # Set the current scene
     def set_scene(self, new_scene):
