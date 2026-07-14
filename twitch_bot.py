@@ -4,6 +4,7 @@ import logging
 import math
 import random
 import sqlite3
+import emoji
 from datetime import datetime, timezone
 
 import asqlite
