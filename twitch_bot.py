@@ -494,9 +494,9 @@ class MyComponent(commands.Component):
 
     def getEmoteList(self) -> list[str]:
         emotes_list: list[str] = []
-        for value in self.emotes_dict.values():
-            for key in value.keys():
-                emotes_list.append(key)
+        for emotes in self.emotes_dict.values():
+            for emote_text in emotes.keys():
+                emotes_list.append(emote_text)
 
         return emotes_list
 
