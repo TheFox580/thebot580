@@ -526,7 +526,7 @@ class MyComponent(commands.Component):
         for word in messageList:
             word = word.replace("_", " ")
             if ("🫡" == word) or ("o7" == word):
-                final_message += "oh 7 "
+                final_message += "o 7 "
             elif "D:" == word:
                 final_message += "D face "
             elif "<3" == word:
@@ -537,7 +537,7 @@ class MyComponent(commands.Component):
                 pass
             elif "Cheer" in word:  # We don't want it to say the bits amount!
                 pass
-            elif self.message_has_an_emote(word):
+            elif emoji.is_emoji(word):
                 pass
             else:
                 final_message += word + " "
