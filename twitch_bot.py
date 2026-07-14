@@ -6,6 +6,7 @@ import random
 import sqlite3
 import emoji
 from datetime import datetime, timezone
+from threading import Timer
 
 import asqlite
 import requests
@@ -298,7 +299,9 @@ class MyComponent(commands.Component):
         self.hype_train_level_complete: float = 0
         self.start_time: datetime = datetime.now()
         self.lurkers: list[str] = []
-        self.activate_tts: bool = False #Desactivating until I find a workaround
+        self.activate_tts: bool = True
+        self.tts_queue: list[str] = []
+        self.currently_playing_tts: bool = False
         self.message_sent: int = 0
         self.db: mongo.Database = mongo.Database(MONGODB_URL)
         # self.db.update(
@@ -633,71 +636,49 @@ class MyComponent(commands.Component):
 
         return time_text
 
-    @commands.Component.listener("event_message")
-    async def event_message_tts(self, payload: twitchio.ChatMessage) -> None:
-        tts_event = False
-        play_audio = self.activate_tts
+    def play_tts_queue(self, has_png: bool) -> None:
+        if len(self.tts_queue) > 0: # If there's TTS in the queue
+            if not self.currently_playing_tts:
+                self.currently_playing_tts = True
 
-        if tts_event:
-            if (
-                payload.chatter.subscriber
-                or payload.chatter.vip
-                or payload.chatter.moderator
-            ):
-                if not payload.chatter.broadcaster:
-                    play_audio = True and self.activate_tts
+                if has_png:
+                    posY = obswebsockets_manager.get_source_transform(
+                        "Bots", "TwitchChat"
+                    )["positionY"]
 
-        if payload.chatter.name in [
-            "fossabot",
-            "streamelements",
-            "thebot580",
-            "nightbot",
-        ]:  # Bots + broadcaster
-            play_audio = False
+                    while posY > 693:
+                        posY -= 1
+                        new_transform = {"positionY": posY}
+                        obswebsockets_manager.set_source_transform(
+                            "Bots", "TwitchChat", new_transform
+                        )
 
-        elif payload.text[0] == "!" or payload.text[0] == "-":
-            play_audio = False
-
-        elif payload.source_broadcaster is not None:
-            play_audio = False
-
-        twitchChatMessage = self.treat_message(payload.text)
-
-        if twitchChatMessage.split() == []:
-            play_audio = False
-
-        elif twitchChatMessage.split(".") == []:
-            play_audio = False
-
-        if payload.broadcaster.id != OWNER_ID:  # Only play TTS from my chat
-            play_audio = False
-
-        if play_audio:
+            tts_message: str = self.tts_queue.pop(0)
 
             # Send Twitch message to Azure to turn into cool audio
-            output = tts_manager.text_to_speech(twitchChatMessage)
+            tts_file = tts_manager.text_to_speech(tts_message)
+            print(tts_file)
 
-            self.socket.send("new_tts_bot", {
-                "tts_loc": output,
-                "text": twitchChatMessage,
-                "username": payload.chatter.name
-            })
+            tts_length = audio_manager.get_audio_length(tts_file)
 
-            if payload.broadcaster.name == "thefox580":
+            # self.socket.send("new_tts_bot", {
+            #     "tts_loc": tts_file,
+            #     "text": tts_message,
+            #     "duration": tts_length,
+            #     "username": payload.chatter.name
+            # })
 
-                # THE NEXT LINES MAKES A PNG CHANGE ON MY OBS, CHANGE TO YOUR PNG OR REMOVE IF YOU DON'T HAVE ONE (1st parameter in set_source_visibility)
-                posY = obswebsockets_manager.get_source_transform(
-                    "Bots", "TwitchChat"
-                )["positionY"]
+            print(f"Playing TTS message: {tts_message}")
+            audio_manager.play_audio(tts_file, sleep_during_playback=False, play_using_music=True)
 
-                while posY > 693:
-                    posY -= 1
-                    new_transform = {"positionY": posY}
-                    obswebsockets_manager.set_source_transform(
-                        "Bots", "TwitchChat", new_transform
-                    )
-                # Play the file
-                # audio_manager.play_audio(output, True, True, True)
+            delete_tts_at_end = Timer(tts_length, audio_manager.delete_file, [tts_file], {}) #Delete TTS at the end
+            delete_tts_at_end.start()
+
+            wait_end_tts = Timer(tts_length, self.play_tts_queue, [has_png], {}) #Waiting until end of TTS to give it some time to breath
+            wait_end_tts.start()
+
+        else:
+            if has_png:
 
                 posY = obswebsockets_manager.get_source_transform(
                     "Bots", "TwitchChat"
@@ -710,11 +691,7 @@ class MyComponent(commands.Component):
                         "Bots", "TwitchChat", new_transform
                     )
 
-            elif payload.broadcaster.name == "thealt580":
-
-                # Play the file
-                audio_manager.play_audio(output, True, True, True)
-
+            self.currently_playing_tts = False
 
     @commands.Component.listener("event_message")
     async def event_message_overlay(self, payload: twitchio.ChatMessage) -> None:
@@ -860,6 +837,60 @@ class MyComponent(commands.Component):
             await payload.chatter.ban(moderator=BOT_ID, reason="INVALID MESSAGE")
             banMessage = "BANNED MESSAGE DETECTED : MESSAGE WILL NOT BE SAID"
             print(banMessage)
+
+    @commands.Component.listener("event_message")
+    async def event_message_tts(self, payload: twitchio.ChatMessage) -> None:
+        tts_event = False
+        play_audio = self.activate_tts
+
+        if tts_event:
+           if (
+               payload.chatter.subscriber
+               or payload.chatter.vip
+               or payload.chatter.moderator
+           ):
+               if not payload.chatter.broadcaster:
+                   play_audio = True and self.activate_tts
+
+        if payload.chatter.name in [
+            "fossabot",
+            "streamelements",
+            "thebot580",
+            "nightbot",
+        ]:  # Bots + broadcaster
+            play_audio = False
+
+        elif payload.text[0] == "!" or payload.text[0] == "-":
+            play_audio = False
+
+        elif payload.source_broadcaster is not None:
+            play_audio = False
+
+        twitchChatMessage = self.treat_message(payload.text)
+
+        if twitchChatMessage.split() == []:
+            play_audio = False
+
+        elif twitchChatMessage.split(".") == []:
+            play_audio = False
+
+        if payload.broadcaster.id != OWNER_ID:  # Only play TTS from my chat
+            play_audio = False
+
+        if len(twitchChatMessage) > 250:
+            play_audio = False
+
+        if play_audio:
+
+            self.tts_queue.append(twitchChatMessage) #Adding the TTS to the queue
+
+            if payload.broadcaster.name == "thefox580":
+                if not self.currently_playing_tts:
+                    self.play_tts_queue(obswebsockets_manager.is_connected())
+
+            elif payload.broadcaster.name == "thealt580":
+                if not self.currently_playing_tts:
+                    self.play_tts_queue(False)
 
     # CHANNEL COMMANDS
 
