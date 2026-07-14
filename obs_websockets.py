@@ -31,6 +31,7 @@ class OBSWebsocketsManager:
 
     def disconnect(self):
         self.ws.disconnect()
+        self.connected = False
 
     def stop_stream(self):
         self.ws.call(requests.StopStream())
