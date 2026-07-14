@@ -47,7 +47,7 @@
               "He": "Il",
               "Him": "Il",
               "Any": "Tous",
-              "All": "Tous
+              "All": "Tous"
             }
 
             const savedPronouns = {}
@@ -118,11 +118,11 @@
                         "flex-row",
                         "items-center",
                         "justify-center",
-                        `w-[${(badgeSize + 2) * payload.badges.length + (payload.shared_chat_pfp > 0 ? badgeSize + 4 : 0)}px]`,
+                        `w-[${(badgeSize + 2) * payload.badges.length + (payload.shared_chat_pfp ? badgeSize + 4 : 0)}px]`,
                         "mr-2",
                     );
 
-                    if (payload.shared_chat_pfp.length > 0) {
+                    if (payload.shared_chat_pfp) {
                         const badge = document.createElement("img");
                         badge.src = payload.shared_chat_pfp;
                         badge.classList.add(
@@ -151,10 +151,10 @@
                         const correct_pronouns = savedPronouns[payload.username];
                         const chatMessagePronouns = document.createElement("p");
                         chatMessagePronouns.textContent =
-                          PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject +
+                          (PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject) +
                             (correct_pronouns[1] === undefined || correct_pronouns[0].singular || correct_pronouns[0] === "All"
                                 ? ""
-                                : "/" + correct_pronouns[1] === undefined ? PRONOUNS_TRAD[correct_pronouns[0].object]) ?? correct_pronouns[0].object : PRONOUNS_TRAD[correct_pronouns[1].subject]) ?? correct_pronouns[1].subject;
+                                : "/" + correct_pronouns[1] === undefined ? (PRONOUNS_TRAD[correct_pronouns[0].object] ?? correct_pronouns[0].object) : (PRONOUNS_TRAD[correct_pronouns[1].subject] ?? correct_pronouns[1].subject));
 
                         chatMessagePronouns.classList.add(
                             "text-white",
@@ -184,28 +184,30 @@
                             ];
 
                             savedPronouns[payload.username] = correct_pronouns;
+                            const chatMessagePronouns = document.createElement("p");
+                            chatMessagePronouns.textContent =
+                              (PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject) +
+                                (correct_pronouns[1] === undefined || correct_pronouns[0].singular || correct_pronouns[0] === "All"
+                                    ? ""
+                                    : "/" + correct_pronouns[1] === undefined ? (PRONOUNS_TRAD[correct_pronouns[0].object] ?? correct_pronouns[0].object) : (PRONOUNS_TRAD[correct_pronouns[1].subject] ?? correct_pronouns[1].subject));
+
+                            chatMessagePronouns.classList.add(
+                                "text-white",
+                                payload.chatter.length < 12 ? "border-4" : "border-2",
+                                "rounded-xl",
+                                "px-2",
+                                "py-1",
+                                "mr-2",
+                                payload.chatter.length < 12 ? bottomSize : topSize,
+                                "text-center",
+                                "items-center",
+                                "justify-center",
+                            );
+                        }
+
                     }
-                        const chatMessagePronouns = document.createElement("p");
-                        chatMessagePronouns.textContent =
-                          PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject +
-                            (correct_pronouns[1] === undefined || correct_pronouns[0].singular || correct_pronouns[0] === "All"
-                                ? ""
-                                : "/" + correct_pronouns[1] === undefined ? PRONOUNS_TRAD[correct_pronouns[0].object]) ?? correct_pronouns[0].object : PRONOUNS_TRAD[correct_pronouns[1].subject]) ?? correct_pronouns[1].subject;
 
-                        chatMessagePronouns.classList.add(
-                            "text-white",
-                            payload.chatter.length < 12 ? "border-4" : "border-2",
-                            "rounded-xl",
-                            "px-2",
-                            "py-1",
-                            "mr-2",
-                            payload.chatter.length < 12 ? bottomSize : topSize,
-                            "text-center",
-                            "items-center",
-                            "justify-center",
-                        );
-                      }
-
+                    if (chatMessagePronouns !== null){
                         chatMessageAuthor.appendChild(chatMessagePronouns);
                     }
 
@@ -273,8 +275,8 @@
                         "mr-1",
                         bottomSize,
                     );
-                    const splitMessages = payload.message.split(" ");
-                    const lastWord = ("" + payload.message)
+                    const splitMessages = payload.message.text.split(" ");
+                    const lastWord = ("" + payload.message.text)
                         .replace(/[\s-]+$/, "")
                         .split(/[\s-]/)
                         .pop();
