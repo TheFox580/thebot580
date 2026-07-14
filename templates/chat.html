@@ -50,7 +50,7 @@
               "All": "Tous"
             }
 
-            const savedPronouns = {}
+            let savedPronouns = {}
 
             const topSize = "text-xl";
             const bottomSize = "text-2xl";
@@ -149,12 +149,12 @@
                     if (savedPronouns[payload.username]){
                       if (savedPronouns[payload.username] !== null){
                         const correct_pronouns = savedPronouns[payload.username];
-                        const chatMessagePronouns = document.createElement("p");
+                        chatMessagePronouns = document.createElement("p");
                         chatMessagePronouns.textContent =
                           (PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject) +
                             (correct_pronouns[1] === undefined || correct_pronouns[0].singular || correct_pronouns[0] === "All"
                                 ? ""
-                                : "/" + correct_pronouns[1] === undefined ? (PRONOUNS_TRAD[correct_pronouns[0].object] ?? correct_pronouns[0].object) : (PRONOUNS_TRAD[correct_pronouns[1].subject] ?? correct_pronouns[1].subject));
+                                : "/" + (correct_pronouns[1] === undefined ? (PRONOUNS_TRAD[correct_pronouns[0].object] ?? correct_pronouns[0].object) : (PRONOUNS_TRAD[correct_pronouns[1].subject] ?? correct_pronouns[1].subject)));
 
                         chatMessagePronouns.classList.add(
                             "text-white",
@@ -184,12 +184,12 @@
                             ];
 
                             savedPronouns[payload.username] = correct_pronouns;
-                            const chatMessagePronouns = document.createElement("p");
+                            chatMessagePronouns = document.createElement("p");
                             chatMessagePronouns.textContent =
                               (PRONOUNS_TRAD[correct_pronouns[0].subject] ?? correct_pronouns[0].subject) +
                                 (correct_pronouns[1] === undefined || correct_pronouns[0].singular || correct_pronouns[0] === "All"
                                     ? ""
-                                    : "/" + correct_pronouns[1] === undefined ? (PRONOUNS_TRAD[correct_pronouns[0].object] ?? correct_pronouns[0].object) : (PRONOUNS_TRAD[correct_pronouns[1].subject] ?? correct_pronouns[1].subject));
+                                    : "/" + (correct_pronouns[1] === undefined ? (PRONOUNS_TRAD[correct_pronouns[0].object] ?? correct_pronouns[0].object) : (PRONOUNS_TRAD[correct_pronouns[1].subject] ?? correct_pronouns[1].subject)));
 
                             chatMessagePronouns.classList.add(
                                 "text-white",
@@ -206,6 +206,8 @@
                         }
 
                     }
+
+                    console.log(chatMessagePronouns);
 
                     if (chatMessagePronouns !== null){
                         chatMessageAuthor.appendChild(chatMessagePronouns);
