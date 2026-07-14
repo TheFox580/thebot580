@@ -32,6 +32,9 @@ class OBSWebsocketsManager:
     def is_connected(self) -> bool:
         return self.connected
 
+    def stop_stream(self):
+        self.ws.call(requests.StopStream())
+
     # Set the current scene
     def set_scene(self, new_scene):
         self.ws.call(requests.SetCurrentProgramScene(sceneName=new_scene))
