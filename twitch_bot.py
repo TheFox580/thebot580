@@ -518,9 +518,7 @@ class MyComponent(commands.Component):
     def treat_message(self, message: str, cheer: bool = False) -> str:
         final_message = ""
         if not cheer:
-            if (
-                "Cheer" in message
-            ):  # If the message is being treated as a non cheer message and has "Cheer" in it, just don't read it
+            if "Cheer" in message:  # If the message is being treated as a non cheer message and has "Cheer" in it, just don't read it
                 return ""
         messageList = message.split()
         for word in messageList:
