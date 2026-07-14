@@ -308,7 +308,7 @@ class MyComponent(commands.Component):
         #    {"$set": {"user_id": OWNER_ID, "messages": []}},
         # )
 
-        self.socket.send("start", {"bot_start": True})
+        self.socket.send("start", {"Bot": True})
 
     def getBTTVEmotes(self, broadcaster_id: str) -> dict[str, str]:
         emotes: dict[str, str] = {}

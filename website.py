@@ -41,7 +41,9 @@ class Website:
 
         @self.socketio.on("start")
         def something_started(data):
-            print(f"Something started! -> {data}")
+            for key, value in data.items():
+                if value is True:
+                    print(f"{key} has started")
 
         @self.socketio.on("*")
         def any_event(event, data):
