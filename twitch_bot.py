@@ -4,6 +4,7 @@ import logging
 import math
 import random
 import sqlite3
+from threading import Timer
 from datetime import datetime, timezone
 
 import asqlite
@@ -288,6 +289,9 @@ class MyComponent(commands.Component):
         self.hype_train_level_complete: float = 0
         self.start_time: datetime = datetime.now()
         self.lurkers = []
+        self.activate_tts: bool = True
+        self.tts_queue: list[str] = []
+        self.currently_playing_tts: bool = False
         self.message_sent = 0
         self.db = mongo.Database(MONGODB_URL)
         # self.db.update(
@@ -607,9 +611,35 @@ class MyComponent(commands.Component):
 
         return time_text
 
+    def play_tts_queue(self) -> None:
+        if len(self.tts_queue) > 0 and self.activate_tts: # If there's TTS in the queue
+            if not self.currently_playing_tts:
+                self.currently_playing_tts = True
+
+            tts_message: str = self.tts_queue.pop(0)
+            print(f"Taille de la file: {len(self.tts_queue)}")
+
+            # Send Twitch message to Azure to turn into cool audio
+            tts_file = tts_manager.text_to_speech(tts_message)
+            print(tts_file)
+
+            tts_length = audio_manager.get_audio_length(tts_file)
+
+            print(f"Message joué: {tts_message}")
+            audio_manager.play_audio(tts_file, sleep_during_playback=False, play_using_music=True)
+
+            delete_tts_at_end = Timer(tts_length, audio_manager.delete_file, [tts_file], {}) #Delete TTS at the end
+            delete_tts_at_end.start()
+
+            wait_end_tts = Timer(tts_length, self.play_tts_queue, [], {}) #Waiting until end of TTS to give it some time to breath
+            wait_end_tts.start()
+
+        else:
+            self.currently_playing_tts = False
+
     # We use a listener in our Component to display the messages received.
-    @commands.Component.listener()
-    async def event_message(self, payload: twitchio.ChatMessage) -> None:
+    @commands.Component.listener("event_message")
+    async def event_message_overlay(self, payload: twitchio.ChatMessage) -> None:
         banned_message = False
         command_message = False
 
@@ -740,13 +770,61 @@ class MyComponent(commands.Component):
 
             self.socket.send("new_message_bot", message)
 
-            if not (command_message or banned_message):
-
         if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
             await payload.chatter.ban(moderator=BOT_ID, reason="MESSAGE INVALIDE")
             banMessage = "MESSAGE BANNI DETECTE : LE MESSAGE NE SERA PAS TRAITE"
             print(banMessage)
+
+    @commands.Component.listener("event_message")
+    async def event_message_tts(self, payload: twitchio.ChatMessage) -> None:
+        tts_event = False
+        play_audio = self.activate_tts
+
+        if tts_event:
+           if (
+               payload.chatter.subscriber
+               or payload.chatter.vip
+               or payload.chatter.moderator
+           ):
+               if not payload.chatter.broadcaster:
+                   play_audio = True and self.activate_tts
+
+        if payload.chatter.name in [
+            "fossabot",
+            "streamelements",
+            "thebot580",
+            "nightbot",
+        ]:  # Bots + broadcaster
+            play_audio = False
+
+        elif payload.text[0] == "!" or payload.text[0] == "-":
+            play_audio = False
+
+        elif payload.source_broadcaster is not None:
+            play_audio = False
+
+        twitchChatMessage = self.treat_message(payload.text)
+
+        if twitchChatMessage.split() == []:
+            play_audio = False
+
+        elif twitchChatMessage.split(".") == []:
+            play_audio = False
+
+        if payload.broadcaster.id != OWNER_ID:  # Only play TTS from my chat
+            play_audio = False
+
+        if len(twitchChatMessage) > 250:
+            play_audio = False
+
+        if play_audio:
+
+            self.tts_queue.append(twitchChatMessage) #Adding the TTS to the queue
+            print(f"Nouveau TTS! Taille de la file : {len(self.tts_queue)}")
+
+            if not self.currently_playing_tts:
+                self.play_tts_queue()
 
     # CHANNEL COMMANDS
 
@@ -856,6 +934,7 @@ class MyComponent(commands.Component):
             self.activate_tts = not self.activate_tts
             if self.activate_tts:
                 await ctx.reply("TTS à été activé.")
+                self.play_tts_queue()
                 return
             await ctx.reply("TTS à été désactivé.")
             return
