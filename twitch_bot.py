@@ -748,6 +748,15 @@ class MyComponent(commands.Component):
                         f"Nouveau combo : {self.chat_emotes_combo[0]}. Commencé par {payload.chatter.display_name}"
                     )
 
+            color_reply = None
+
+            if payload.reply is not None:
+                color_reply = self.getChatterColor(payload.reply.parent_user.id)
+
+                color_reply = ( color_reply
+                if color_reply is not None
+                else "#%06x" % random.randint(0, 0xFFFFFF) )
+
             message = {
                 "badges": [
                     self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
@@ -755,7 +764,7 @@ class MyComponent(commands.Component):
                 "reply": {
                     "id": payload.reply.parent_message_id,
                     "username": payload.reply.parent_user.display_name,
-                    "color": self.getChatterColor(payload.reply.parent_user.id)
+                    "color": color_reply
                 } if payload.reply is not None else None,
                 "chatter": payload.chatter.display_name,
                 "color": color,
