@@ -1,4 +1,3 @@
-import sys
 import time
 
 from obswebsocket import obsws, requests  # noqa: E402
@@ -15,16 +14,23 @@ class OBSWebsocketsManager:
     def __init__(self):
         # Connect to websockets
         self.ws = obsws(WEBSOCKET_HOST, WEBSOCKET_PORT, WEBSOCKET_PASSWORD)
+        self.connected: bool = False
         try:
             self.ws.connect()
             print("Connected to OBS Websockets!\n")
+            self.connected = True
         except:
             print(
                 "\nPANIC!!\nCOULD NOT CONNECT TO OBS!\nDouble check that you have OBS open and that your websockets server is enabled in OBS."
             )
+            self.connected = False
 
     def disconnect(self):
         self.ws.disconnect()
+        self.connected = False
+
+    def is_connected(self) -> bool:
+        return self.connected
 
     # Set the current scene
     def set_scene(self, new_scene):
