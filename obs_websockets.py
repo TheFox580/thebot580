@@ -71,7 +71,7 @@ class OBSWebsocketsManager:
         response = self.ws.call(requests.GetInputSettings(inputName=source_name))
         return response.datain["inputSettings"]["text"]
 
-    # Returns the text of a text source
+    # Sets the text of a text source
     def set_text(self, source_name, new_text):
         self.ws.call(
             requests.SetInputSettings(
