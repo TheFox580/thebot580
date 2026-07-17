@@ -1142,11 +1142,11 @@ class MyComponent(commands.Component):
     #         f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
     #     )
 
-    @commands.command()
+    @commands.command(aliases=["inside", "trading", "it"])
     @commands.cooldown(
         rate=1, per=60 * 10, key=commands.BucketType.chatter
     )  # Cooldown for 1 / 10mins
-    async def detroit(self, ctx: commands.Context):
+    async def ad(self, ctx: commands.Context):
         await ctx.send_announcement(
             self.readCommandTextFile("ad")
         )
