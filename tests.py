@@ -1,5 +1,12 @@
-def roundToNNearest(time: int, n: int):
-    time = round(time/n)
-    return time*n
+import mcci
 
-print(roundToNNearest(2*60+44, 60))
+data = mcci.getMCCIInfo("DarkZorua")
+
+print(f"Total Playtime on MCCI for {data.getUsername()}:")
+print(data.getStatistic("playtime") / 20, "seconds")
+print(data.getStatistic("playtime") / 20/60, "mins")
+print(data.getStatistic("playtime") / 20/60/60, "hours")
+print(data.getStatistic("playtime") / 20/60/60/24, "days")
+print(data.getStatistic("playtime") / 20/60/60/24/7, "weeks")
+print(data.getStatistic("playtime") / 20/60/60/24/365.25 * 12, "months")
+print(data.getStatistic("playtime") / 20/60/60/24/365.25, "years")
