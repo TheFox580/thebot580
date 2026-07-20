@@ -303,6 +303,7 @@ class MyComponent(commands.Component):
         self.lurkers: list[str] = []
         self.activate_tts: bool = True
         self.tts_queue: list[str] = []
+        self.alerts_queue: list[tuple[str, dict]] = []
         self.currently_playing_tts: bool = False
         self.message_sent: int = 0
         self.db: mongo.Database = mongo.Database(MONGODB_URL)
@@ -385,7 +386,7 @@ class MyComponent(commands.Component):
         req = requests.post("https://id.twitch.tv/oauth2/token", params=params)
 
         if not req.ok:
-            print("WARNING!! COULDN'T GET THE TOKEN")
+            print("WARNING!! COULDN'T GET THE TWITCH TOKEN")
             return
 
         res = req.json()
@@ -637,6 +638,55 @@ class MyComponent(commands.Component):
                 time_text = f"{years} years, {time_text}"
 
         return time_text
+
+    def get_month(self, month: int) -> str:
+         match month:
+             case 1:
+                 return "January"
+             case 2:
+                 return "February"
+             case 3:
+                 return "March"
+             case 4:
+                 return "April"
+             case 5:
+                 return "May"
+             case 6:
+                 return "June"
+             case 7:
+                 return "July"
+             case 8:
+                 return "August"
+             case 9:
+                 return "September"
+             case 10:
+                 return "October"
+             case 11:
+                 return "November"
+             case 12:
+                 return "Decemner"
+             case _:
+                 return "None"
+
+    def get_day(self, week_day: int) -> str:
+         match week_day:
+             case 0:
+                 return "Monday"
+             case 1:
+                 return "Tuesday"
+             case 2:
+                 return "Wednesday"
+             case 3:
+                 return "Thrusday"
+             case 4:
+                 return "Friday"
+             case 5:
+                 return "Saturday"
+             case 6:
+                 return "Sunday"
+             case _:
+                 return "None"
+
 
     def play_tts_queue(self, has_png: bool) -> None:
         if len(self.tts_queue) > 0 and self.activate_tts: # If there's TTS in the queue
@@ -967,7 +1017,7 @@ class MyComponent(commands.Component):
     @commands.command()
     async def lurk(self, ctx: commands.Context):
         if ctx.chatter.name not in self.lurkers:
-            self.lurkers.append(ctx.chatter.name)
+            self.lurkers.append(ctx.chatter.name) #type: ignore
             await ctx.reply(
                 f"You just started lurking {ctx.chatter.display_name}, see ya soon!"
             )
@@ -1121,6 +1171,22 @@ class MyComponent(commands.Component):
     @commands.command()
     async def backseat(self, ctx: commands.Context):
        await ctx.send_announcement(f"No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating.", color="green")
+
+    @commands.command()
+    async def schedule(self, ctx: commands.Context):
+        week_schedule = self.db.getData("twitch_api", "schedule_week", {"start_week" : { "$lt": datetime.now() }, "end_week" : { "$gte": datetime.now() } })
+
+        if len(week_schedule) > 0:
+            this_week = week_schedule[0]
+            streams = list(filter(lambda x: (x["time"] > datetime.now().timestamp()), this_week["days"]))
+            if len(streams) > 0:
+                next_stream = streams[0]
+                time = datetime.fromtimestamp(next_stream["time"])
+                await ctx.send(f"Next stream: {next_stream["title"]}. Game: {next_stream["category"]}. Time: {self.get_day(time.weekday())} {time.day} at {f"0{time.hour}" if time.hour < 10 else time.hour}:{f"0{time.minute}" if time.minute < 10 else time.minute} GMT. Get the full week schedule here: https://thewebsite580.vercel.app/schedule/week")
+            else:
+                await ctx.send("No other streams scheduled this week, get the full schedule here: https://thewebsite580.vercel.app/schedule")
+        else:
+            await ctx.send("No streams scheduled this week, get the full schedule here: https://thewebsite580.vercel.app/schedule")
 
     # @commands.command()
     # async def pb(self, ctx: commands.Context):
