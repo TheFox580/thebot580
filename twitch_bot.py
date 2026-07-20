@@ -689,7 +689,7 @@ class MyComponent(commands.Component):
 
 
     def play_tts_queue(self, has_png: bool) -> None:
-        if len(self.tts_queue) > 0 and self.activate_tts: # If there's TTS in the queue
+        if len(self.alerts_queue) > 0:
             if not self.currently_playing_tts:
                 self.currently_playing_tts = True
 
@@ -707,8 +707,51 @@ class MyComponent(commands.Component):
 
                     obswebsockets_manager.set_source_visibility("Bots", "TTS Queue", True)
 
-            tts_message: str = self.tts_queue.pop(0)
-            obswebsockets_manager.set_text("TTS Queue", f"TTS Queue: {len(self.tts_queue)}")
+            alert_message: tuple[str, dict] = self.alerts_queue.pop(0)
+            obswebsockets_manager.set_text("TTS Queue", f"TTS Queue: {self.getTTSQueueLength()}")
+
+            tts_message = alert_message[0]
+            socket_message = alert_message[1]
+
+            # Send Twitch message to Azure to turn into cool audio
+            tts_file = tts_manager.text_to_speech(tts_message)
+            print(tts_file)
+
+            tts_length = audio_manager.get_audio_length(tts_file)
+
+            socket_message["time_to_live"] = tts_length
+
+            self.socket.send("new_alert_bot", socket_message)
+
+            print(f"Playing TTS message: {tts_message}")
+            audio_manager.play_audio(tts_file, sleep_during_playback=False, play_using_music=True)
+
+            delete_tts_at_end = Timer(tts_length, audio_manager.delete_file, [tts_file], {}) #Delete TTS at the end
+            delete_tts_at_end.start()
+
+            wait_end_tts = Timer(tts_length, self.play_tts_queue, [has_png], {}) #Waiting until end of TTS to give it some time to breath
+            wait_end_tts.start()
+
+        elif len(self.tts_queue) > 0 and self.activate_tts: # If there's TTS in the queue
+            if not self.currently_playing_tts:
+                self.currently_playing_tts = True
+
+                if has_png:
+                    posY = obswebsockets_manager.get_source_transform(
+                        "Bots", "TwitchChat"
+                    )["positionY"]
+
+                    while posY > 693:
+                        posY -= 1
+                        new_transform = {"positionY": posY}
+                        obswebsockets_manager.set_source_transform(
+                            "Bots", "TwitchChat", new_transform
+                        )
+
+                    obswebsockets_manager.set_source_visibility("Bots", "TTS Queue", True)
+
+            tts_message = self.tts_queue.pop(0)
+            obswebsockets_manager.set_text("TTS Queue", f"TTS Queue: {self.getTTSQueueLength()}")
 
             # Send Twitch message to Azure to turn into cool audio
             tts_file = tts_manager.text_to_speech(tts_message)
@@ -749,6 +792,9 @@ class MyComponent(commands.Component):
                     )
 
             self.currently_playing_tts = False
+
+    def getTTSQueueLength(self):
+        return len(self.tts_queue) + len(self.alerts_queue)
 
     @commands.Component.listener("event_message")
     async def event_message_overlay(self, payload: twitchio.ChatMessage) -> None:
@@ -940,7 +986,7 @@ class MyComponent(commands.Component):
         if play_audio:
 
             self.tts_queue.append(twitchChatMessage) #Adding the TTS to the queue
-            obswebsockets_manager.set_text("TTS Queue", f"TTS Queue: {len(self.tts_queue)}")
+            obswebsockets_manager.set_text("TTS Queue", f"TTS Queue: {self.getTTSQueueLength()}")
 
             if payload.broadcaster.name == "thefox580":
                 if not self.currently_playing_tts:
@@ -1251,6 +1297,7 @@ class MyComponent(commands.Component):
             "type": "follow",
             "username": payload.user.display_name,
             "color": color,
+            "time_to_live": 5,
         }
 
         self.socket.send("new_alert_bot", alert_message)
@@ -1259,24 +1306,29 @@ class MyComponent(commands.Component):
     async def event_subscription(self, payload: twitchio.ChannelSubscribe) -> None:
         print("Received event : 'New User Subscription'")
         channel = payload.broadcaster
-        sub_tier = self.format_tier(payload.tier)
-
-        color = self.getChatterColor(payload.user.id)
-
-        alert_message = {
-            "type": "first_year",
-            "username": payload.user.display_name,
-            "color": color,
-            "sub_type": sub_tier,
-        }
-
-        self.socket.send("new_alert_bot", alert_message)
 
         if not payload.gift:
+            sub_tier = self.format_tier(payload.tier)
+
+            color = self.getChatterColor(payload.user.id)
+
+            alert_message = {
+                "type": "first_year",
+                "username": payload.user.display_name,
+                "color": color,
+                "sub_type": sub_tier,
+            }
+
+            message = f"{payload.user.display_name} subscribed with a Tier {sub_tier} subscription!"
+
+            self.alerts_queue.append((message, alert_message))
+
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"{payload.user.display_name} subscribed with a Tier {sub_tier} subscription!",
+                message=message,
             )
+
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_subscription_message")
     async def event_subscription_message(
@@ -1306,19 +1358,17 @@ class MyComponent(commands.Component):
             )
 
         alert_message = {
-            "type": "resub_year" if payload.months % 12 == 0 else "resub_not_year",
+            "type": "resub",
             "username": payload.user.display_name,
             "message": payload.text,
-            "amount": payload.months // 12
-            if payload.months % 12 == 0
-            else payload.months,
+            "amount": payload.months,
             "color": color,
             "emotes": emote_urls,
             "sub_type": sub_tier,
         }
 
-        self.socket.send("new_alert_bot", alert_message)
-        # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
+        self.alerts_queue.append((message, alert_message))
+        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_subscription_gift")
     async def event_subscription_gift(
@@ -1360,8 +1410,8 @@ class MyComponent(commands.Component):
             "total_amount": payload.cumulative_total,
         }
 
-        self.socket.send("new_alert_bot", alert_message)
-        # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
+        self.alerts_queue.append((message, alert_message))
+        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_cheer")
     async def event_cheer(self, payload: twitchio.ChannelCheer) -> None:
@@ -1407,9 +1457,8 @@ class MyComponent(commands.Component):
             "emotes": emote_urls,
         }
 
-        self.socket.send("new_alert_bot", alert_message)
-
-        # audio_manager.play_audio(output, True, True, True) # Disabled to play in the webpage
+        self.alerts_queue.append((message, alert_message))
+        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_prediction_start")
     async def event_prediction_start(
@@ -1590,9 +1639,12 @@ class MyComponent(commands.Component):
         train_level_complete = round(
             train_progress / train_goal * 100, 2
         )  # A percentage of level completion
+
+        message = f"A {shared_text}{special_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!"
+
         await channel.send_message(
             sender=BOT_ID,
-            message=f"thefox91Stonks A {shared_text}{special_text}Hype Train has just started! We're {train_level_complete}% through level {train_level}!",
+            message=f"thefox91Stonks {message}",
         )
 
         alert_message = {
@@ -1601,7 +1653,8 @@ class MyComponent(commands.Component):
             "train_type": payload.type,
         }
 
-        self.socket.send("new_alert_bot", alert_message)
+        self.alerts_queue.append((message, alert_message))
+        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_hype_train_progress")
     async def event_hype_train_progress(
@@ -1628,9 +1681,12 @@ class MyComponent(commands.Component):
             self.hype_train_level_complete = round(
                 train_progress / train_goal * 100, 2
             )  # A percentage of level completion
+
+            message = f"The {shared_text}{special_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!"
+
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks The {shared_text}{special_text}Hype Train has leveled up! We're {self.hype_train_level_complete}% through level {train_level}!",
+                message=f"thefox91Stonks {message}",
             )
 
             alert_message = {
@@ -1640,7 +1696,8 @@ class MyComponent(commands.Component):
                 "level": train_level,
             }
 
-            self.socket.send("new_alert_bot", alert_message)
+            self.alerts_queue.append((message, alert_message))
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_hype_train_end")
     async def event_hype_train_end(self, payload: twitchio.HypeTrainEnd) -> None:

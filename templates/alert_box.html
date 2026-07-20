@@ -18,15 +18,14 @@
             integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
             crossorigin="anonymous"
         ></script>
+        <script src="{{ url_for('static', filename='env.js') }}"></script>
         <script type="text/javascript" charset="utf-8">
-            alertImage = {
+            const alertImage = {
                 follow: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_aa995c48561b4d8d9b27d461de10d020/default/dark/3.0", // thefox91Hi
                 first_sub:
-                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_804268ab0a784eeeb4ce4ee5d2d2719f/default/dark/3.0", // thefox91Sub
-                resub_not_year:
-                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_6f0a2074255b4af5b102353f3bcfd969/default/dark/3.0", // thefox91Happy
-                resub_year:
-                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_54ca704f62824448be8cfde07e3b09d8/default/dark/3.0", // thefox91GaySub
+                    getSubBadge(1), // Subbed for 1 month
+                resub:
+                    "", // TBD by sub month
                 gift_sub:
                     "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_80112d39a08b4ee78d778cdb7500a617/default/dark/3.0", // thefox91StareSlide
                 cheer: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_3e45798a8d5846d0b8074faae196c128/default/dark/3.0", // thefox91Money
@@ -38,6 +37,36 @@
                 channel_points:
                     "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_ad7e8ae6e14e4ccaa59d46a436719736/default/dark/3.0", // thefox91Chat
             };
+
+            //based on month of sub
+            const sub_badges = {
+              "1": "{{ url_for('static', filename='images/sub_badges/1_month.png') }}",
+              "2": "{{ url_for('static', filename='images/sub_badges/2_months.png') }}",
+              "3": "{{ url_for('static', filename='images/sub_badges/3_months.png') }}",
+              "6": "{{ url_for('static', filename='images/sub_badges/6_months.png') }}",
+              "9": "{{ url_for('static', filename='images/sub_badges/9_months.png') }}",
+              "12": "{{ url_for('static', filename='images/sub_badges/1_year.png') }}",
+              "18": "{{ url_for('static', filename='images/sub_badges/1.5_years.png') }}",
+              "24": "{{ url_for('static', filename='images/sub_badges/2_years.png') }}",
+              "30": "{{ url_for('static', filename='images/sub_badges/2.5_years.png') }}",
+              "36": "{{ url_for('static', filename='images/sub_badges/3_years.png') }}",
+              "42": "{{ url_for('static', filename='images/sub_badges/3.5_years.png') }}",
+              "48": "{{ url_for('static', filename='images/sub_badges/4_years.png') }}",
+              "54": "{{ url_for('static', filename='images/sub_badges/4.5_years.png') }}",
+              "60": "{{ url_for('static', filename='images/sub_badges/5_years.png') }}",
+            }
+
+            function getSubBadge(sub_month){
+              let previous_possible_sub_month = "0";
+
+              for (const possible_sub_month of Object.keys(sub_badges)){
+                if (sub_month === parseInt(possible_sub_month)) return sub_badges[possible_sub_month];
+                else if (sub_month < parseInt(possible_sub_month)) return sub_badges[previous_possible_sub_month];
+                previous_possible_sub_month = possible_sub_month;
+              }
+
+              return sub_badges[previous_possible_sub_month];
+            }
 
             function deleteFile(file_name) {
                 $.ajax({
@@ -78,10 +107,7 @@
                     alert_box_chat_message.textContent = "";
                 }
 
-                function triggerAlert() {
-                    isAlertPlaying = true;
-                    const alert = alert_queue.shift();
-
+                function triggerAlert(alert) {
                     console.log("Now playing: " + alert.type);
                     console.log(alert);
 
@@ -123,7 +149,9 @@
                         );
 
                         alert_box_text.appendChild(sub_type);
-                    } else if (alert.type === "resub_not_year") {
+                    } else if (alert.type === "resub") {
+                        alert_box_img.src = getSubBadge(alert.amount);
+
                         alert_box_text.appendChild(
                             document.createTextNode("Thank you "),
                         );
@@ -143,38 +171,6 @@
                         alert_box_text.appendChild(
                             document.createTextNode(
                                 ` month${alert.amount > 1 ? "s" : ""} of `,
-                            ),
-                        );
-
-                        const sub_type = document.createElement("span");
-                        sub_type.textContent = "Tier " + alert.sub_type;
-                        sub_type.style.color = alert.color;
-
-                        alert_box_text.appendChild(sub_type);
-
-                        alert_box_text.appendChild(
-                            document.createTextNode(" sub!"),
-                        );
-                    } else if (alert.type === "resub_year") {
-                        alert_box_text.appendChild(
-                            document.createTextNode("Thank you "),
-                        );
-
-                        alert_box_text.appendChild(user);
-
-                        alert_box_text.appendChild(
-                            document.createTextNode(" for the "),
-                        );
-
-                        const sub_month = document.createElement("span");
-                        sub_month.textContent = alert.amount;
-                        sub_month.style.color = alert.color;
-
-                        alert_box_text.appendChild(sub_month);
-
-                        alert_box_text.appendChild(
-                            document.createTextNode(
-                                ` year${alert.amount > 1 ? "s" : ""} of`,
                             ),
                         );
 
@@ -412,33 +408,10 @@
                         );
                     }
 
-                    if (alert.tts_loc) {
-                        const tts = new Audio(alert.tts_loc);
-                        tts.play();
-
-                        tts.addEventListener("ended", (event) => {
-                            deleteFile(tts_loc);
-                        });
-                    }
-
-                    let time_for_alerts = alert.tts_loc
-                        ? new Audio(alert.tts_loc).duration
-                        : 5; // Make the alert at least as long as the TTS message if there's one, otherwise 5s
-
-                    time_for_alerts += alert_queue < 20 ? 2 : 0.5; // Add 2s if less than 20 alerts in the queue, 0.5s otherwise
+                    const time_for_alerts = alert.time_to_live  // Make the alert at least as long as the TTS message if there's one, otherwise 5s
 
                     setTimeout(() => {
                         resetAlert();
-                        if (alert_queue.length > 0) {
-                            setTimeout(
-                                () => {
-                                    triggerAlert();
-                                },
-                                (time_for_alerts / 2) * 1000,
-                            ); //1s timeout in-between alerts if less than 20 alerts, 0.25s otherwise
-                        } else {
-                            isAlertPlaying = false;
-                        }
                     }, time_for_alerts * 1000);
                 }
 
@@ -452,12 +425,7 @@
                     console.log("Got a new message: ");
                     console.log(msg);
 
-                    alert_queue.push(msg);
-                    console.log("Added " + alert.type + " to the queue.");
-
-                    if (!isAlertPlaying) {
-                        triggerAlert();
-                    }
+                    triggerAlert(msg);
                 });
             });
         </script>
