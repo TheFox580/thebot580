@@ -6,3 +6,5 @@ keys.py
 tests.py
 tokens.*
 _Msg*
+env.*
+.env
