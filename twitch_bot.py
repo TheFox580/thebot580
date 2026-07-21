@@ -1228,7 +1228,7 @@ class MyComponent(commands.Component):
             if len(streams) > 0:
                 next_stream = streams[0]
                 time = datetime.fromtimestamp(next_stream["time"])
-                await ctx.send(f"Next stream: {next_stream["title"]}. Game: {next_stream["category"]}. Time: {self.get_day(time.weekday())} {time.day} at {f"0{time.hour}" if time.hour < 10 else time.hour}:{f"0{time.minute}" if time.minute < 10 else time.minute} GMT. Get the full week schedule here: https://thewebsite580.vercel.app/schedule/week")
+                await ctx.send(f"Next stream: {next_stream["title"]}. Game: {next_stream["category"]}. Time: {self.get_day(time.weekday())} {time.day} at {f"0{time.hour}" if time.hour < 10 else time.hour}:{f"0{time.minute}" if time.minute < 10 else time.minute} GMT+2. Get the full week schedule here: https://thewebsite580.vercel.app/schedule/week")
             else:
                 await ctx.send("No other streams scheduled this week, get the full schedule here: https://thewebsite580.vercel.app/schedule")
         else:
@@ -1328,7 +1328,8 @@ class MyComponent(commands.Component):
                 message=message,
             )
 
-            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+            if not self.currently_playing_tts:
+                self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_subscription_message")
     async def event_subscription_message(
@@ -1368,7 +1369,8 @@ class MyComponent(commands.Component):
         }
 
         self.alerts_queue.append((message, alert_message))
-        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+        if not self.currently_playing_tts:
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_subscription_gift")
     async def event_subscription_gift(
@@ -1411,7 +1413,8 @@ class MyComponent(commands.Component):
         }
 
         self.alerts_queue.append((message, alert_message))
-        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+        if not self.currently_playing_tts:
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_cheer")
     async def event_cheer(self, payload: twitchio.ChannelCheer) -> None:
@@ -1458,7 +1461,8 @@ class MyComponent(commands.Component):
         }
 
         self.alerts_queue.append((message, alert_message))
-        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+        if not self.currently_playing_tts:
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_prediction_start")
     async def event_prediction_start(
@@ -1654,7 +1658,8 @@ class MyComponent(commands.Component):
         }
 
         self.alerts_queue.append((message, alert_message))
-        self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+        if not self.currently_playing_tts:
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_hype_train_progress")
     async def event_hype_train_progress(
@@ -1697,7 +1702,8 @@ class MyComponent(commands.Component):
             }
 
             self.alerts_queue.append((message, alert_message))
-            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+            if not self.currently_playing_tts:
+                self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
     @commands.Component.listener("event_hype_train_end")
     async def event_hype_train_end(self, payload: twitchio.HypeTrainEnd) -> None:
