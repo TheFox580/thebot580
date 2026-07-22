@@ -20,23 +20,6 @@
         ></script>
         <script src="{{ url_for('static', filename='env.js') }}"></script>
         <script type="text/javascript" charset="utf-8">
-            const alertImage = {
-                follow: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_aa995c48561b4d8d9b27d461de10d020/default/dark/3.0", // thefox91Hi
-                first_sub:
-                    getSubBadge(1), // Subbed for 1 month
-                resub:
-                    "", // TBD by sub month
-                gift_sub:
-                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_80112d39a08b4ee78d778cdb7500a617/default/dark/3.0", // thefox91StareSlide
-                cheer: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_3e45798a8d5846d0b8074faae196c128/default/dark/3.0", // thefox91Money
-                hype_train_start:
-                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_b122a699fc1e4343b33de09ba057e295/default/dark/3.0", // thefox91ChatArrive
-                hype_train_level_up:
-                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_e03c942f8fa640b0b384474f3ebdf295/default/dark/3.0", // thefox91Stonks
-                raid: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_c647c365c0674050bf12c1c666243628/default/dark/3.0", // thefox91Stare
-                channel_points:
-                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_ad7e8ae6e14e4ccaa59d46a436719736/default/dark/3.0", // thefox91Chat
-            };
 
             //based on month of sub
             const sub_badges = {
@@ -60,13 +43,34 @@
               let previous_possible_sub_month = "0";
 
               for (const possible_sub_month of Object.keys(sub_badges)){
+
                 if (sub_month === parseInt(possible_sub_month)) return sub_badges[possible_sub_month];
                 else if (sub_month < parseInt(possible_sub_month)) return sub_badges[previous_possible_sub_month];
+
                 previous_possible_sub_month = possible_sub_month;
+
               }
 
               return sub_badges[previous_possible_sub_month];
             }
+
+            const alertImage = {
+                follow: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_aa995c48561b4d8d9b27d461de10d020/default/dark/3.0", // thefox91Hi
+                first_sub:
+                    getSubBadge(1), // Subbed for 1 month
+                resub:
+                    "", // TBD by sub month
+                gift_sub:
+                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_80112d39a08b4ee78d778cdb7500a617/default/dark/3.0", // thefox91StareSlide
+                cheer: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_3e45798a8d5846d0b8074faae196c128/default/dark/3.0", // thefox91Money
+                hype_train_start:
+                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_b122a699fc1e4343b33de09ba057e295/default/dark/3.0", // thefox91ChatArrive
+                hype_train_level_up:
+                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_e03c942f8fa640b0b384474f3ebdf295/default/dark/3.0", // thefox91Stonks
+                raid: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_c647c365c0674050bf12c1c666243628/default/dark/3.0", // thefox91Stare
+                channel_points:
+                    "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_ad7e8ae6e14e4ccaa59d46a436719736/default/dark/3.0", // thefox91Chat
+            };
 
             function deleteFile(file_name) {
                 $.ajax({
