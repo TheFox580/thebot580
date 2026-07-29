@@ -12,6 +12,6 @@ pydantic==2.46.3
 pydub==0.25.1
 pygame==2.6.1
 rich==15.0.0
-setuptools==82.0.1
+setuptools==83.0.0
 soundfile==0.13.1
 twitchio==3.2.2
