@@ -11,13 +11,13 @@ gtts==2.5.4
 logging==0.4.9.6
 mutagen==1.47.0
 obs_websocket_py==1.0
-pydantic==2.46.3
+pydantic-core==2.46.4
 pydub==0.25.1
 pygame==2.6.1
 pymongo==4.17.0
 python-socketio[client]==5.16.2
 requests==2.33.1
 rich==15.0.0
-setuptools==82.0.1
+setuptools==83.0.0
 soundfile==0.13.1
 twitchio==3.2.2
