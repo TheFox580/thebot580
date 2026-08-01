@@ -784,12 +784,22 @@ class MyComponent(commands.Component):
                     "Bots", "TwitchChat"
                 )["positionY"]
 
+
+                has_tts = False
+
                 while posY < 1080:
                     posY += 1
                     new_transform = {"positionY": posY}
                     obswebsockets_manager.set_source_transform(
                         "Bots", "TwitchChat", new_transform
                     )
+
+                    has_tts = len(self.alerts_queue) > 0
+                    if has_tts: #If a TTS pops up when the bot goes down (visually), stop it and play the tts message
+                        break
+
+                if has_tts:
+                    self.play_tts_queue(has_png)
 
             self.currently_playing_tts = False
 
