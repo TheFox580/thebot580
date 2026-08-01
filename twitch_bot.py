@@ -453,7 +453,7 @@ class MyComponent(commands.Component):
         for badge in res["data"]:
             badge_comp = {}
             for version in badge["versions"]:
-                badge_comp[version["id"]] = version["image_url_1x"].split("/1")[0]
+                badge_comp[version["id"]] = version["image_url_1x"][:-2]
             badges[badge["set_id"]] = badge_comp
 
         req = requests.get(
@@ -469,7 +469,7 @@ class MyComponent(commands.Component):
         for badge in res["data"]:
             badge_comp = {}
             for version in badge["versions"]:
-                badge_comp[version["id"]] = version["image_url_1x"].split("/1")[0]
+                badge_comp[version["id"]] = version["image_url_1x"][:-2]
             badges[badge["set_id"]] = badge_comp
 
         return badges
