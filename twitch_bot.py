@@ -1234,7 +1234,7 @@ class MyComponent(commands.Component):
 
         if len(week_schedule) > 0:
             this_week = week_schedule[0]
-            streams = list(filter(lambda x: (x["time"] > datetime.now().timestamp()), this_week["days"]))
+            streams = list(sorted(filter(lambda x: (x["time"] > datetime.now().timestamp()), this_week["days"]), key=lambda stream: stream["time"]))
             if len(streams) > 0:
                 next_stream = streams[0]
                 time = datetime.fromtimestamp(next_stream["time"])
