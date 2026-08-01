@@ -8,7 +8,7 @@ gtts==2.5.4
 logging==0.4.9.6
 mutagen==1.47.0
 obs_websocket_py==1.0
-pydantic==2.46.3
+pydantic-core==2.46.4
 pydub==0.25.1
 pygame==2.6.1
 rich==15.0.0
