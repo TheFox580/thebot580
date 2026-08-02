@@ -6,3 +6,5 @@ keys.py
 tests.py
 tokens.*
 _Msg*
+static/env.js
+static/images/
