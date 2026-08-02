@@ -3,6 +3,8 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <style>
             html {
                 background-color: rgba(0, 0, 0, 0);
@@ -39,7 +41,18 @@
                 }
             }
 
-            const savedPronouns = {}
+            function addNewFont(font) {
+              if (loadedFonts.includes(font)) return; //If font is already loaded, don't reload it.
+              loadedFonts.push(font);
+              font = font.replaceAll(" ", "+");
+              const link = document.createElement('link');
+              link.href = `https://fonts.googleapis.com/css2?family=${font}&display=swap`;
+              link.rel = 'stylesheet';
+              document.getElementsByTagName('head')[0].appendChild(link);
+            }
+
+            const savedPronouns = {};
+            const loadedFonts = [];
 
             const topSize = "text-xl";
             const bottomSize = "text-2xl";
@@ -60,14 +73,23 @@
                 socket.on("new_message_chat", async (payload, cb) => {
                     console.log("Got a new message: ");
 
-                    const newColor = hexToRgb(payload.color);
-                    let newColorReply = null;
+                    const newBorderColor = hexToRgb(payload.color);
+                    const newReplyColor = hexToRgb(payload.color);
+                    const newMessageColor = hexToRgb(payload.preferences.message_color);
+                    const newBackgroundColor = hexToRgb(payload.preferences.background_color);
 
-                    payload.color = `rgba(${newColor.r}, ${newColor.g}, ${newColor.b}, 1)`
+                    payload.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, 1)`
+                    payload.preferences.message_color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, 1)`
+                    payload.preferences.background_color = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, 1)`
                     if (payload.reply){
-                      newColorReply = hexToRgb(payload.reply.color);
-                      payload.reply.color = `rgba(${newColorReply.r}, ${newColorReply.g}, ${newColorReply.b}, 1)`;
+                      newReplyColor = hexToRgb(payload.reply.color);
+                      payload.reply.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, 1)`;
                     }
+
+                    if (payload.preferences.message_font !== ""){
+                      addNewFont(payload.preferences.message_font);
+                    }
+
                     console.log(payload);
 
                     const chatbox = document.getElementById("chatbox");
@@ -89,7 +111,9 @@
                         "rounded-2xl",
                         "bigChatMessage",
                     );
+
                     chatMessage.style.borderColor = payload.color;
+                    chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, 1)`;
 
                     const chatMessageAuthor = document.createElement("div");
                     chatMessageAuthor.classList.add(
@@ -273,6 +297,12 @@
                         bottomSize,
                     );
 
+                    if (payload.preferences.message_font !== ""){
+                      chatMessageContent.style.fontFamily = payload.preferences.message_font;
+                    }
+
+                    chatMessageContent.style.color = payload.preferences.message_color
+
                     const splitMessages = payload.message.text.split(" ");
                     const lastWord = ("" + payload.message.text)
                         .replace(/[\s-]+$/, "")
@@ -313,8 +343,8 @@
                           clearInterval(transparent);
                           chatMessage.remove();
                         }
-                        chatMessage.style.backgroundColor = `rgba(0, 0, 0, ${transparancy})`;
-                        chatMessage.style.borderColor = `rgba(${newColor.r}, ${newColor.g}, ${newColor.b}, ${transparancy})`;
+                        chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, ${transparancy})`;
+                        chatMessage.style.borderColor = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
                         for (const badge of chatMessageBadges.children){
                           badge.style.opacity = transparancy;
                         }
@@ -323,16 +353,16 @@
                           chatMessagePronouns.style.borderColor = `rgba(255, 255, 255, ${transparancy})`;
                           chatMessagePronouns.style.color = `rgba(255, 255, 255, ${transparancy})`;
                         }
-                        chatMessageAuthorName.style.color = `rgba(${newColor.r}, ${newColor.g}, ${newColor.b}, ${transparancy})`;
+                        chatMessageAuthorName.style.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
 
                         if (chatMessageReplyContent !== null){
                           chatMessageReplyContent.style.color = `rgba(82, 82, 82, ${transparancy})`;
-                          chatMessageReplyUsername.style.color = `rgba(${newColorReply.r}, ${newColorReply.g}, ${newColorReply.b}, ${transparancy})`;
+                          chatMessageReplyUsername.style.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, ${transparancy})`;
                         }
 
                         for (const messageFragment of chatMessagetText.children){
-                          if (messageFragment.nodeType === messageFragment.TEXT_NODE){
-                            messageFragment.style.color = `rgba(255, 255, 255, ${transparancy})`;
+                          if (messageFragment.tagName === "span"){
+                            messageFragment.style.color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, ${transparancy})`;
                           } else {
                             messageFragment.style.opacity = transparancy;
                           }

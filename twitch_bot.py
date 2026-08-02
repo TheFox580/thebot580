@@ -806,6 +806,31 @@ class MyComponent(commands.Component):
     def getTTSQueueLength(self):
         return len(self.tts_queue) + len(self.alerts_queue)
 
+    def checkHTMLColor(self, text: str) -> str:
+        if text[0] != "#":
+           return ""
+
+        value = text.split('#')[1]
+
+        if len(value) != 6:
+            return ""
+
+        for letter in value:
+            ascii_value = ord(letter)
+
+            if 48 <= ascii_value <= 57:
+                continue
+
+            elif 65 <= ascii_value <= 70:
+                continue
+
+            elif 97 <= ascii_value <= 102:
+                continue
+
+            return ""
+
+        return text
+
     @commands.Component.listener("event_message")
     async def event_message_overlay(self, payload: twitchio.ChatMessage) -> None:
         banned_message = False
@@ -818,6 +843,11 @@ class MyComponent(commands.Component):
         if payload.type == "user_intro":
             command_message = True
             twitchChatMessage = f"FIRST TIME CHATTER --> {payload.chatter.name} said : {payload.text}"
+            return
+
+        elif payload.type != "text": #This is most likely a reward, don't display it
+            command_message = True
+            return
 
         blocked_terms: list[str] = []
         async for blocked_term in payload.broadcaster.fetch_blocked_terms(
@@ -924,6 +954,24 @@ class MyComponent(commands.Component):
 
             if not (command_message or banned_message):
 
+                preferences = {
+                    "user_id": payload.chatter.id,
+                    "user_name": payload.chatter.name,
+                    "message_color": "#ffffff",
+                    "background_color": "#000000",
+                    "message_font": "",
+                }
+
+                if self.db.has("twitch_api", "chatter_preferences", {"user_id": payload.chatter.id}):
+                    db_preferences = self.db.getData("twitch_api", "chatter_preferences", {"user_id": payload.chatter.id})[0]
+
+                    db_preferences.pop("_id")
+
+                    for key in db_preferences.keys():
+                        preferences[key] = db_preferences[key]
+
+                print(preferences)
+
                 message = {
                     "badges": [
                         self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
@@ -933,6 +981,7 @@ class MyComponent(commands.Component):
                         "username": payload.reply.parent_user.display_name,
                         "color": self.getChatterColor(payload.reply.parent_user.id)
                     } if payload.reply is not None else None,
+                    "preferences": preferences,
                     "chatter": payload.chatter.display_name,
                     "color": color,
                     "emotes": emote_urls,
@@ -956,6 +1005,10 @@ class MyComponent(commands.Component):
     async def event_message_tts(self, payload: twitchio.ChatMessage) -> None:
         tts_event = False
         play_audio = self.activate_tts
+
+        if payload.type != "text": #This is most likely a reward, don't display it
+            play_audio = False
+            return
 
         if tts_event:
            if (
@@ -1978,7 +2031,7 @@ class MyComponent(commands.Component):
 
         user_input = (
             payload.user_input
-        )  # The input provided by the user, "" if none was (/ was needed)
+        )  # The input provided by the user, "" if none was given /needed
 
         # While most attributes won't be used, it's always good to have them down for later.
 
@@ -2047,6 +2100,125 @@ class MyComponent(commands.Component):
             }
 
             self.socket.send("new_alert_bot", alert_message)
+
+        elif reward_title == "Change Message Text Color":
+            if self.checkHTMLColor(user_input) != "":
+
+                if self.db.has("twitch_api", "chatter_preferences", {"user_id": user.id}):
+                    user_preferences = self.db.getData("twitch_api", "chatter_preferences", {"user_id": user.id})[0]
+
+                    user_preferences["message_color"] = user_input
+
+                    self.db.replace("twitch_api", "chatter_preferences", {"user_id": user.id}, user_preferences)
+
+                else:
+                    user_preferences = {
+                        "user_id": user.id,
+                        "user_name": user.name,
+                        "message_color": user_input,
+                        "background_color": "#000000",
+                        "message_font": "",
+                    }
+
+                    self.db.insert("twitch_api", "chatter_preferences", user_preferences)
+
+            else:
+
+                if self.db.has("twitch_api", "chatter_preferences", {"user_id": user.id}):
+                    user_preferences = self.db.getData("twitch_api", "chatter_preferences", {"user_id": user.id})[0]
+
+                    user_preferences["message_color"] = "#ffffff"
+
+                    self.db.replace("twitch_api", "chatter_preferences", {"user_id": user.id}, user_preferences)
+
+                else:
+                    user_preferences = {
+                        "user_id": user.id,
+                        "user_name": user.name,
+                        "message_color": "#ffffff",
+                        "background_color": "#000000",
+                        "message_font": "",
+                    }
+
+                    self.db.insert("twitch_api", "chatter_preferences", user_preferences)
+
+        elif reward_title == "Change Message Background Color":
+            if self.checkHTMLColor(user_input) != "":
+
+                if self.db.has("twitch_api", "chatter_preferences", {"user_id": user.id}):
+                    user_preferences = self.db.getData("twitch_api", "chatter_preferences", {"user_id": user.id})[0]
+
+                    user_preferences["background_color"] = user_input
+
+                    self.db.replace("twitch_api", "chatter_preferences", {"user_id": user.id}, user_preferences)
+
+                else:
+                    user_preferences = {
+                        "user_id": user.id,
+                        "user_name": user.name,
+                        "message_color": "#ffffff",
+                        "background_color": user_input,
+                        "message_font": "",
+                    }
+
+                    self.db.insert("twitch_api", "chatter_preferences", user_preferences)
+
+            else:
+                if self.db.has("twitch_api", "chatter_preferences", {"user_id": user.id}):
+                    user_preferences = self.db.getData("twitch_api", "chatter_preferences", {"user_id": user.id})[0]
+
+                    user_preferences["background_color"] = "#000000"
+
+                    self.db.replace("twitch_api", "chatter_preferences", {"user_id": user.id}, user_preferences)
+
+                else:
+                    user_preferences = {
+                        "user_id": user.id,
+                        "user_name": user.name,
+                        "message_color": "#ffffff",
+                        "background_color": "#000000",
+                        "message_font": "",
+                    }
+
+                    self.db.insert("twitch_api", "chatter_preferences", user_preferences)
+
+        elif reward_title == "Change Message Text Font":
+
+            if user_input != "Reset":
+
+                if self.db.has("twitch_api", "chatter_preferences", {"user_id": user.id}):
+                    user_preferences = self.db.getData("twitch_api", "chatter_preferences", {"user_id": user.id})[0]
+                    user_preferences["message_font"] = user_input
+                    self.db.replace("twitch_api", "chatter_preferences", {"user_id": user.id}, user_preferences)
+
+                else:
+                    user_preferences = {
+                        "user_id": user.id,
+                        "user_name": user.name,
+                        "message_color": "#ffffff",
+                        "background_color": "#000000",
+                        "message_font": user_input
+                    }
+
+                    self.db.insert("twitch_api", "chatter_preferences", user_preferences)
+
+            else:
+
+                if self.db.has("twitch_api", "chatter_preferences", {"user_id": user.id}):
+                    user_preferences = self.db.getData("twitch_api", "chatter_preferences", {"user_id": user.id})[0]
+                    user_preferences["message_font"] = ""
+                    self.db.replace("twitch_api", "chatter_preferences", {"user_id": user.id}, user_preferences)
+
+                else:
+                    user_preferences = {
+                        "user_id": user.id,
+                        "user_name": user.name,
+                        "message_color": "#ffffff",
+                        "background_color": "#000000",
+                        "message_font": "",
+                    }
+
+                    self.db.insert("twitch_api", "chatter_preferences", user_preferences)
 
         else:
             color = self.getChatterColor(user.id)
