@@ -29,8 +29,20 @@ class Database:
     ):
         self.__client[db][collection].update_one(query, replace)
 
-    def insert(self, db: str, collection: str, document):
+    def replace(
+        self,
+        db: str,
+        collection: str,
+        query: Mapping[str, Any],
+        replace: Mapping[str, Any],
+    ):
+        self.__client[db][collection].replace_one(query, replace)
+
+    def insert(self, db: str, collection: str, document: dict):
         self.__client[db][collection].insert_one(document)
+
+    def has(self, db: str, collection: str, query={}) -> bool:
+        return len(self.getData(db, collection, query)) > 0
 
     def dispose(self):
         self.__client.close()
