@@ -1,9 +1,11 @@
 import asyncio
+from asyncio.proactor_events import events
 import logging
 import sqlite3
 from datetime import datetime, timezone
 
 import asqlite
+from pygame import event
 import twitchio
 from twitchio import eventsub
 from twitchio.ext import commands
@@ -117,6 +119,12 @@ class Bot(commands.AutoBot):
             eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID)
         )
 
+        subscriptions.append(
+            eventsub.ChatNotificationSubscription(
+              broadcaster_user_id=OWNER_ID, user_id=BOT_ID
+            )
+        )
+
         # Affiliate & Partner only subscriptions:
         if HAS_ONBOARDED:
             # Subscribe and listen to when someone (re)sub(-gift)..
@@ -205,6 +213,11 @@ class Bot(commands.AutoBot):
             )
             subscriptions.append(
                 eventsub.ChannelPointsRedeemAddSubscription(
+                    broadcaster_user_id=payload.user_id
+                )
+            )
+            subscriptions.append(
+                eventsub.CustomPowerupRedeemAddSubscription(
                     broadcaster_user_id=payload.user_id
                 )
             )
@@ -526,7 +539,7 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
         await ctx.reply(
-            "I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.2.0 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580",
+            "I'm a custom bot I made in python, based on DougDoug's Babagaboosh app. It is currently running on version 2.0 (Using TwitchIO 3.3.0 & Python 3.13.12). Check out the project at https://github.com/TheFox580/thebot580",
             me=True,
         )
 
@@ -581,7 +594,7 @@ class MyComponent(commands.Component):
             streak = f" They've subscribed for {payload.streak_months} months in a row!"
         await channel.send_message(
             sender=BOT_ID,
-            message=f"thefox91Stonks {payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak}",
+            message=f"{payload.user.display_name} resubscribed with a Tier {sub_tier} subscription for {payload.months} months!{streak}",
         )
 
     @commands.Component.listener("event_subscription_gift")
@@ -597,12 +610,12 @@ class MyComponent(commands.Component):
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!",
+                message=f"An anonymous user gifted {payload.total} Tier {sub_tier} subs to the community! In total, there has been {payload.cumulative_total} sub gifts from anonymous users to the community!",
             )
         else:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks {display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!",
+                message=f"{display_name} gifted {payload.total} Tier {sub_tier} subs to the community! In total, {display_name} has gifted {payload.cumulative_total} subs to the community!",
             )
 
     @commands.Component.listener("event_cheer")
@@ -615,12 +628,12 @@ class MyComponent(commands.Component):
         if payload.anonymous:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks An anonymous user cheered {payload.bits} bits!",
+                message=f"An anonymous user cheered {payload.bits} bits!",
             )
         else:
             await channel.send_message(
                 sender=BOT_ID,
-                message=f"thefox91Stonks {display_name} cheered {payload.bits} bits!",
+                message=f"{display_name} cheered {payload.bits} bits!",
             )
 
     @commands.Component.listener("event_prediction_start")
@@ -1089,6 +1102,25 @@ class MyComponent(commands.Component):
 
         # While most attributes won't be used, it's always good to have them down for later.
 
+    @commands.Component.listener("event_custom_power_up_redemption_add")
+    async def event_custom_power_up_redemption_add(self, payload: twitchio.CustomPowerupRedemptionAdd) -> None:
+      print("Received event : Channel Point Redeemed")
+      channel = payload.broadcaster  # The channel it happened on
+      user = payload.user  # The user who redeemed this powerup
+      powerup = payload.custom_powerup  # The powerup object
+      powerup_cost = powerup.bits  # The cost of the powerup, in channel points
+      powerup_id = powerup.id  # The powerup ID of this powerup
+      powerup_title = powerup.title  # The title of this powerup
+      powerup_prompt = powerup.prompt  # The description of the powerup
+      powerup_redeemed_at = payload.redeemed_at  # When the powerup was redeemed
+      powerup_status = payload.status  # The powerup status (defaults to 'unfulfilled')
+
+      user_input = (
+          payload.user_input
+      )  # The input provided by the user, "" if none was given /needed
+
+      # While most attributes won't be used, it's always good to have them down for later.
+
     @commands.Component.listener("event_ad_break")
     async def event_ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:
         print("Received event : Ad Break Starts")
@@ -1100,6 +1132,17 @@ class MyComponent(commands.Component):
             sender=BOT_ID,
             message=f"⚠️ A {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
         )
+
+    @commands.Component.listener("event_chat_notification")
+    async def event_chat_notification(self, payload: twitchio.ChatNotification) -> None:
+        print("Received event: Chat Notification")
+        channel = payload.broadcaster
+        user = payload.chatter
+        type = payload.notice_type
+
+        if type == "watch_streak" and payload.watch_streak is not None:
+          streak_amount = payload.watch_streak.streak
+          channel_points_awarded = payload.watch_streak.points
 
 
 async def setup_database(
@@ -1146,6 +1189,9 @@ async def setup_database(
                     eventsub.SharedChatSessionEndSubscription(
                         broadcaster_user_id=OWNER_ID
                     ),
+                    eventsub.ChatNotificationSubscription(
+                      broadcaster_user_id=OWNER_ID, user_id=BOT_ID
+                    )
                 ]
             )
 
