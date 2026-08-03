@@ -303,6 +303,8 @@ class MyComponent(commands.Component):
         #    {"$set": {"user_id": OWNER_ID, "messages": []}},
         # )
 
+        self.socket.send("start", {"Bot": True})
+
     def getBTTVEmotes(self, broadcaster_id: str) -> dict[str, str]:
         emotes: dict[str, str] = {}
         req = requests.get(
@@ -440,7 +442,7 @@ class MyComponent(commands.Component):
         for badge in res["data"]:
             badge_comp = {}
             for version in badge["versions"]:
-                badge_comp[version["id"]] = version["image_url_1x"].split("/1")[0]
+                badge_comp[version["id"]] = version["image_url_1x"][:-2]
             badges[badge["set_id"]] = badge_comp
 
         req = requests.get(
@@ -456,7 +458,7 @@ class MyComponent(commands.Component):
         for badge in res["data"]:
             badge_comp = {}
             for version in badge["versions"]:
-                badge_comp[version["id"]] = version["image_url_1x"].split("/1")[0]
+                badge_comp[version["id"]] = version["image_url_1x"][:-2]
             badges[badge["set_id"]] = badge_comp
 
         return badges
@@ -617,17 +619,16 @@ class MyComponent(commands.Component):
         if len(self.tts_queue) > 0 and self.activate_tts: # If there's TTS in the queue
             if not self.currently_playing_tts:
                 self.currently_playing_tts = True
+                obswebsockets_manager.set_source_visibility("Overlay Stuff", "Queue TTS", True)
 
             tts_message: str = self.tts_queue.pop(0)
-            print(f"Taille de la file: {len(self.tts_queue)}")
+            obswebsockets_manager.set_text("Queue TTS", f"Queue TTS: {len(self.tts_queue)}")
 
             # Send Twitch message to Azure to turn into cool audio
             tts_file = tts_manager.text_to_speech(tts_message)
-            print(tts_file)
 
             tts_length = audio_manager.get_audio_length(tts_file)
 
-            print(f"Message joué: {tts_message}")
             audio_manager.play_audio(tts_file, sleep_during_playback=False, play_using_music=True)
 
             delete_tts_at_end = Timer(tts_length, audio_manager.delete_file, [tts_file], {}) #Delete TTS at the end
@@ -637,6 +638,7 @@ class MyComponent(commands.Component):
             wait_end_tts.start()
 
         else:
+            obswebsockets_manager.set_source_visibility("Overlay Stuff", "Queue TTS", False)
             self.currently_playing_tts = False
 
     # We use a listener in our Component to display the messages received.
@@ -840,6 +842,8 @@ class MyComponent(commands.Component):
 
             if not self.currently_playing_tts:
                 self.play_tts_queue()
+            else:
+                obswebsockets_manager.set_text("Queue TTS", f"Queue TTS: {len(self.tts_queue)}")
 
     # CHANNEL COMMANDS
 
