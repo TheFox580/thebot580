@@ -122,13 +122,13 @@ class Bot(commands.AutoBot):
         # These events are disabled for now, as they are kinda broken. I plan on fixing them in the next update.
         # Subscribe and listen to when shared chat starts, updates or ends..
         subscriptions.append(
-            eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=OWNER_ID)
+            eventsub.SharedChatSessionBeginSubscription(broadcaster_user_id=payload.user_id)
         )
         subscriptions.append(
-            eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=OWNER_ID)
+            eventsub.SharedChatSessionUpdateSubscription(broadcaster_user_id=payload.user_id)
         )
         subscriptions.append(
-            eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=OWNER_ID)
+            eventsub.SharedChatSessionEndSubscription(broadcaster_user_id=payload.user_id)
         )
 
         # Affiliate & Partner only subscriptions:
@@ -227,7 +227,13 @@ class Bot(commands.AutoBot):
                 eventsub.AdBreakBeginSubscription(broadcaster_user_id=payload.user_id),
             )
 
-            eventsub.ChatNotificationSubscription(broadcaster_user_id=payload.user_id, user_id=BOT_ID)
+            subscriptions.append(
+              eventsub.ChatNotificationSubscription(broadcaster_user_id=payload.user_id, user_id=BOT_ID)
+            )
+
+            subscriptions.append(
+              eventsub.CustomPowerupRedeemAddSubscription(broadcaster_user_id=payload.user_id)
+            )
 
         resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(subscriptions)
         if resp.errors:
@@ -2079,7 +2085,7 @@ class MyComponent(commands.Component):
                     f'{user.display_name} tried to timeout "{user_input}", but this User ID doesn\'t exist. Warned them in whisper with account "TheFox580"'
                 )
 
-        elif reward_title == "First" or reward_title == "Also First":
+        elif reward_title == "First":
             color = self.getChatterColor(user.id)
 
             alert_message = {
@@ -2241,6 +2247,80 @@ class MyComponent(commands.Component):
 
             self.socket.send("new_alert_bot", alert_message)
 
+    @commands.Component.listener("event_custom_power_up_redemption_add")
+    async def event_custom_power_up_redemption_add(self, payload: twitchio.CustomPowerupRedemptionAdd) -> None:
+      print("Received event : Channel Point Redeemed")
+      channel = payload.broadcaster  # The channel it happened on
+      user = payload.user  # The user who redeemed this powerup
+      powerup = payload.custom_powerup  # The powerup object
+      powerup_cost = powerup.cost  # The cost of the powerup, in channel points
+      powerup_id = powerup.id  # The powerup ID of this powerup
+      powerup_title = powerup.title  # The title of this powerup
+      powerup_prompt = powerup.prompt  # The description of the powerup
+      powerup_redeemed_at = payload.redeemed_at  # When the powerup was redeemed
+      powerup_status = payload.status  # The powerup status (defaults to 'unfulfilled')
+
+      user_input = (
+          payload.user_input
+      )  # The input provided by the user, "" if none was given /needed
+
+      # While most attributes won't be used, it's always good to have them down for later.
+
+      if powerup_title == "Also First":
+        color = self.getChatterColor(user.id)
+
+        alert_message = {
+            "type": "powerup",
+            "username": user.display_name,
+            "amount": powerup_cost,
+            "message": "They are the 1st (frfr) to join the stream.",
+            "title": powerup_title,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+        }
+
+        self.alerts_queue.append((f"{user.display_name} is the 1st (frfr) to join the stream.", alert_message))
+        if not self.currently_playing_tts:
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+
+      elif powerup_title == "One-time Backseat":
+        color = self.getChatterColor(user.id)
+
+        alert_message = {
+            "type": "powerup",
+            "username": user.display_name,
+            "amount": powerup_cost,
+            "message": user_input,
+            "title": powerup_title,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+        }
+
+        self.alerts_queue.append((user_input, alert_message))
+        if not self.currently_playing_tts:
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+
+      elif powerup_title == "Toggle Backseat":
+        color = self.getChatterColor(user.id)
+
+        alert_message = {
+            "type": "powerup",
+            "username": user.display_name,
+            "amount": powerup_cost,
+            "message": "All of chat is allowed to backseat!",
+            "title": powerup_title,
+            "color": color
+            if color is not None
+            else "#%06x" % random.randint(0, 0xFFFFFF),
+        }
+
+        self.alerts_queue.append((f"{user.display_name} enabled backseat for the next 10 minutes.", alert_message))
+        if not self.currently_playing_tts:
+            self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
+
+
     @commands.Component.listener("event_ad_break")
     async def event_ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:
         print("Received event : Ad Break Starts")
@@ -2262,7 +2342,7 @@ class MyComponent(commands.Component):
         user = payload.chatter
         type = payload.notice_type
 
-        if type == "watch_streak":
+        if type == "watch_streak" and payload.watch_streak is not None:
             color = self.getChatterColor(user.id)
 
             alert_message = {
@@ -2371,7 +2451,8 @@ async def setup_database(
                             broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.AdBreakBeginSubscription(broadcaster_user_id=OWNER_ID),
-                        eventsub.ChatNotificationSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID)
+                        eventsub.ChatNotificationSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID),
+                        eventsub.CustomPowerupRedeemAddSubscription(broadcaster_user_id=OWNER_ID)
                     ]
                 )
 
