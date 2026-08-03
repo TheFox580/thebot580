@@ -352,6 +352,23 @@
                         channel_points_reward_title.style.color = alert.color;
 
                         alert_box_text.appendChild(channel_points_reward_title);
+                    } else if (alert.type === "watch_streak") {
+                        alert_box_text.appendChild(user);
+
+                        alert_box_text.appendChild(
+                            document.createTextNode(" reached a "),
+                        );
+
+                        const wacth_streak_amount =
+                            document.createElement("span");
+                        wacth_streak_amount.textContent = alert.amount;
+                        wacth_streak_amount.style.color = alert.color;
+
+                        alert_box_text.appendChild(wacth_streak_amount);
+
+                        alert_box_text.appendChild(
+                            document.createTextNode(" streams streak!"),
+                        );
                     }
 
                     if (alert.message) {

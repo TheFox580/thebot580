@@ -2247,6 +2247,26 @@ class MyComponent(commands.Component):
             )
             self.message_sent = 0
 
+    @commands.Component.listener("event_chat_notification")
+    async def event_chat_notification(self, payload: twitchio.ChatNotification) -> None:
+        print("Received event: Chat Notification")
+        channel = payload.broadcaster
+        user = payload.chatter
+        type = payload.notice_type
+
+        if type == "watch_streak":
+            color = self.getChatterColor(user.id)
+
+            alert_message = {
+                "type": "watch_streak",
+                "username": user.display_name,
+                "amount": payload.watch_streak.streak,
+                "color": color,
+            }
+
+            self.alerts_queue.append((f"{user.display_name} reached a {payload.watch_streak.streak} streams streak!", alert_message))
+            if not self.currently_playing_tts:
+                self.play_tts_queue(obswebsockets_manager.is_connected() if channel.name == "thefox580" else False)
 
 async def setup_database(
     db: asqlite.Pool,
@@ -2343,7 +2363,7 @@ async def setup_database(
                             broadcaster_user_id=OWNER_ID
                         ),
                         eventsub.AdBreakBeginSubscription(broadcaster_user_id=OWNER_ID),
-                        eventsub.ChatMessageSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID)
+                        eventsub.ChatNotificationSubscription(broadcaster_user_id=OWNER_ID, user_id=BOT_ID)
                     ]
                 )
 
