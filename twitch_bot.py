@@ -2253,7 +2253,7 @@ class MyComponent(commands.Component):
       channel = payload.broadcaster  # The channel it happened on
       user = payload.user  # The user who redeemed this powerup
       powerup = payload.custom_powerup  # The powerup object
-      powerup_cost = powerup.cost  # The cost of the powerup, in channel points
+      powerup_cost = powerup.bits  # The cost of the powerup, in channel points
       powerup_id = powerup.id  # The powerup ID of this powerup
       powerup_title = powerup.title  # The title of this powerup
       powerup_prompt = powerup.prompt  # The description of the powerup
