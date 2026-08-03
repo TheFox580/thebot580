@@ -883,6 +883,7 @@ class MyComponent(commands.Component):
 
             twitchChatMessage = ""
             emote_urls = {}
+            gif_urls = {}
 
             for messageFragment in payload.fragments:
                 if messageFragment.type == "emote":
@@ -893,6 +894,14 @@ class MyComponent(commands.Component):
 
                     self.emotes_dict["Twitch"][messageFragment.text] = f"https://static-cdn.jtvnw.net/emoticons/v2/{messageFragment.emote.id}/default/dark/2.0" #type: ignore
                     self.emotes_list.append(messageFragment.text)
+
+                elif messageFragment.type == "gif":
+                    gif_url = messageFragment.gif.url #type: ignore
+                    gif_name = messageFragment.gif.qualified_name #type: ignore
+                    gif_urls[gif_name] =  gif_url
+
+                    twitchChatMessage += gif_url + " "
+
                 elif messageFragment.type == "text":
                     twitchChatMessage += messageFragment.text + " "
 
@@ -970,8 +979,6 @@ class MyComponent(commands.Component):
                     for key in db_preferences.keys():
                         preferences[key] = db_preferences[key]
 
-                print(preferences)
-
                 message = {
                     "badges": [
                         self.badges_dict[badge.set_id][badge.id] for badge in payload.badges
@@ -985,6 +992,7 @@ class MyComponent(commands.Component):
                     "chatter": payload.chatter.display_name,
                     "color": color,
                     "emotes": emote_urls,
+                    "gifs": gif_urls,
                     "message": {
                         "text": twitchChatMessage,
                         "id": payload.id

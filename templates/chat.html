@@ -1,383 +1,394 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <style>
-            html {
-                background-color: rgba(0, 0, 0, 0);
-            }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+      html {
+        background-color: rgba(0, 0, 0, 0);
+      }
 
-            .bigChatMessage {
-                background-color: rgba(0, 0, 0, 1);
-            }
-        </style>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
-            integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
-            crossorigin="anonymous"
-        ></script>
-        <script type="text/javascript" charset="utf-8">
-            function hexToRgb(hex) {
-              var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-              return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-              } : null;
-            }
+      .bigChatMessage {
+          background-color: rgba(0, 0, 0, 1);
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+      integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+      crossorigin="anonymous"
+    ></script>
+    <script type="text/javascript" charset="utf-8">
+      function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : null;
+      }
 
-            async function getPronouns() {
-                const all_pronouns_req = await fetch(
-                    `https://api.pronouns.alejo.io/v1/pronouns`,
+      async function getPronouns() {
+        const all_pronouns_req = await fetch(
+          `https://api.pronouns.alejo.io/v1/pronouns`,
+        );
+
+        if (all_pronouns_req.ok) {
+          const all_pronouns = await all_pronouns_req.json();
+          return all_pronouns;
+        }
+      }
+
+      function addNewFont(font) {
+        if (loadedFonts.includes(font)) return; //If font is already loaded, don't reload it.
+        loadedFonts.push(font);
+        font = font.replaceAll(" ", "+");
+        const link = document.createElement('link');
+        link.href = `https://fonts.googleapis.com/css2?family=${font}&display=swap`;
+        link.rel = 'stylesheet';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+
+      const savedPronouns = {};
+      const loadedFonts = [];
+
+      const topSize = "text-xl";
+      const bottomSize = "text-2xl";
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const all_pronouns = await getPronouns();
+
+        const badgeSize = 28;
+        const emoteSize = 36
+        const timeBeforeDisappear = 30;
+
+        const socket = io();
+
+        socket.on("message_send", (payload, cb) => {
+          console.log("Got data: " + payload.message.text);
+        });
+
+        socket.on("new_message_chat", async (payload, cb) => {
+          console.log("Got a new message: ");
+
+          const newBorderColor = hexToRgb(payload.color);
+          const newReplyColor = hexToRgb(payload.color);
+          const newMessageColor = hexToRgb(payload.preferences.message_color);
+          const newBackgroundColor = hexToRgb(payload.preferences.background_color);
+
+          payload.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, 1)`
+          payload.preferences.message_color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, 1)`
+          payload.preferences.background_color = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, 1)`
+          if (payload.reply){
+            newReplyColor = hexToRgb(payload.reply.color);
+            payload.reply.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, 1)`;
+          }
+
+          if (payload.preferences.message_font !== ""){
+            addNewFont(payload.preferences.message_font);
+          }
+
+          console.log(payload);
+
+          const chatbox = document.getElementById("chatbox");
+
+          //Max 20 message
+
+          if (chatbox.children.length >= 20) {
+              chatbox.firstElementChild.remove();
+          }
+
+          const chatMessage = document.createElement("div");
+          chatMessage.id = payload.message.id
+          chatMessage.classList.add(
+              "flex",
+              "flex-col",
+              "mb-5",
+              "border-4",
+              "p-2.5",
+              "rounded-2xl",
+              "bigChatMessage",
+          );
+
+          chatMessage.style.borderColor = payload.color;
+          chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, 1)`;
+
+          const chatMessageAuthor = document.createElement("div");
+          chatMessageAuthor.classList.add(
+              "w-auto",
+              "flex",
+              "flex-row",
+              "items-center",
+              "justify-center",
+          );
+
+          const chatMessageBadges = document.createElement("div");
+          chatMessageBadges.classList.add(
+              "flex",
+              "flex-row",
+              "items-center",
+              "justify-center",
+              `w-[${(badgeSize + 2) * payload.badges.length + (payload.shared_chat_pfp ? badgeSize + 4 : 0)}px]`,
+              "mr-2",
+          );
+
+          if (payload.shared_chat_pfp) {
+              const badge = document.createElement("img");
+              badge.src = payload.shared_chat_pfp;
+              badge.classList.add(
+                  `h-[${badgeSize + 2}px]`,
+                  "mr-1",
+                  "rounded",
+              );
+
+              chatMessageBadges.appendChild(badge);
+          }
+
+          for (const badgeURL of payload.badges) {
+              const badge = document.createElement("img");
+              badge.src = badgeURL + "/2";
+              badge.classList.add(`h-[${badgeSize}px]`, "mr-1");
+
+              chatMessageBadges.appendChild(badge);
+          }
+
+          chatMessageAuthor.appendChild(chatMessageBadges);
+
+          let chatMessagePronouns = null;
+
+          if (savedPronouns[payload.username]){
+            if (savedPronouns[payload.username] !== null){
+              const correct_pronouns = savedPronouns[payload.username];
+              chatMessagePronouns = document.createElement("p");
+              chatMessagePronouns.textContent =
+                  correct_pronouns[0].subject
+                  + (correct_pronouns[0].subject === "Any"
+                    ? ""
+                    : "/"
+                  + (correct_pronouns[1] === undefined
+                      ? correct_pronouns[0].object
+                      : correct_pronouns[1].subject
+                    )
+                  );
+              chatMessagePronouns.classList.add(
+                  "text-white",
+                  payload.chatter.length < 12 ? "border-4" : "border-2",
+                  "rounded-xl",
+                  "px-2",
+                  "py-1",
+                  "mr-2",
+                  payload.chatter.length < 12 ? bottomSize : topSize,
+                  "text-center",
+                  "items-center",
+                  "justify-center",
+              );
+
+              chatMessageAuthor.appendChild(chatMessagePronouns);
+            }
+          } else {
+            const pronouns_req = await fetch(
+                `https://api.pronouns.alejo.io/v1/users/${payload.username}`,
+            );
+            if (pronouns_req.ok) {
+                const pronouns = await pronouns_req.json();
+                const correct_pronouns = [
+                    all_pronouns[pronouns.pronoun_id],
+                    all_pronouns[pronouns.pronoun_id].singular
+                        ? all_pronouns[pronouns.pronoun_id]
+                        : all_pronouns[pronouns.alt_pronoun_id],
+                ];
+                savedPronouns[payload.username] = correct_pronouns;
+                chatMessagePronouns = document.createElement("p");
+                chatMessagePronouns.textContent =
+                  correct_pronouns[0].subject
+                  + (correct_pronouns[0].subject === "Any"
+                    ? ""
+                    : "/"
+                  + (correct_pronouns[1] === undefined
+                      ? correct_pronouns[0].object
+                      : correct_pronouns[1].subject
+                    )
+                  );
+                chatMessagePronouns.classList.add(
+                    "text-white",
+                    payload.chatter.length < 12 ? "border-4" : "border-2",
+                    "rounded-xl",
+                    "px-2",
+                    "py-1",
+                    "mr-2",
+                    payload.chatter.length < 12 ? bottomSize : topSize,
+                    "text-center",
+                    "items-center",
+                    "justify-center",
                 );
 
-                if (all_pronouns_req.ok) {
-                    const all_pronouns = await all_pronouns_req.json();
-                    return all_pronouns;
+                chatMessageAuthor.appendChild(chatMessagePronouns);
+            } else {
+              savedPronouns[payload.username] = null;
+            }
+          }
+
+          const chatMessageAuthorName = document.createElement("p");
+          chatMessageAuthorName.id = "username"
+          chatMessageAuthorName.textContent = payload.chatter;
+          chatMessageAuthorName.style.color = payload.color;
+          chatMessageAuthorName.classList.add(
+              "font-bold",
+              payload.chatter.length < 12 ? bottomSize : topSize,
+          );
+
+          chatMessageAuthor.appendChild(chatMessageAuthorName);
+
+          chatMessage.appendChild(chatMessageAuthor);
+
+          let chatMessageReplyContent = null;
+          let chatMessageReplyUsername = null;
+
+          if (payload.reply){
+              const chatMessageReply = document.createElement("div");
+              chatMessageReply.classList.add(
+                  "flex",
+                  "items-center",
+                  "justify-center",
+                  "text-center",
+                  "mt-2.5",
+              );
+
+              chatMessageReplyContent = document.createElement("span");
+              chatMessageReplyContent.classList.add(
+                  "text-center",
+                  "text-neutral-600",
+                  "mr-1",
+                  topSize,
+              );
+
+              chatMessageReplyContent.textContent = "⤷ Replying to";
+
+              chatMessageReplyUsername = document.createElement("span");
+              chatMessageReplyUsername.classList.add(
+                  "text-center",
+                  topSize,
+              );
+
+              chatMessageReplyUsername.textContent = "@"+ payload.reply.username;
+              chatMessageReplyUsername.style.color = payload.reply.color;
+
+              chatMessageReply.appendChild(chatMessageReplyContent);
+              chatMessageReply.appendChild(chatMessageReplyUsername);
+              chatMessage.appendChild(chatMessageReply);
+          }
+
+          const chatMessagetText = document.createElement("div");
+          chatMessagetText.classList.add(
+              "flex",
+              "items-center",
+              "justify-center",
+              "text-center",
+              `mt-${payload.reply ? 1 : 2}.5`,
+          );
+
+          const chatMessageContent = document.createElement("span");
+          chatMessageContent.classList.add(
+              "text-white",
+              "text-center",
+              "mr-1",
+              bottomSize,
+          );
+
+          if (payload.preferences.message_font !== ""){
+            chatMessageContent.style.fontFamily = payload.preferences.message_font;
+          }
+
+          chatMessageContent.style.color = payload.preferences.message_color
+
+          const splitMessages = payload.message.text.split(" ");
+          const lastWord = ("" + payload.message.text)
+              .replace(/[\s-]+$/, "")
+              .split(/[\s-]/)
+              .pop();
+
+          for (const word of splitMessages) {
+              if (Object.keys(payload.emotes).includes(word)) {
+                  const chatMessageFragment =
+                      document.createElement("img");
+                  chatMessageFragment.src = payload.emotes[word];
+                  chatMessageFragment.classList.add(
+                      "inline-grid",
+                      "mr-2",
+                      `h-[${emoteSize}px]`,
+                      "align-middle",
+                  );
+                  chatMessageContent.appendChild(chatMessageFragment);
+              } else if (Object.keys(payload.gifs).includes(word)){
+                const chatMessageFragment =
+                    document.createElement("img");
+                chatMessageFragment.src = payload.gifs[word];
+                chatMessageFragment.classList.add(
+                    "inline-grid",
+                    "mr-2",
+                    `h-[${emoteSize*4}px]`,
+                    "align-middle",
+                );
+                chatMessageContent.appendChild(chatMessageFragment);
+              } else {
+                  chatMessageContent.appendChild(
+                      document.createTextNode(
+                          word + (lastWord === word ? "" : " "),
+                      ),
+                  );
+              }
+          }
+
+          chatMessagetText.appendChild(chatMessageContent);
+
+          chatMessage.appendChild(chatMessagetText);
+
+          chatbox.appendChild(chatMessage);
+
+          setTimeout(() => {
+            let transparancy = 1;
+            const transparent = setInterval(() => {
+              if (transparancy <= 0){
+                clearInterval(transparent);
+                chatMessage.remove();
+              }
+              chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, ${transparancy})`;
+              chatMessage.style.borderColor = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
+              for (const badge of chatMessageBadges.children){
+                badge.style.opacity = transparancy;
+              }
+
+              if (chatMessagePronouns !== null){
+                chatMessagePronouns.style.borderColor = `rgba(255, 255, 255, ${transparancy})`;
+                chatMessagePronouns.style.color = `rgba(255, 255, 255, ${transparancy})`;
+              }
+              chatMessageAuthorName.style.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
+
+              if (chatMessageReplyContent !== null){
+                chatMessageReplyContent.style.color = `rgba(82, 82, 82, ${transparancy})`;
+                chatMessageReplyUsername.style.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, ${transparancy})`;
+              }
+
+              for (const messageFragment of chatMessagetText.children){
+                if (messageFragment.tagName === "span"){
+                  messageFragment.style.color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, ${transparancy})`;
+                } else {
+                  messageFragment.style.opacity = transparancy;
                 }
-            }
-
-            function addNewFont(font) {
-              if (loadedFonts.includes(font)) return; //If font is already loaded, don't reload it.
-              loadedFonts.push(font);
-              font = font.replaceAll(" ", "+");
-              const link = document.createElement('link');
-              link.href = `https://fonts.googleapis.com/css2?family=${font}&display=swap`;
-              link.rel = 'stylesheet';
-              document.getElementsByTagName('head')[0].appendChild(link);
-            }
-
-            const savedPronouns = {};
-            const loadedFonts = [];
-
-            const topSize = "text-xl";
-            const bottomSize = "text-2xl";
-
-            document.addEventListener("DOMContentLoaded", async () => {
-                const all_pronouns = await getPronouns();
-
-                const badgeSize = 28;
-                const emoteSize = 36
-                const timeBeforeDisappear = 30;
-
-                const socket = io();
-
-                socket.on("message_send", (payload, cb) => {
-                    console.log("Got data: " + payload.message.text);
-                });
-
-                socket.on("new_message_chat", async (payload, cb) => {
-                    console.log("Got a new message: ");
-
-                    const newBorderColor = hexToRgb(payload.color);
-                    const newReplyColor = hexToRgb(payload.color);
-                    const newMessageColor = hexToRgb(payload.preferences.message_color);
-                    const newBackgroundColor = hexToRgb(payload.preferences.background_color);
-
-                    payload.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, 1)`
-                    payload.preferences.message_color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, 1)`
-                    payload.preferences.background_color = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, 1)`
-                    if (payload.reply){
-                      newReplyColor = hexToRgb(payload.reply.color);
-                      payload.reply.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, 1)`;
-                    }
-
-                    if (payload.preferences.message_font !== ""){
-                      addNewFont(payload.preferences.message_font);
-                    }
-
-                    console.log(payload);
-
-                    const chatbox = document.getElementById("chatbox");
-
-                    //Max 20 message
-
-                    if (chatbox.children.length >= 20) {
-                        chatbox.firstElementChild.remove();
-                    }
-
-                    const chatMessage = document.createElement("div");
-                    chatMessage.id = payload.message.id
-                    chatMessage.classList.add(
-                        "flex",
-                        "flex-col",
-                        "mb-5",
-                        "border-4",
-                        "p-2.5",
-                        "rounded-2xl",
-                        "bigChatMessage",
-                    );
-
-                    chatMessage.style.borderColor = payload.color;
-                    chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, 1)`;
-
-                    const chatMessageAuthor = document.createElement("div");
-                    chatMessageAuthor.classList.add(
-                        "w-auto",
-                        "flex",
-                        "flex-row",
-                        "items-center",
-                        "justify-center",
-                    );
-
-                    const chatMessageBadges = document.createElement("div");
-                    chatMessageBadges.classList.add(
-                        "flex",
-                        "flex-row",
-                        "items-center",
-                        "justify-center",
-                        `w-[${(badgeSize + 2) * payload.badges.length + (payload.shared_chat_pfp ? badgeSize + 4 : 0)}px]`,
-                        "mr-2",
-                    );
-
-                    if (payload.shared_chat_pfp) {
-                        const badge = document.createElement("img");
-                        badge.src = payload.shared_chat_pfp;
-                        badge.classList.add(
-                            `h-[${badgeSize + 2}px]`,
-                            "mr-1",
-                            "rounded",
-                        );
-
-                        chatMessageBadges.appendChild(badge);
-                    }
-
-                    for (const badgeURL of payload.badges) {
-                        const badge = document.createElement("img");
-                        badge.src = badgeURL + "/2";
-                        badge.classList.add(`h-[${badgeSize}px]`, "mr-1");
-
-                        chatMessageBadges.appendChild(badge);
-                    }
-
-                    chatMessageAuthor.appendChild(chatMessageBadges);
-
-                    let chatMessagePronouns = null;
-
-                    if (savedPronouns[payload.username]){
-                      if (savedPronouns[payload.username] !== null){
-                        const correct_pronouns = savedPronouns[payload.username];
-                        chatMessagePronouns = document.createElement("p");
-                        chatMessagePronouns.textContent =
-                            correct_pronouns[0].subject
-                            + (correct_pronouns[0].subject === "Any"
-                              ? ""
-                              : "/"
-                            + (correct_pronouns[1] === undefined
-                                ? correct_pronouns[0].object
-                                : correct_pronouns[1].subject
-                              )
-                            );
-                        chatMessagePronouns.classList.add(
-                            "text-white",
-                            payload.chatter.length < 12 ? "border-4" : "border-2",
-                            "rounded-xl",
-                            "px-2",
-                            "py-1",
-                            "mr-2",
-                            payload.chatter.length < 12 ? bottomSize : topSize,
-                            "text-center",
-                            "items-center",
-                            "justify-center",
-                        );
-
-                        chatMessageAuthor.appendChild(chatMessagePronouns);
-                      }
-                    } else {
-                      const pronouns_req = await fetch(
-                          `https://api.pronouns.alejo.io/v1/users/${payload.username}`,
-                      );
-                      if (pronouns_req.ok) {
-                          const pronouns = await pronouns_req.json();
-                          const correct_pronouns = [
-                              all_pronouns[pronouns.pronoun_id],
-                              all_pronouns[pronouns.pronoun_id].singular
-                                  ? all_pronouns[pronouns.pronoun_id]
-                                  : all_pronouns[pronouns.alt_pronoun_id],
-                          ];
-                          savedPronouns[payload.username] = correct_pronouns;
-                          chatMessagePronouns = document.createElement("p");
-                          chatMessagePronouns.textContent =
-                            correct_pronouns[0].subject
-                            + (correct_pronouns[0].subject === "Any"
-                              ? ""
-                              : "/"
-                            + (correct_pronouns[1] === undefined
-                                ? correct_pronouns[0].object
-                                : correct_pronouns[1].subject
-                              )
-                            );
-                          chatMessagePronouns.classList.add(
-                              "text-white",
-                              payload.chatter.length < 12 ? "border-4" : "border-2",
-                              "rounded-xl",
-                              "px-2",
-                              "py-1",
-                              "mr-2",
-                              payload.chatter.length < 12 ? bottomSize : topSize,
-                              "text-center",
-                              "items-center",
-                              "justify-center",
-                          );
-
-                          chatMessageAuthor.appendChild(chatMessagePronouns);
-                      } else {
-                        savedPronouns[payload.username] = null;
-                      }
-                    }
-
-                    const chatMessageAuthorName = document.createElement("p");
-                    chatMessageAuthorName.id = "username"
-                    chatMessageAuthorName.textContent = payload.chatter;
-                    chatMessageAuthorName.style.color = payload.color;
-                    chatMessageAuthorName.classList.add(
-                        "font-bold",
-                        payload.chatter.length < 12 ? bottomSize : topSize,
-                    );
-
-                    chatMessageAuthor.appendChild(chatMessageAuthorName);
-
-                    chatMessage.appendChild(chatMessageAuthor);
-
-                    let chatMessageReplyContent = null;
-                    let chatMessageReplyUsername = null;
-
-                    if (payload.reply){
-                        const chatMessageReply = document.createElement("div");
-                        chatMessageReply.classList.add(
-                            "flex",
-                            "items-center",
-                            "justify-center",
-                            "text-center",
-                            "mt-2.5",
-                        );
-
-                        chatMessageReplyContent = document.createElement("span");
-                        chatMessageReplyContent.classList.add(
-                            "text-center",
-                            "text-neutral-600",
-                            "mr-1",
-                            topSize,
-                        );
-
-                        chatMessageReplyContent.textContent = "⤷ Replying to";
-
-                        chatMessageReplyUsername = document.createElement("span");
-                        chatMessageReplyUsername.classList.add(
-                            "text-center",
-                            topSize,
-                        );
-
-                        chatMessageReplyUsername.textContent = "@"+ payload.reply.username;
-                        chatMessageReplyUsername.style.color = payload.reply.color;
-
-                        chatMessageReply.appendChild(chatMessageReplyContent);
-                        chatMessageReply.appendChild(chatMessageReplyUsername);
-                        chatMessage.appendChild(chatMessageReply);
-                    }
-
-                    const chatMessagetText = document.createElement("div");
-                    chatMessagetText.classList.add(
-                        "flex",
-                        "items-center",
-                        "justify-center",
-                        "text-center",
-                        `mt-${payload.reply ? 1 : 2}.5`,
-                    );
-
-                    const chatMessageContent = document.createElement("span");
-                    chatMessageContent.classList.add(
-                        "text-white",
-                        "text-center",
-                        "mr-1",
-                        bottomSize,
-                    );
-
-                    if (payload.preferences.message_font !== ""){
-                      chatMessageContent.style.fontFamily = payload.preferences.message_font;
-                    }
-
-                    chatMessageContent.style.color = payload.preferences.message_color
-
-                    const splitMessages = payload.message.text.split(" ");
-                    const lastWord = ("" + payload.message.text)
-                        .replace(/[\s-]+$/, "")
-                        .split(/[\s-]/)
-                        .pop();
-
-                    for (const word of splitMessages) {
-                        if (Object.keys(payload.emotes).includes(word)) {
-                            const chatMessageFragment =
-                                document.createElement("img");
-                            chatMessageFragment.src = payload.emotes[word];
-                            chatMessageFragment.classList.add(
-                                "inline-grid",
-                                "mr-2",
-                                `h-[${emoteSize}px]`,
-                                "align-middle",
-                            );
-                            chatMessageContent.appendChild(chatMessageFragment);
-                        } else {
-                            chatMessageContent.appendChild(
-                                document.createTextNode(
-                                    word + (lastWord === word ? "" : " "),
-                                ),
-                            );
-                        }
-                    }
-
-                    chatMessagetText.appendChild(chatMessageContent);
-
-                    chatMessage.appendChild(chatMessagetText);
-
-                    chatbox.appendChild(chatMessage);
-
-                    setTimeout(() => {
-                      let transparancy = 1;
-                      const transparent = setInterval(() => {
-                        if (transparancy <= 0){
-                          clearInterval(transparent);
-                          chatMessage.remove();
-                        }
-                        chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, ${transparancy})`;
-                        chatMessage.style.borderColor = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
-                        for (const badge of chatMessageBadges.children){
-                          badge.style.opacity = transparancy;
-                        }
-
-                        if (chatMessagePronouns !== null){
-                          chatMessagePronouns.style.borderColor = `rgba(255, 255, 255, ${transparancy})`;
-                          chatMessagePronouns.style.color = `rgba(255, 255, 255, ${transparancy})`;
-                        }
-                        chatMessageAuthorName.style.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
-
-                        if (chatMessageReplyContent !== null){
-                          chatMessageReplyContent.style.color = `rgba(82, 82, 82, ${transparancy})`;
-                          chatMessageReplyUsername.style.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, ${transparancy})`;
-                        }
-
-                        for (const messageFragment of chatMessagetText.children){
-                          if (messageFragment.tagName === "span"){
-                            messageFragment.style.color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, ${transparancy})`;
-                          } else {
-                            messageFragment.style.opacity = transparancy;
-                          }
-                        }
-                        transparancy -= 0.01
-                      }, 10) // 10ms
-                    }, timeBeforeDisappear*1000)
-                });
-            });
-        </script>
-    </head>
-    <body class="w-screen h-screen items-center justify-center">
-        <div
-            class="w-full h-full flex flex-col items-center justify-end"
-            id="chatbox"
-        ></div>
-    </body>
+              }
+              transparancy -= 0.01
+            }, 10) // 10ms
+          }, timeBeforeDisappear*1000)
+      });
+  });
+  </script>
+  </head>
+  <body class="w-screen h-screen items-center justify-center">
+    <div
+      class="w-full h-full flex flex-col items-center justify-end"
+      id="chatbox"
+    ></div>
+  </body>
 </html>
