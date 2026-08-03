@@ -14,4 +14,4 @@ pygame==2.6.1
 rich==15.0.0
 setuptools==83.0.0
 soundfile==0.13.1
-twitchio==3.2.2
+twitchio==3.3.0
