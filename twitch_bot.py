@@ -313,6 +313,7 @@ class MyComponent(commands.Component):
         self.currently_playing_tts: bool = False
         self.message_sent: int = 0
         self.db: mongo.Database = mongo.Database(MONGODB_URL)
+        self.streamer = None
         # self.db.update(
         #    "twitch_api",
         #    "messages",
@@ -321,6 +322,9 @@ class MyComponent(commands.Component):
         # )
 
         self.socket.send("start", {"Bot": True})
+
+    async def getStreamerUser(self):
+        self.streamer = await self.bot.fetch_user(id=OWNER_ID)
 
     def getBTTVEmotes(self, broadcaster_id: str) -> dict[str, str]:
         emotes: dict[str, str] = {}
@@ -837,6 +841,34 @@ class MyComponent(commands.Component):
 
         return text
 
+    async def ban_user(self, user: twitchio.User | twitchio.Chatter | twitchio.PartialUser, reason: str):
+      if self.streamer is not None:
+        mods: list[twitchio.PartialUser] = list(await self.streamer.fetch_moderators(first=100))
+        if user.id in list(map(lambda mod: mod.id, mods)):
+          print("User is Moderator, it bypasses ban filters")
+          return
+        vips: list[twitchio.PartialUser] = list(await self.streamer.fetch_vips())
+        if user.id in list(map(lambda vip: vip.id, vips)):
+          print("User is VIP, it bypasses ban filters")
+          return
+        await self.streamer.ban_user(moderator=BOT_ID, user=user, reason=reason)
+      else:
+        print("ERROR: self.streamer HAS NOT BEEN INITIALIZED (or it wasn't found, probably a skill issue either way)")
+
+    async def timeout_user(self, user: twitchio.User | twitchio.Chatter | twitchio.PartialUser, reason: str, duration: int):
+      if self.streamer is not None:
+        mods: list[twitchio.PartialUser] = list(await self.streamer.fetch_moderators(first=100))
+        if user.id in list(map(lambda mod: mod.id, mods)):
+          print("User is Moderator, it bypasses ban filters")
+          return
+        vips: list[twitchio.PartialUser] = list(await self.streamer.fetch_vips())
+        if user.id in list(map(lambda vip: vip.id, vips)):
+          print("User is VIP, it bypasses ban filters")
+          return
+        await self.streamer.timeout_user(moderator=BOT_ID, user=user, reason=reason, duration=duration)
+      else:
+        print("ERROR: self.streamer HAS NOT BEEN INITIALIZED (or it wasn't found, probably a skill issue either way)")
+
     @commands.Component.listener("event_message")
     async def event_message_overlay(self, payload: twitchio.ChatMessage) -> None:
         banned_message = False
@@ -845,6 +877,9 @@ class MyComponent(commands.Component):
         print(
             f"[{payload.broadcaster.display_name}] - {payload.chatter.display_name}: {payload.text} {f'(From {payload.source_broadcaster.display_name})' if payload.source_broadcaster is not None else ''}"
         )
+
+        if self.streamer is None:
+          await self.getStreamerUser()
 
         if payload.type == "user_intro":
             command_message = True
@@ -870,7 +905,7 @@ class MyComponent(commands.Component):
                         moderator=BOT_ID, text=word.lower()
                     )
                     print(f"{word} has been added as a blocked term on your channel.")
-                    await payload.chatter.timeout(moderator=BOT_ID, duration=120, reason="You used a banned term.")
+                    await self.timeout_user(user=payload.chatter, duration=120, reason="You used a banned term.")
                     banned_message = True
                     return
 
@@ -915,7 +950,7 @@ class MyComponent(commands.Component):
             emotes = self.get_emotes_in_message(twitchChatMessage)
 
             if len(emotes) + emoji.emoji_count(twitchChatMessage) > 6:
-                await payload.chatter.timeout(moderator=BOT_ID, duration=5, reason="Messages can't have more than 6 emotes & emoji combinaison")
+                await self.timeout_user(user=payload.chatter, duration=5, reason="Messages can't have more than 6 emotes & emoji combinaison")
                 return
 
             for emote in emotes:
@@ -1011,9 +1046,8 @@ class MyComponent(commands.Component):
 
         if banned_message:
             # IF A WORD IN SOMEONE'S MESSAGE IS IN self.banned_words, THEY WILL BE BANNED FOREVER, THE MESSAGE WILL NOT BE SAID OUT LOUD, INSTEAD SAYING THAT SOMEONE IS BANNED. MODS / STREAMER CAN UNBAN THEM IF YOU WANT.
-            await payload.chatter.ban(moderator=BOT_ID, reason="INVALID MESSAGE")
-            banMessage = "BANNED MESSAGE DETECTED : MESSAGE WILL NOT BE SAID"
-            print(banMessage)
+            await self.ban_user(user=payload.chatter, reason="INVALID MESSAGE")
+            print("BANNED MESSAGE DETECTED : MESSAGE WILL NOT BE SAID")
 
     @commands.Component.listener("event_message")
     async def event_message_tts(self, payload: twitchio.ChatMessage) -> None:
