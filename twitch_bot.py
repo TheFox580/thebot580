@@ -20,7 +20,6 @@ import socket_client
 from audio_player import AudioManager
 from keys import (
     AZURE_TTS_VOICE,
-    BANNED_WORD_LIST,
     BOT_ID,
     HAS_ONBOARDED,
     MONGODB_URL,
@@ -31,6 +30,7 @@ from keys import (
 )
 from obs_websockets import OBSWebsocketsManager
 from tts import TTSManager
+from banned_words import getBannedWords
 
 tts_manager = TTSManager(AZURE_TTS_VOICE)
 audio_manager = AudioManager()
@@ -275,7 +275,7 @@ class MyComponent(commands.Component):
     def __init__(self, bot: Bot):
         # Passing args is not required...
         # We pass bot here as an example...
-        self.banned_words = BANNED_WORD_LIST
+        self.banned_words = getBannedWords()
         self.bot = bot
 
         self.socket = socket_client.SocketClient()
