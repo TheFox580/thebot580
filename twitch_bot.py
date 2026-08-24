@@ -1401,16 +1401,16 @@ class MyComponent(commands.Component):
     #        file.close()
     #    await ctx.reply(f"Fox's current PB is {pb} (In private rooms)")
 
-    # @commands.command()
-    # async def games(self, ctx: commands.Context):
-    #     await ctx.reply("Fox is playing Balatro, Portal 2, Trackmania and a Bingo")
+    @commands.command()
+    async def games(self, ctx: commands.Context):
+        await ctx.reply("Fox is playing Portal 2 (Sendning Wheatly to space), Trackmania (Getting 30 gold medals), Haste (Completing Shard 10), Peggle Deluxe (Collecting 30 gold pegs & Beating the gold map (4-4)) and a Bingo (Completed Buckshot Roulette (Winning 200k+) & Minecraft (Obtaining 50 advancements))")
 
-    # @commands.command()
-    # async def archipelago(self, ctx: commands.Context):
-    #     link = "https://archipelago.gg/tracker/ANatV6flTqei79kJ7RpPig"
-    #     await ctx.reply(
-    #         f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
-    #     )
+    @commands.command()
+    async def archipelago(self, ctx: commands.Context):
+        link = "https://thewebsite580.vercel.app/archipelago/tracker/HsT0nGBVSuW3NBbkdYRhBw/overlay"
+        await ctx.reply(
+            f"Archipelago is a multi-game randomizer, this means objects in a game can be found in another one. You can check Fox's progress at {link}"
+        )
 
     @commands.command(aliases=["inside", "trading", "it"])
     @commands.cooldown(
