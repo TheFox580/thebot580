@@ -1260,6 +1260,35 @@ class MyComponent(commands.Component):
             me=True,
         )
 
+    @commands.command(aliases=["music"])
+    async def song(self, ctx: commands.Context):
+        req = requests.get("http://localhost:1608/")
+        res = req.json()
+
+        status = res["status_id"]
+
+        if status == 3:
+            await ctx.reply("No song playing.")
+        elif status == 2:
+            await ctx.reply("Song is paused.")
+        else:
+            title = res["title"]
+            artists = res["artists"]
+
+            artists_str = artists[0]
+            for i in range(1, len(artists)):
+                if i < len(artists)-1:
+                    artists_str += f", {artists[i]}"
+                else:
+                    artists_str += f" and {artists[i]}"
+
+            total_time = math.floor(res["duration"] / 1000)
+            current_time = math.floor(res["progress"] / 1000)
+
+            album = f" from '{res["album"]}'" if "album" in res.keys() else ""
+
+            await ctx.reply(f"Song: '{title}'{album} by {artists_str} ({math.floor(current_time/60)}:{"0" if current_time % 60 < 10 else ""}{current_time % 60}/{math.floor(total_time/60)}:{"0" if total_time % 60 < 10 else ""}{total_time%60})")
+
     @commands.command()
     async def age(self, ctx: commands.Context):
         await ctx.send(
