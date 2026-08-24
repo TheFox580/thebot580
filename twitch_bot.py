@@ -1092,7 +1092,7 @@ class MyComponent(commands.Component):
         if payload.broadcaster.id != OWNER_ID:  # Only play TTS from my chat
             play_audio = False
 
-        if len(twitchChatMessage) > 250:
+        if len(twitchChatMessage) > 256:
             play_audio = False
 
         if play_audio:
