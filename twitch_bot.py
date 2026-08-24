@@ -1180,7 +1180,13 @@ class MyComponent(commands.Component):
     @commands.command()
     async def uptime(self, ctx: commands.Context):
         await ctx.reply(
-            f"Fox has been live for {self.format_time_since(datetime.now(timezone.utc), self.start_time)} (Stream started at {self.start_time.strftime('%d/%m/%Y at %H:%M:%S %Z')})."
+            f"Fox has been live for {self.format_time_since(datetime.now(timezone.utc), self.start_time)} (Stream started at {self.start_time.strftime('%d/%m/%Y at %H:%M:%S %Z (%A)')})."
+        )
+
+    @commands.command()
+    async def controller(self, ctx: commands.Context):
+        await ctx.reply(
+            self.readCommandTextFile("controller")
         )
 
     @commands.command()
