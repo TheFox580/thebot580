@@ -1208,7 +1208,7 @@ class MyComponent(commands.Component):
     @commands.command()
     async def time(self, ctx: commands.Context):
         await ctx.reply(
-            f"It is currently {datetime.now().strftime('%B %d %Y, %H:%M:%S')} for Fox."
+            f"It is currently {datetime.now().strftime('%B %d %Y, %H:%M:%S %Z (%A)')} for Fox."
         )
 
     @commands.command()
