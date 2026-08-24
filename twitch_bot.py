@@ -549,6 +549,8 @@ class MyComponent(commands.Component):
                 final_message += "don't love "
             elif "https" in word:
                 pass
+            elif "@" in word: #Don't say mentions out loud
+                pass
             elif "Cheer" in word:  # We don't want it to say the bits amount!
                 pass
             elif emoji.is_emoji(word):
