@@ -1095,6 +1095,17 @@ class MyComponent(commands.Component):
         if len(twitchChatMessage) > 256:
             play_audio = False
 
+        blocked_terms: list[str] = []
+        async for blocked_term in payload.broadcaster.fetch_blocked_terms(
+            moderator=BOT_ID
+        ):
+            term: twitchio.BlockedTerm = blocked_term
+            blocked_terms.append(term.text.lower())
+
+        for word in self.banned_words:
+            if word.lower() in payload.text.lower():
+                play_audio = False
+
         if play_audio:
 
             self.tts_queue.append(twitchChatMessage) #Adding the TTS to the queue
