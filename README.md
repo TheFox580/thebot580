@@ -6,7 +6,7 @@
 
 This is a fork of [Babagaboosh ↗](https://www.github.com/DougDougGithub/Babagaboosh), changed as a bot for [TheFox580 ↗](https://www.twitch.tv/thefox580), [TheAlt580 ↗](https://www.twitch.tv/thealt580), [TheEvents580 ↗](https://www.twitch.tv/theevents580) and [LeRenard580 ↗](https://www.twitch.tv/lerenard580)
 
-This code uses the TwitchIO **3.3.0** Library, Azure's Text-To-Speech fonctionnality, PyGame's Audio Library and OBS Websockets.
+This code uses the TwitchIO **3.3.3** Library, Azure's Text-To-Speech fonctionnality, PyGame's Audio Library and OBS Websockets.
 
 ## Here are all of TheBot580's functionnality
 
