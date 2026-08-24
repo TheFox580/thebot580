@@ -2032,6 +2032,7 @@ class MyComponent(commands.Component):
             "color": self.getChatterColor(raider.id),
             "username": raider.display_name,
             "viewers": payload.viewer_count,
+            "time_to_live": 10,
         }
 
         self.socket.send("new_alert_bot", alert_message)
@@ -2177,6 +2178,7 @@ class MyComponent(commands.Component):
                 "color": color
                 if color is not None
                 else "#%06x" % random.randint(0, 0xFFFFFF),
+                "time_to_live": 5,
             }
 
             self.socket.send("new_alert_bot", alert_message)
@@ -2191,6 +2193,7 @@ class MyComponent(commands.Component):
                 "message": "It's time to drink some water!",
                 "title": reward_title,
                 "color": color,
+                "time_to_live": 5,
             }
 
             self.socket.send("new_alert_bot", alert_message)
@@ -2323,6 +2326,7 @@ class MyComponent(commands.Component):
                 "amount": reward_cost,
                 "title": reward_title,
                 "color": color,
+                "time_to_live": 3,
             }
 
             self.socket.send("new_alert_bot", alert_message)
