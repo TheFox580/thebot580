@@ -1236,9 +1236,9 @@ class MyComponent(commands.Component):
             return
         await ctx.reply("TTS is currently turned off.")
 
-    # @commands.command()
-    # async def subtember(self, ctx: commands.Context):
-    #    await ctx.send(f"For the next {self.format_time_since(datetime.fromtimestamp(1759338000), datetime.now())}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to https://www.twitch.tv/subs/thefox580 !")
+    @commands.command()
+    async def subtember(self, ctx: commands.Context):
+       await ctx.send(f"For the next {self.format_time_since(datetime.fromtimestamp(1790874000), datetime.now())}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to https://www.twitch.tv/subs/thefox580 !")
 
     @commands.command(aliases=["donate"])
     async def charity(self, ctx: commands.Context):
