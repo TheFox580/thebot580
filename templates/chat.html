@@ -57,13 +57,14 @@
 
       const topSize = "text-xl";
       const bottomSize = "text-2xl";
+      const badgeSize = 28;
+      const emoteSize = 36;
+
+      const hideChat = true;
+      const hideChatAfter = 30;
 
       document.addEventListener("DOMContentLoaded", async () => {
         const all_pronouns = await getPronouns();
-
-        const badgeSize = 28;
-        const emoteSize = 36
-        const timeBeforeDisappear = 30;
 
         const socket = io();
 
@@ -348,40 +349,52 @@
 
           chatbox.appendChild(chatMessage);
 
-          setTimeout(() => {
-            let transparancy = 1;
-            const transparent = setInterval(() => {
-              if (transparancy <= 0){
-                clearInterval(transparent);
-                chatMessage.remove();
-              }
-              chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, ${transparancy})`;
-              chatMessage.style.borderColor = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
-              for (const badge of chatMessageBadges.children){
-                badge.style.opacity = transparancy;
-              }
+          if (hideChat){
 
-              if (chatMessagePronouns !== null){
-                chatMessagePronouns.style.borderColor = `rgba(255, 255, 255, ${transparancy})`;
-                chatMessagePronouns.style.color = `rgba(255, 255, 255, ${transparancy})`;
-              }
-              chatMessageAuthorName.style.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
+            setTimeout(() => {
+              let transparancy = 1;
+              const transparent = setInterval(() => {
 
-              if (chatMessageReplyContent !== null){
-                chatMessageReplyContent.style.color = `rgba(82, 82, 82, ${transparancy})`;
-                chatMessageReplyUsername.style.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, ${transparancy})`;
-              }
+                  if (transparancy <= 0){
+                      clearInterval(transparent);
+                      chatMessage.remove();
+                  }
 
-              for (const messageFragment of chatMessagetText.children){
-                if (messageFragment.tagName === "span"){
-                  messageFragment.style.color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, ${transparancy})`;
-                } else {
-                  messageFragment.style.opacity = transparancy;
-                }
-              }
-              transparancy -= 0.01
-            }, 10) // 10ms
-          }, timeBeforeDisappear*1000)
+                  chatMessage.style.backgroundColor = `rgba(${newBackgroundColor.r}, ${newBackgroundColor.g}, ${newBackgroundColor.b}, ${transparancy})`;
+                  chatMessage.style.borderColor = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
+
+                  for (const badge of chatMessageBadges.children){
+                      badge.style.opacity = transparancy;
+                  }
+
+                  if (chatMessagePronouns !== null){
+                      chatMessagePronouns.style.borderColor = `rgba(255, 255, 255, ${transparancy})`;
+                      chatMessagePronouns.style.color = `rgba(255, 255, 255, ${transparancy})`;
+                  }
+
+                  chatMessageAuthorName.style.color = `rgba(${newBorderColor.r}, ${newBorderColor.g}, ${newBorderColor.b}, ${transparancy})`;
+
+                  if (chatMessageReplyContent !== null){
+                      chatMessageReplyContent.style.color = `rgba(82, 82, 82, ${transparancy})`;
+                      chatMessageReplyUsername.style.color = `rgba(${newReplyColor.r}, ${newReplyColor.g}, ${newReplyColor.b}, ${transparancy})`;
+                  }
+
+                  for (const messageFragment of chatMessagetText.children){
+
+                      if (messageFragment.tagName === "span"){
+                          messageFragment.style.color = `rgba(${newMessageColor.r}, ${newMessageColor.g}, ${newMessageColor.b}, ${transparancy})`;
+                      } else {
+                          messageFragment.style.opacity = transparancy;
+                      }
+
+                  }
+
+                  transparancy -= 0.01
+
+                }, 10) // 10ms
+
+            }, hideChatAfter*1000)
+          }
       });
   });
   </script>
