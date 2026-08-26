@@ -263,10 +263,10 @@ class MCCI_STATS:
         return self.getSimpleInfos()
 
     def getSimpleInfos(self) -> str:
-        return f"Infos for {self.getUsername()} | Rank: {self.getUserRank()} | {self.getUserCrownLevel()} | {self.getUserFactionLevel()}"
+        return f"{self.getUsername()} | Rank: {self.getUserRank()} | {self.getUserCrownLevel()} | {self.getUserFactionLevel()}"
 
     def getDetailedInfos(self) -> str:
-        return f"Infos for {self.getUsername()} | {self.getUserOnline()} | {self.getUserFriendCount()} | {self.getUserPartyStatus()} | Rank: {self.getUserRank()} | {self.getUserCoins()} | {self.getUserAnglrTokens()} | {self.getUserRoyalReputation()} | {self.getUserMCCPlus()} | {self.getUserCrownLevel()} | {self.getUserTotalTrophies()} | {self.getUserStyleLevel()} | {self.getUserStyleTrophies()} | {self.getUserSkillTrophies()} | {self.getUserFishingLevel()} | {self.getUserFishingTrophies()} | {self.getUserFactionLevel()}"
+        return f"{self.getUsername()} | {self.getUserOnline()} | {self.getUserFriendCount()} | {self.getUserPartyStatus()} | Rank: {self.getUserRank()} | {self.getUserCoins()} | {self.getUserAnglrTokens()} | {self.getUserRoyalReputation()} | {self.getUserMCCPlus()} | {self.getUserCrownLevel()} | {self.getUserTotalTrophies()} | {self.getUserStyleLevel()} | {self.getUserStyleTrophies()} | {self.getUserSkillTrophies()} | {self.getUserFishingLevel()} | {self.getUserFishingTrophies()} | {self.getUserFactionLevel()}"
 
     def getRawData(self) -> dict:
         return self.__data

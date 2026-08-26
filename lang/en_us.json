@@ -1,0 +1,362 @@
+{
+    "commands": {
+        "ad": "This stream is not an ad :3",
+        "age": "Fox is {0} old.",
+        "ai": "I don't use AI for anything, coding, art, ... I believe anyone can do anything with enough will, make whatever you want by yourself and have fun!",
+        "archipelago": "Not playing an Archipelago randomizer.",
+        "backseat": "No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating.",
+        "charity": "We're raising money for the Joyful Heart Foundation! Donate here: https://thewebsite580.vercel.app/donate",
+        "color": {
+            "fail": "Your color probably is: {0}",
+            "success": "Your color is: {0}"
+        },
+        "elo": {
+            "fail": "No player with the username \"{0}\" found.",
+            "success": "{0} | Elo: {1} (High/Low: {2}/{3}) | #{4} === Played {5} games | W/D/L {6}/{7}/{8} === PB: {9}:{10}.{11} === {12}% Forfeit Rate."
+        },
+        "emotes": "To have acces to a lot of new emotes, install the BetterTTV (https://betterttv.com) or 7TV (https://7tv.app/) extension on your navigator.",
+        "followage": {
+            "fail": "Sorry {0}, but you are not following the channel...",
+            "success": "{0}, you've been following for {1}. (Followed on {2})"
+        },
+        "hi": "Hello {0}!",
+        "lurk": {
+            "fail": "You were already lurking! But see you later {0}.",
+            "success": "You just started lurking {0}, see ya soon!"
+        },
+        "mcci": {
+            "fail": "No player with the username \"{0}\" found."
+        },
+        "pb": "MCSR Ranked: {0}",
+        "schedule": {
+            "fail": "No streams scheduled this week, get the full schedule here: https://thewebsite580.vercel.app/schedule",
+            "week": {
+                "fail": "No other streams scheduled this week, get the full schedule here: https://thewebsite580.vercel.app/schedule",
+                "success": "Next stream: {0}. Game: {1}. Time: {2} {3} at {4}:{5} GMT+2. Get the full week schedule here: https://thewebsite580.vercel.app/schedule/week"
+            }
+        },
+        "setgame": {
+            "fail": "Failed to update the category, please enter a valid category name."
+        },
+        "socials": {
+            "all": "https://www.discord.gg/9tmdgHWaMU, https://www.youtube.com/@thefox580",
+            "discord": "Discord server: https://www.discord.gg/9tmdgHWaMU",
+            "youtube": "Youtube channel: https://www.youtube.com/@thefox580"
+        },
+        "song": {
+            "stopped": "No song playing.",
+            "paused": "Song is paused.",
+            "playing": {
+                "album": " from '{0}'",
+                "message": "Song: '{0}'{1} by {2} ({3}:{4}{5}/{6}:{7}{8})"
+            }
+        },
+        "subtember": "For the next {0}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to: https://www.twitch.tv/subs/{1}!",
+        "time": "It is currently {0} for Fox.",
+        "trigger": "Sent custom trigger.",
+        "tts": {
+            "change": {
+                "off": "TTS has been turned off.",
+                "on": "TTS has been turned on."
+            },
+            "check": {
+                "off": "TTS is currently turned off.",
+                "on": "TTS is currently turned on."
+            }
+        },
+        "unlurk": {
+            "fail": "You weren't lurking! But welcome back {0}.",
+            "success": "Welcome back {0}!"
+        },
+        "uptime": "Fox has been live for {0} (Stream started at {1}).",
+        "version": "I'm a custom bot made in Python, based on DougDoug's Babagaboosh app. It is currently running on version 2.1 (Using TwitchIO 3.3.3 & Python 3.13.12). Check out and contribute to the project at https://github.com/TheFox580/thebot580"
+    },
+    "event": {
+        "ad_break": {
+            "message": "⚠️ A {0} ad break has started. ⚠️",
+            "print": "Received event: 'Ad Break Starts'"
+        },
+        "auto_channel_points": {
+            "message": "{0} has redeemed \"{1}\" for {2} channel points.",
+            "print": "Received event: 'Auto Channel Point Redeemed'",
+            "type": {
+                "single_message_bypass_sub_mode": "Send a Message in Sub-Only Mode",
+                "send_highlighted_message": "Highlight My Message",
+                "random_sub_emote_unlock": "Unlock a Random Sub Emote",
+                "chosen_sub_emote_unlock": "Choose an Emote to Unlock",
+                "chosen_modified_sub_emote_unlock": "Modify a Single Emote",
+                "message_effect": "Message Effects",
+                "gigantify_an_emote": "Gigantify an Emote",
+                "celebration": "On-Screen Celebration"
+            }
+        },
+        "channel_points": {
+            "message": "{0} has redeemed \"{1}\" for {2} channel points.",
+            "print": "Received event: 'Channel Point Redeemed'"
+        },
+        "channel_update": {
+            "message": "Updated title to \"{0}\" and category to \"{1}\".",
+            "print": "Received event: 'Channel Update'"
+        },
+        "chat_notification": {
+            "print": "Received event: 'Chat Notification'",
+            "watch_streak": {
+                "message": "{0} has a {1} watch streak!"
+            }
+        },
+        "cheer": {
+            "anonymous": "An anonymous user",
+            "message": "{0} cheered {1} bits!",
+            "print": "Received event: 'User Cheer'",
+            "tts": "{0} They said: \"{1}\""
+        },
+        "follow": {
+            "message": "Thank you {0} for the follow!",
+            "print": "Received event: 'User Follow'"
+        },
+        "gift_sub": {
+            "message": {
+                "anonymous": "An anonymous user gifted {0} Tier {1} subs to the community! In total, there has been {2} sub gifts from anonymous users to the community!",
+                "regular": "{0} gifted {1} Tier {2} subs to the community! In total, {0} has gifted {3} subs to the community!"
+            },
+            "print": "Received event: 'User Sub Gifting'"
+        },
+        "goal": {
+            "begin": {
+                "message": "A new {0} goal has begun! {1} ({2}/{3})",
+                "print": "Received event: 'Goal Started'"
+            },
+            "end": {
+                "message": "{0} has been completed! ({1} {2})",
+                "print": "Received event: 'Goal Ended'"
+            },
+            "progress": {
+                "message": "{0} goal \"{1}\" updated! ({2}/{3})",
+                "print": "Received event: 'Goal Progressed'"
+            },
+            "type": {
+                "follow": "Follow",
+                "subscription": "Subcription",
+                "cheer": "Cheer"
+            }
+        },
+        "hype_train": {
+            "begin": {
+                "message": "A {0}{1} Hype Train has just started! We're {2}% through level {3}!",
+                "print": "Received event: 'Hype Train Started'"
+            },
+            "end": {
+                "message": "The {0}{1} Hype Train has left the chat... We reached {2}% of level {3}! The next Hype Train can come back in {4} minutes.",
+                "print": "Received event: 'Hype Train Ended'"
+            },
+            "progress": {
+                "message": "A {0}{1} Hype Train has levelled up! We're {2}% through level {3}!",
+                "print": "Received event: 'Hype Train Progressed'"
+            },
+            "shared": "Shared ",
+            "type": {
+                "golden_kappa": "Golden Kappa",
+                "mythic": "Mythic",
+                "regular": "Regular",
+                "treasure": "Treasure"
+            }
+        },
+        "message": {
+            "ban": "INVALID MESSAGE",
+            "block": "{0} has been added as a blocked term on your channel.",
+            "emote": {
+                "add": "+1 to the {0} combo by {1} (Now {2})",
+                "end": {
+                    "message": "{0}x {1} combo! POGGIES",
+                    "print": "{0}x {1} combo was ended by {2}"
+                },
+                "limit": "Messages can't have more than 6 emotes & emoji combinaison.",
+                "start": "New combo emote: {0}. Started by {1}"
+            },
+            "first_time": "FIRST TIME CHATTER --> {0} said: {1}",
+            "from_broadcast": "(From {0})",
+            "print": "[{0}] - {1}: {2} {3}"
+        },
+        "new_sub": {
+            "message": "{0} subscribed with a Tier {0} subscription!",
+            "print": "Received event: 'New User Subscription'"
+        },
+        "poll": {
+            "begin": {
+                "message": "A new poll has been started! \"{0}\" | Choices are: {1}. This poll ends in {2} minute(s).",
+                "print": "Received event: 'Poll Started'"
+            },
+            "end": {
+                "message": "Anwsers are in! {0} won \"{1}\" with {2} votes | Choices were: {3}.",
+                "print": "Received event: 'Poll Ended'"
+            },
+            "progress": {
+                "message": "{0} has had new votes! It ends in {1} minute(s).",
+                "print": "Received event: 'Poll Progressed'"
+            }
+        },
+        "powerups": {
+            "message": "{0} has redeemed \"{1}\" for {2} bits.",
+            "print": "Received event: 'Custom Powerup Redeemed'"
+        },
+        "predictions": {
+            "begin": {
+                "message": "A new prediction has been started! \"{0}\" | Outcomes are: {1}. This prediction locks in {2} minute(s).",
+                "print": "Received event: 'Prediction Started'"
+            },
+            "end": {
+                "message": {
+                    "cancelled": "The \"{0}\" prediction has been canceled! All channel points will be refunded.",
+                    "resolved": "The \"{0}\" prediction has been ended! \"{1}\" is the winning outcome with {2}% (That's {3} channel points for {4} viewers) | Outcomes were: {5}."
+                },
+                "print": "Received event: 'Prediction Ended'"
+            },
+            "lock": {
+                "message": "The \"{0}\" prediction has been locked! \"{1}\" is the highest outcome with {2}% | Outcomes are: {3}.",
+                "print": "Received event: 'Prediction Locked'"
+            },
+            "progress": {
+                "message": "The prediction has progressed! It locks in {0} minute(s).",
+                "print": "Received event: 'Prediction Progressed'"
+            }
+        },
+        "raid": {
+            "message": "Thank you so much {0} for the raid with {1} viewers!",
+            "print": "Received event: 'New Raid'"
+        },
+        "resub": {
+            "message": "{0} resubscribed with a Tier {1} subscription for {2} months!{3}",
+            "print": "Received event: 'User Resubscription'",
+            "streak": " They've subscribed for {0} months in a row!",
+            "tts": "{0} They said: \"{1}\""
+        },
+        "shared_chat": {
+            "begin": {
+                "message": "{0} has started a shared chat session with {1}.",
+                "print": "Received event: 'Shared Chat Session Started'"
+            },
+            "end": {
+                "message": "{0} has ended the shared chat session.",
+                "print": "Received event: 'Shared Chat Session Ended'"
+            },
+            "update": {
+                "message": {
+                    "added": "{0} has added {1} users to the shared chat. The participants now are {2}.",
+                    "removed": "{0} has removed {1} users to the shared chat. The participants now are {2}."
+                },
+                "print": "Received event: 'Shared Chat Session Updated'"
+            }
+        },
+        "shoutout": {
+            "create": {
+                "message": {
+                    "with_game": "{0} was streaming \"{1}\"! If you enjoy it, you should go check it out!",
+                    "without_game": "{0} was streaming to {1} viewer(s)! Welcome in!"
+                },
+                "print": "Received event: 'Created Shoutout'"
+            },
+            "receive": {
+                "message": {
+                    "with_game": "Thank you {0} for the shoutout! They are streaming \"{1}\"! If you enjoy it, you should go check it out!",
+                    "without_game": "Thank you {0} for the shoutout! They are streaming to {1} viewer(s)!"
+                },
+                "print": "Received event: 'Received Shoutout'"
+            }
+        },
+        "stream": {
+            "offline": {
+                "message": "The stream is now offline. {0} has been live for the past {1}",
+                "print": "Received event: 'Stream Offline'"
+            },
+            "online": {
+                "message": "{0} is now live.",
+                "print": "Received event: 'Stream Online'"
+            }
+        }
+    },
+    "functions": {
+        "format_tier": {
+            "tier_1_or_prime": "1 / Prime"
+        },
+        "format_time_since": {
+            "day": {
+                "one": "{0} day, {1}",
+                "multiple": "{0} days, {1}"
+            },
+            "hour": {
+                "one": "{0} hour, {1}",
+                "multiple": "{0} hours, {1}"
+            },
+            "leap_year": " (Time might be offset by a few days due to leap years.)",
+            "minute": {
+                "base": "minute",
+                "plural": "s"
+            },
+            "month": {
+                "one": "{0} month, {1}",
+                "multiple": "{0} months, {1}"
+            },
+            "second": {
+                "base": "second",
+                "plural": "s"
+            },
+            "text": "{0} {1} and {2} {3}",
+            "year": {
+                "one": "{0} year, {1}",
+                "multiple": "{0} years, {1}"
+            }
+        },
+        "get_month": {
+            "1": "January",
+            "2": "February",
+            "3": "March",
+            "4": "April",
+            "5": "May",
+            "6": "June",
+            "7": "July",
+            "8": "August",
+            "9": "September",
+            "10": "October",
+            "11": "November",
+            "12": "December"
+        },
+        "get_day": {
+            "1": "Monday",
+            "2": "Tuesday",
+            "3": "Wedesday",
+            "4": "Thursday",
+            "5": "Friday",
+            "6": "Saturday",
+            "7": "Sunday"
+        },
+        "play_tts_queue": {
+            "playing_message": "Playing TTS message: {0}",
+            "tts_queue": "TTS Queue: {0}"
+        }
+    },
+    "logger": {
+        "error": {
+            "no_streamer": "ERROR: self.streamer HAS NOT BEEN INITIALIZED (or it wasn't found, probably a skill issue either way)"
+        },
+        "info": {
+            "add_token": "Added token to the database for user: %s",
+            "login_success": "Successfully logged in as: %s",
+            "filter": {
+                "bypass": "User is %s, it bypasses %s filters.",
+                "type": {
+                    "ban": "ban",
+                    "timeout": "timeout"
+                },
+                "role": {
+                    "moderator": "Moderator",
+                    "vip": "VIP"
+                }
+            }
+        },
+        "warning": {
+            "fail_to_subscribe": "Failed to subscribe to: %r, for user: %s",
+            "fail_token_fetch": "COULDN'T GET THE TWITCH TOKEN",
+            "keyboard_interrupt": "Shutting down due to KeyboardInterrupt"
+        }
+    }
+}
