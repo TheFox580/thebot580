@@ -9,3 +9,4 @@ OWNER_ID = ""
 BOT_ID = "830282294"
 
 HAS_ONBOARDED = False  # Set this to True if you have passed the "Monetieation Onboarding" at https://dashboard.twitch.tv/monetization/revenue
+LANG = "en_us"

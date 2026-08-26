@@ -16,6 +16,12 @@ This code uses the TwitchIO **3.3.3** Library, Azure's Text-To-Speech fonctionna
 
 ---
 
+### Multiple languages *🆕*
+
+**TheBot580 now supports multiple languages, meaning it's easier than before to changes languages!**
+
+---
+
 ### Support for TTS message
 
 **TheBot580 will by default enable Text-To-Speech messages, meaning that any safe messages will be read out loud by the program!**

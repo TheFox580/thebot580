@@ -1,0 +1,271 @@
+{
+    "commands": {
+        "followage": {
+            "fail": "Désolé {0}, mais tu ne suis pas la chaîne...",
+            "success": "{0}, tu suis la chaîne depuis {1}. (Follow le {2})"
+        },
+        "hi": "Bienvenue {0} !",
+        "lurk": {
+            "fail": "Tu étais déjà en train de lurk ! Mais à bientôt {0}.",
+            "success": "Merci de lurk {0}, À bientôt !"
+        },
+        "setgame": {
+            "fail": "Erreur en mettant à jour la catégorie, veuillez entrer un nom de catégorie valide."
+        },
+        "socials": {
+            "all": "Insérer les liens ici.",
+            "discord": "Serveur Discord : Insérer un lien ici.",
+            "youtube": "Chaîne Youtube : Insérer un lien ici."
+        },
+        "tts": {
+            "change": {
+                "off": "Le TTS a été désactivé.",
+                "on": "Le TTS a été activé."
+            },
+            "check": {
+                "off": "Le TTS est actuellement désactivé.",
+                "on": "Le TTS est actuellement activé."
+            }
+        },
+        "unlurk": {
+            "fail": "Tu n'étais pas en train de lurk ! Mais te voila de retour {0}.",
+            "success": "Te voila de retour {0} !"
+        },
+        "version": "Je suis un bot custom fait en Python, d'origine sur l'appication 'Babagaboosh' de DougDoug. Je fonctionne actuellement sous la version 2.1 (En utilisant TwitchIO 3.3.3 & Python 3.13.12). Viens voir et contribuer au projet à https://github.com/TheFox580/thebot580"
+    },
+    "event": {
+        "ad_break": {
+            "message": "⚠️ Une publicité de {0} viens de commencer. ⚠️",
+            "print": "Évènement recu : 'Début d'une pause publicitaire'"
+        },
+        "auto_channel_points": {
+            "message": "{0} a réclamé \"{1}\" pour {2} points de chaîne.",
+            "print": "Évènement recu : 'Récompese automatique de points de chaîne'",
+            "type": {
+                "single_message_bypass_sub_mode": "Envoyer un message sur le chat réservé aux abonnés",
+                "send_highlighted_message": "Mettre mon message en avant",
+                "random_sub_emote_unlock": "Émoticône d'abonné au hasard",
+                "chosen_sub_emote_unlock": "Choisir une émoticône à débloquer",
+                "chosen_modified_sub_emote_unlock": "Modifier une émoticône",
+                "message_effect": "Effets de message",
+                "gigantify_an_emote": "Gigantiser une émoticône",
+                "celebration": "Célébration de chaîne"
+            }
+        },
+        "channel_points": {
+            "message": "{0} a réclamé \"{1}\" pour {2} points de chaîne.",
+            "print": "Évènement recu : 'Récompense de points de chaîne'"
+        },
+        "channel_update": {
+            "message": "Mise à jour du titre en \"{0}\" et de la catégorie en \"{1}\".",
+            "print": "Évènement recu : 'Channel Update'"
+        },
+        "chat_notification": {
+            "print": "Évènement recu: 'Notification du Chat'",
+            "watch_streak": {
+                "message": "{0} à une série de visionnage de {1} streams !"
+            }
+        },
+        "cheer": {
+            "anonymous": "Un utilisateur anonyme",
+            "message": "{0} à donné {1} bits !",
+            "print": "Évènement recu : 'Utilisateur a donné des bits'"
+        },
+        "follow": {
+            "message": "Merci {0} pour le follow !",
+            "print": "Évènement recu : 'Utilisateur a follow'"
+        },
+        "gift_sub": {
+            "message": {
+                "anonymous": "Un utilisateur anonyme a donné {0} subs de tier {1} à la communauté! Au total, il y a eu {2} sub gifts d'utilisateurs anonyme pour la communauté !",
+                "regular": "{0} a donné {1} subs de tier {2} à la communauté! Au total, {0} a donné {3} subs pour la communauté!"
+            },
+            "print": "Évènement recu : 'Utilisateur a donné des subs'"
+        },
+        "goal": {
+            "begin": {
+                "message": "Un nouveau goal de {0} a commencé ! {1} ({2}/{3})",
+                "print": "Évènement recu : 'Début d'un goal'"
+            },
+            "end": {
+                "message": "{0} a été complété ! ({1} {2})",
+                "print": "Évènement recu : 'Fin d'un goal'"
+            },
+            "progress": {
+                "message": "Goal de {0} \"{1}\" a été mis a jour ! ({2}/{3})",
+                "print": "Évènement recu : 'Goal mis à jour'"
+            },
+            "type": {
+                "follow": "Follow",
+                "subscription": "Subs",
+                "cheer": "Bits"
+            }
+        },
+        "hype_train": {
+            "begin": {
+                "message": "Un Train de la Hype {1} {0}viens de commencer ! Nous sommes à {2}% du niveau {3}!",
+                "print": "Évènement recu : 'Début du Train de la Hype'"
+            },
+            "end": {
+                "message": "Le Train de la Hype {1} {0}viens de quitter le chat... Nous avons atteint {2}% du niveau {3}! Le prochain Train de la Hype peut revenir dans {4} minutes.",
+                "print": "Évènement recu : 'Fin du Train de la Hype'"
+            },
+            "progress": {
+                "message": "Le Train de la Hype {1} {0}a évolué ! Nous sommes à {2}% du niveau {3}!",
+                "print": "Évènement recu : 'Mise à jour du Train de la Hype'"
+            },
+            "shared": "Partagé ",
+            "type": {
+                "golden_kappa": "du Kappa Doré",
+                "mythic": "Mytique",
+                "regular": "Normal",
+                "treasure": "Trésor"
+            }
+        },
+        "message": {
+            "ban": "MESSAGE INVALIDE",
+            "block": "{0} à été ajouté en tant que terme bloqué sur votre chaîne.",
+            "first_time": "CHATTEUR POUR LA PREMIÈRE FOIS --> {0} a dit : {1}",
+            "from_broadcast": "(Depuis {0})",
+            "print": "[{0}] - {1}: {2} {3}"
+        },
+        "new_sub": {
+            "message": "{0} s'est abonné en tier {0} !",
+            "print": "Évènement recu : 'Nouveau Sub'"
+        },
+        "poll": {
+            "begin": {
+                "message": "Un nouveau sondage a commencé ! \"{0}\" | Les choix sont : {1}. Ce sondage s'arrête dans {2} minute(s).",
+                "print": "Évènement recu : 'Début d'un sondage'"
+            },
+            "end": {
+                "message": "Nous avons un gagnant ! {0} a gagné \"{1}\" avec {2} voies | Les choix étaient : {3}.",
+                "print": "Évènement recu : 'Fin d'un sondage'"
+            },
+            "progress": {
+                "message": "{0} a recu des nouveaux votes! Il se termine dans {1} minute(s).",
+                "print": "Évènement recu : 'Mise à jour d'un sondage'"
+            }
+        },
+        "powerups": {
+            "message": "{0} a réclamé \"{1}\" pour {2} bits.",
+            "print": "Évènement recu : 'Powerup Custom Réclamé'"
+        },
+        "predictions": {
+            "begin": {
+                "message": "Une nouvelle prédiction a commencé ! \"{0}\" | Les choix sont : {1}. Cette prédiction se bloque dans {2} minute(s).",
+                "print": "Évènement recu : 'Début d'une prédiction'"
+            },
+            "end": {
+                "message": {
+                    "cancelled": "La prédiction \"{0}\" a été annulée ! Tout les points de chaine seront remboursés.",
+                    "resolved": "La prédiction \"{0}\" s'est terminé ! \"{1}\" est le choix gagnant avec {2}% (C'est {3} points de chaîne pour {4} spectateur(s)) | Les choix étaient : {5}."
+                },
+                "print": "Évènement recu : 'Fin d'une prédiction'"
+            },
+            "lock": {
+                "message": "La prédiction \"{0}\" est maintenant bloquée ! \"{1}\" est le choix avec plus plus de points de chaîne ({2}%) | Les choix sont : {3}.",
+                "print": "Évènement recu : 'Prédiction bloquée'"
+            },
+            "progress": {
+                "message": "La prédictio a été mise à jour! Elle se ferme dans {0} minute(s).",
+                "print": "Évènement recu : 'Mise à jour d'une prédiction'"
+            }
+        },
+        "raid": {
+            "message": "Merci beaucoup {0} pour le raid avec {1} spectateur(s)!",
+            "print": "Évènement recu : 'Nouveau Raid'"
+        },
+        "resub": {
+            "message": "{0} s'est réabonné avec un sub de tier {1} pour un {2} mois !{3}",
+            "print": "Évènement recu : 'Resub d'un Utilisateur'",
+            "streak": " Iel s'est réabonné {0} mois d'affilé !"
+        },
+        "shared_chat": {
+            "begin": {
+                "message": "{0} a commencé une session de chat partagé avec {1}.",
+                "print": "Évènement recu : 'Début d'une session de chat partagé'"
+            },
+            "end": {
+                "message": "{0} a terminé la session de chat partagé.",
+                "print": "Évènement recu : 'Fin d'une session de chat partagé'"
+            },
+            "update": {
+                "message": {
+                    "added": "{0} a ajouté {1} utilisateurs du chat partagé. Les participants sont maintenant {2}.",
+                    "removed": "{0} a retiré {1} utilisateurs du chat partagé. Les participants sont maintenant {2}."
+                },
+                "print": "Évènement recu : 'Mise à jour d'une session de chat partagé'"
+            }
+        },
+        "shoutout": {
+            "create": {
+                "message": {
+                    "with_game": "{0} était en train de stream \"{1}\"! Si vous aimez, alors passez-y un coup d'œil !",
+                    "without_game": "{0} était en train de stream avec {1} spectateur(s)! Bienvenue!"
+                },
+                "print": "Évènement recu : 'Création d'une dédicace'"
+            },
+            "receive": {
+                "message": {
+                    "with_game": "Merci {0} pour la dédicace ! Iel est en train de stream \"{1}\"! Si vous aimez, alors passez-y un coup d'œil !",
+                    "without_game": "meric {0} pour la dédicace ! Iel est en train de stream avec {1} spectateur(s)!"
+                },
+                "print": "Évènement recu : 'Dédicace recue'"
+            }
+        },
+        "stream": {
+            "offline": {
+                "message": "Le stream viens de se terminer.",
+                "print": "Évènement recu : 'Fin d'un stream'"
+            },
+            "online": {
+                "message": "{0} viens de partir en live.",
+                "print": "Évènement recu : 'Début d'un stream'"
+            }
+        }
+    },
+    "functions": {
+        "format_tier": {
+            "tier_1_or_prime": "1 ou Prime"
+        },
+        "format_time_since": {
+            "day": {
+                "one": "{0} jour, {1}",
+                "multiple": "{0} jours, {1}"
+            },
+            "hour": {
+                "one": "{0} heure, {1}",
+                "multiple": "{0} heures, {1}"
+            },
+            "leap_year": " (Le temps peut être déaclé de quelque jours à cause des années bisextiles.)",
+            "minute": {
+                "base": "minute",
+                "plural": "s"
+            },
+            "month": {
+                "one": "{0} mois, {1}",
+                "multiple": "{0} mois, {1}"
+            },
+            "second": {
+                "base": "seconde",
+                "plural": "s"
+            },
+            "text": "{0} {1} et {2} {3}",
+            "year": {
+                "one": "{0} anneé, {1}",
+                "multiple": "{0} anneés, {1}"
+            }
+        }
+    },
+    "logger": {
+        "info": {
+            "add_token": "Token ajouté dans la base de donnée pour l'utilisateur : %s",
+            "login_success": "Correctement connecté en tant que : %s"
+        },
+        "warning": {
+            "fail_to_subscribe": "Erreur d'abonnement à : %r, pour l'utilisateur : %s",
+            "keyboard_interrupt": "Extinction du programme à cause d'un KeyboardInterrupt"
+        }
+    }
+}
