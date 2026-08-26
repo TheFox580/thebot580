@@ -80,9 +80,14 @@ class Bot(commands.AutoBot):
             )
         )
 
-        # Subscribe and listen to when a shoutout is sent in chat..
+        # Subscribe and listen to when a shoutout is sent / received..
         subscriptions.append(
             eventsub.ShoutoutCreateSubscription(
+                broadcaster_user_id=payload.user_id, moderator_user_id=self.bot_id
+            )
+        )
+        subscriptions.append(
+            eventsub.ShoutoutReceiveSubscription(
                 broadcaster_user_id=payload.user_id, moderator_user_id=self.bot_id
             )
         )
@@ -147,9 +152,14 @@ class Bot(commands.AutoBot):
                 eventsub.ChannelCheerSubscription(broadcaster_user_id=payload.user_id)
             )
 
-            # Subscribe and listen to when prediction starts, locks or ends..
+            # Subscribe and listen to when prediction starts, progresses, locks or ends..
             subscriptions.append(
                 eventsub.ChannelPredictionBeginSubscription(
+                    broadcaster_user_id=payload.user_id
+                )
+            )
+            subscriptions.append(
+                eventsub.ChannelPredictionProgressSubscription(
                     broadcaster_user_id=payload.user_id
                 )
             )

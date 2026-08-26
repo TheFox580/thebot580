@@ -54,31 +54,33 @@ This code uses the TwitchIO **3.3.3** Library, Azure's Text-To-Speech fonctionna
 
 * [ ] **New Follower**
 * [ ] **Shoutout Created**
+* [ ] **Shoutout Recieved** *🆕 Added*
 * [ ] Stream **Starts** and **Ends**
 * [ ] **Raid** *(Gives an automatic shoutout)*
 * [ ] **Title & Category Update**
 * [ ] **Shared Chat Collaboration Begins**
 * [ ] **Shared Chat Collaboration Updates (User join / left)**
 * [ ] **Shared Chat Collaboration Ends**
-* [ ] **Watch Streaks** *🆕 Added*
+* [ ] **Watch Streaks**
 * [x] **New Subscriber**
 * [x] **Resubscriptions**
-* [x] **Normal / Anonymous Gifted Subscriptions**
-* [x] **Normal / Anonymous Cheer Message**
-* [x] **Prediction Begins**
+* [x] **Gifted Subscriptions**
+* [x] **Cheer Message**
+* [x] **Prediction Begins** *🆙 Fixed*
+* [x] **Prediction Progresses** *🆕 Added*
 * [x] **Prediction Locks**
 * [x] **Prediction Ends**
 * [x] **Poll Begins**
 * [x] **Poll Progresses**
 * [x] **Poll Ends**
-* [x] **Golden / Treasure / Normal (Shared) Hype Train Begins**
-* [x] **Golden / Treasure / Normal (Shared) Hype Train Progress**
-* [x] **Golden / Treasure / Normal (Shared) Hype Train Ends**
-* [x] **Follower / Subcription / Cheer Goal Begins**
-* [x] **Follower / Subcription / Cheer Goal Progress**
-* [x] **Follower / Subcription / Cheer Goal Reached**
+* [x] **Hype Train Begins** *🆙 Added support for Mythic Hype Trains*
+* [x] **Hype Train Progress** *🆙 Added support for Mythic Hype Trains*
+* [x] **Hype Train Ends** *🆙 Added support for Mythic Hype Trains*
+* [x] **Goal Begins**
+* [x] **Goal Progress**
+* [x] **Goal Reached**
 * [x] **Channel Points ups**
-* [x] **Power ups** *🆕 Added*
+* [x] **Power ups**
 * [x] **Ad starts**
 * More to come...
 
