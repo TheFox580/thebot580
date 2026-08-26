@@ -1,11 +1,9 @@
 import asyncio
-from asyncio.proactor_events import events
 import logging
 import sqlite3
 from datetime import datetime, timezone
 
 import asqlite
-from pygame import event
 import twitchio
 from twitchio import eventsub
 from twitchio.ext import commands
