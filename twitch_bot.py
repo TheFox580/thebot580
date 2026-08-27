@@ -766,7 +766,6 @@ class MyComponent(commands.Component):
                     "Bots", "TwitchChat"
                 )["positionY"]
 
-
                 has_tts = False
 
                 while posY < 1080:
@@ -1399,7 +1398,7 @@ class MyComponent(commands.Component):
             color = self.getChatterColor(payload.user.id)
 
             alert_message = {
-                "type": "first_year",
+                "type": "first_sub",
                 "username": payload.user.display_name,
                 "color": color,
                 "sub_type": sub_tier,
@@ -1548,7 +1547,7 @@ class MyComponent(commands.Component):
     async def event_prediction_start(
         self, payload: twitchio.ChannelPredictionBegin
     ) -> None:
-        print(translation("event.prediction.begin.print"))
+        print(translation("event.predictions.begin.print"))
         channel = payload.broadcaster
         prediction_title = payload.title
         prediction_outcomes = payload.outcomes
@@ -1561,14 +1560,14 @@ class MyComponent(commands.Component):
         mins = int(secs // 60)
         await channel.send_message(
             sender=BOT_ID,
-            message=translation("event.prediction.begin.message").format(prediction_title, prediction_outcomes_str, mins),
+            message=translation("event.predictions.begin.message").format(prediction_title, prediction_outcomes_str, mins),
         )
 
     @commands.Component.listener()
     async def event_prediction_lock(
         self, payload: twitchio.ChannelPredictionLock
     ) -> None:
-        print(translation("event.prediction.lock.print"))
+        print(translation("event.predictions.lock.print"))
         channel = payload.broadcaster
         prediction_title = payload.title
         prediction_outcomes = payload.outcomes
@@ -1595,20 +1594,20 @@ class MyComponent(commands.Component):
 
         await channel.send_message(
             sender=BOT_ID,
-            message=translation("event.prediction.lock.message").format(prediction_title, prediction_highest.title, round(channel_points / prediction_total * 100, 2), prediction_outcomes_str),
+            message=translation("event.predictions.lock.message").format(prediction_title, prediction_highest.title, round(channel_points / prediction_total * 100, 2), prediction_outcomes_str),
         )
 
     @commands.Component.listener("event_prediction_end")
     async def event_prediction_end(
         self, payload: twitchio.ChannelPredictionEnd
     ) -> None:
-        print(translation("event.prediction.end.print"))
+        print(translation("event.predictions.end.print"))
         channel = payload.broadcaster
         prediction_title = payload.title
         if payload.status == "canceled":
             await channel.send_message(
                 sender=BOT_ID,
-                message=translation("event.prediction.end.message.cancelled").format(prediction_title),
+                message=translation("event.predictions.end.message.cancelled").format(prediction_title),
             )
         else:
             prediction_winner = payload.winning_outcome
@@ -1632,7 +1631,7 @@ class MyComponent(commands.Component):
                 channel_points = prediction_winner.channel_points
             await channel.send_message(
                 sender=BOT_ID,
-                message=translation("event.prediction.end.message.resolved").format(prediction_title, prediction_winner.title, round(channel_points / prediction_total * 100, 2), prediction_total, len(prediction_winner.users), prediction_outcomes_str),
+                message=translation("event.predictions.end.message.resolved").format(prediction_title, prediction_winner.title, round(channel_points / prediction_total * 100, 2), prediction_total, len(prediction_winner.users), prediction_outcomes_str),
             )
 
     @commands.Component.listener("event_poll_begin")
@@ -1768,7 +1767,7 @@ class MyComponent(commands.Component):
             )
 
             alert_message = {
-                "type": "hype_train_start",
+                "type": "hype_train_level_up",
                 "is_shared": is_shared,
                 "train_type": payload.type,
                 "level": train_level,

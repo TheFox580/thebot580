@@ -66,14 +66,22 @@
       document.addEventListener("DOMContentLoaded", async () => {
         const all_pronouns = await getPronouns();
 
+        const fetch_lang = await fetch("/lang");
+        const lang = (await fetch_lang.json())["lang"];
+
+        const fetch_lang_file = await fetch(`/lang/${lang}.json`);
+        const lang_file = await fetch_lang_file.json();
+
+        const lang_chat = lang_file["chat"];
+
         const socket = io();
 
         socket.on("message_send", (payload, cb) => {
-          console.log("Got data: " + payload.message.text);
+          console.log(lang_chat.console.got_data + payload.message.text);
         });
 
         socket.on("new_message_chat", async (payload, cb) => {
-          console.log("Got a new message: ");
+          console.log(lang_chat.console.got_message);
 
           const newBorderColor = hexToRgb(payload.color);
           const newReplyColor = hexToRgb(payload.color);
@@ -163,31 +171,41 @@
           if (savedPronouns[payload.username]){
             if (savedPronouns[payload.username] !== null){
               const correct_pronouns = savedPronouns[payload.username];
-              chatMessagePronouns = document.createElement("p");
-              chatMessagePronouns.textContent =
-                  correct_pronouns[0].subject
-                  + (correct_pronouns[0].subject === "Any"
-                    ? ""
-                    : "/"
-                  + (correct_pronouns[1] === undefined
-                      ? correct_pronouns[0].object
-                      : correct_pronouns[1].subject
-                    )
-                  );
-              chatMessagePronouns.classList.add(
-                  "text-white",
-                  payload.chatter.length < 12 ? "border-4" : "border-2",
-                  "rounded-xl",
-                  "px-2",
-                  "py-1",
-                  "mr-2",
-                  payload.chatter.length < 12 ? bottomSize : topSize,
-                  "text-center",
-                  "items-center",
-                  "justify-center",
-              );
 
-              chatMessageAuthor.appendChild(chatMessagePronouns);
+                const pronoun1 = correct_pronouns[0].subject;
+                let pronoun2 = correct_pronouns[0].object;
+
+                if (correct_pronouns[1] !== undefined) pronoun2 = correct_pronouns[1].subject;
+
+                if (Object.keys(lang_chat.pronouns).includes(pronoun1)) {
+                    pronoun1 = lang_chat.pronouns[pronoun1]
+                }
+                if (Object.keys(lang_chat.pronouns).includes(pronoun2)) {
+                    pronoun2 = lang_chat.pronouns[pronoun2]
+                }
+
+                chatMessagePronouns = document.createElement("p");
+                chatMessagePronouns.textContent =
+                    pronoun1
+                    + (pronoun1 === lang_chat.pronouns["Any"]
+                    ? ""
+                    : "/" + lang_chat.pronouns[pronoun2]
+                    );
+
+                chatMessagePronouns.classList.add(
+                    "text-white",
+                    payload.chatter.length < 12 ? "border-4" : "border-2",
+                    "rounded-xl",
+                    "px-2",
+                    "py-1",
+                    "mr-2",
+                    payload.chatter.length < 12 ? bottomSize : topSize,
+                    "text-center",
+                    "items-center",
+                    "justify-center",
+                );
+
+                chatMessageAuthor.appendChild(chatMessagePronouns);
             }
           } else {
             const pronouns_req = await fetch(
@@ -203,15 +221,24 @@
                 ];
                 savedPronouns[payload.username] = correct_pronouns;
                 chatMessagePronouns = document.createElement("p");
+
+                const pronoun1 = correct_pronouns[0].subject;
+                let pronoun2 = correct_pronouns[0].object;
+
+                if (correct_pronouns[1] !== undefined) pronoun2 = correct_pronouns[1].subject;
+
+                if (Object.keys(lang_chat.pronouns).includes(pronoun1)) {
+                    pronoun1 = lang_chat.pronouns[pronoun1]
+                }
+                if (Object.keys(lang_chat.pronouns).includes(pronoun2)) {
+                    pronoun2 = lang_chat.pronouns[pronoun2]
+                }
+
                 chatMessagePronouns.textContent =
-                  correct_pronouns[0].subject
-                  + (correct_pronouns[0].subject === "Any"
+                  pronoun1
+                  + (pronoun1 === lang_chat.pronouns["Any"]
                     ? ""
-                    : "/"
-                  + (correct_pronouns[1] === undefined
-                      ? correct_pronouns[0].object
-                      : correct_pronouns[1].subject
-                    )
+                    : "/" + lang_chat.pronouns[pronoun2]
                   );
                 chatMessagePronouns.classList.add(
                     "text-white",

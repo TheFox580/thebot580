@@ -1,4 +1,108 @@
 {
+    "alerts": {
+        "channel_points": {
+            "post_user": " a réclammé "
+        },
+        "cheer": {
+            "post_cheer": " bits !",
+            "post_user": " pour les ",
+            "pre_user": "Merci "
+        },
+        "console": {
+            "got_data": "Data recue : ",
+            "got_message": "Nouveau message recu : ",
+            "now_playing": "Alerte jouée : "
+        },
+        "first_sub": {
+            "post_sub": " !",
+            "post_user": " pour le sub de ",
+            "pre_user": "merci ",
+            "tier": "Tier "
+        },
+        "follow": {
+            "post_user": " pour le follow !",
+            "pre_user": "Merci "
+        },
+        "gift_sub": {
+            "message": {
+                "pre_amount": "Iel a donné ",
+                "post_amount": {
+                    "one": " sub au total pour la communauté !",
+                    "multiple": " subs au total pour la communauté !"
+                }
+            },
+            "post_user": " pour le(s) ",
+            "pre_user": "Merci ",
+            "amount": {
+                "one": " sub-gift !",
+                "multiple": " sub-gifts !"
+            },
+            "tier": "Tier "
+        },
+        "hype_train_level_up": {
+            "end": " !",
+            "level": " niveau ",
+            "pre_level": " a atteint ",
+            "pre_shared": "Le Train de la Hype ",
+            "shared": "Partagé ",
+            "type": {
+                "golden_kappa": "du Kappa Doré",
+                "mythic": "Mythique",
+                "regular": "Normal",
+                "treasure": "Trésor"
+            }
+        },
+        "hype_train_start": {
+            "pre_shared": "Un Train de la Hype ",
+            "post_type": " has started!",
+            "shared": "Partagé ",
+            "type": {
+                "golden_kappa": "du Kappa Doré",
+                "mythic": "Mythique",
+                "regular": "Normal",
+                "treasure": "Trésor"
+            }
+        },
+        "powerup": {
+            "post_user": " a réclammé "
+        },
+        "raid": {
+            "amount": {
+                "one": " spectateur !",
+                "multiple": " spectateurs !"
+            },
+            "message": "Bienvenue sur le stream !",
+            "post_user": " pour le raid de ",
+            "pre_user": "Merci "
+        },
+        "resub": {
+            "time": " mois de sub ",
+            "post_sub": " !",
+            "post_user": " pour les ",
+            "pre_user": "Merci ",
+            "tier": "Tier "
+        },
+        "watch_streak": {
+            "post_amount": " série de visionnage !",
+            "post_user": " a atteint "
+        }
+    },
+    "chat": {
+        "console": {
+            "got_data": "Data recue : ",
+            "got_message": "Nouveau message recu : "
+        },
+        "pronouns": {
+            "He": "Il",
+            "Him": "Il",
+            "She": "Elle",
+            "Her": "Elle",
+            "They": "Iel",
+            "Them": "Iel",
+            "Any": "Tous",
+            "All": "Tous"
+        }
+    },
     "commands": {
         "ad": "Ce stream n'est pas une collaboration commerciale :3",
         "age": "Fox a {0}.",

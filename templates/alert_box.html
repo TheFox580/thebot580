@@ -18,7 +18,7 @@
             integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
             crossorigin="anonymous"
         ></script>
-        <script src="{{ url_for('static', filename='env.js') }}"></script>
+        <script src="{{ url_for('static', filename='string_format.js') }}"></script>
         <script type="text/javascript" charset="utf-8">
 
             //based on month of sub
@@ -98,6 +98,14 @@
                 const alert_queue = [];
                 const emoteSize = 36;
 
+                const fetch_lang = await fetch("/lang");
+                const lang = (await fetch_lang.json())["lang"];
+
+                const fetch_lang_file = await fetch(`/lang/${lang}.json`);
+                const lang_file = await fetch_lang_file.json();
+
+                const lang_alerts = lang_file["alerts"];
+
                 let isAlertPlaying = false;
 
                 const alert_box_text =
@@ -116,8 +124,13 @@
                 }
 
                 function triggerAlert(alert) {
-                    console.log("Now playing: " + alert.type);
+
+                    resetAlert();
+
+                    console.log(lang_alerts.console.now_playing + alert.type);
                     console.log(alert);
+
+                    const lang_alert_type = lang_alerts[alert.type]
 
                     alert_box_img.src = alertImage[alert.type];
 
@@ -127,47 +140,45 @@
 
                     if (alert.type === "follow") {
                         alert_box_text.appendChild(
-                            document.createTextNode("Thank you "),
+                            document.createTextNode(lang_alert_type.pre_user),
                         );
 
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" for the follow!"),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
                     } else if (alert.type === "first_sub") {
                         alert_box_text.appendChild(
-                            document.createTextNode("Thank you "),
+                            document.createTextNode(lang_alert_type.pre_user),
                         );
 
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" for the "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const sub_type = document.createElement("span");
-                        sub_type.textContent = "Tier " + alert.sub_type;
+                        sub_type.textContent = lang_alert_type.tier + alert.sub_type;
                         sub_type.style.color = alert.color;
 
                         alert_box_text.appendChild(sub_type);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" sub!"),
+                            document.createTextNode(lang_alert_type.post_sub),
                         );
-
-                        alert_box_text.appendChild(sub_type);
                     } else if (alert.type === "resub") {
                         alert_box_img.src = getSubBadge(alert.amount);
 
                         alert_box_text.appendChild(
-                            document.createTextNode("Thank you "),
+                            document.createTextNode(lang_alert_type.pre_user),
                         );
 
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" for the "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const sub_month = document.createElement("span");
@@ -177,29 +188,27 @@
                         alert_box_text.appendChild(sub_month);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(
-                                ` month${alert.amount > 1 ? "s" : ""} of `,
-                            ),
+                            document.createTextNode(lang_alert_type.time),
                         );
 
                         const sub_type = document.createElement("span");
-                        sub_type.textContent = "Tier " + alert.sub_type;
+                        sub_type.textContent = lang_alert_type.tier + alert.sub_type;
                         sub_type.style.color = alert.color;
 
                         alert_box_text.appendChild(sub_type);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" sub!"),
+                            document.createTextNode(lang_alert_type.post_sub),
                         );
                     } else if (alert.type === "gift_sub") {
                         alert_box_text.appendChild(
-                            document.createTextNode("Thank you "),
+                            document.createTextNode(lang_alert_type.pre_user),
                         );
 
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" for the "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const sub_amount = document.createElement("span");
@@ -209,25 +218,25 @@
                         alert_box_text.appendChild(sub_amount);
 
                         const sub_type = document.createElement("span");
-                        sub_type.textContent = "Tier " + alert.sub_type;
+                        sub_type.textContent = lang_alert_type.tier + alert.sub_type;
                         sub_type.style.color = alert.color;
 
                         alert_box_text.appendChild(sub_type);
 
                         alert_box_text.appendChild(
                             document.createTextNode(
-                                ` sub-gift${alert.amount > 1 ? "s" : ""}!`,
+                                alert.amount > 1 ? lang_alert_type.amount.multiple : lang_alert_type.amount.one
                             ),
                         );
                     } else if (alert.type === "cheer") {
                         alert_box_text.appendChild(
-                            document.createTextNode("Thank you "),
+                            document.createTextNode(lang_alert_type.pre_user),
                         );
 
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" for the "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const cheer_amount = document.createElement("span");
@@ -237,99 +246,103 @@
                         alert_box_text.appendChild(cheer_amount);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" bits!"),
+                            document.createTextNode(lang_alert_type.post_cheer),
                         );
                     } else if (alert.type === "hype_train_start") {
                         alert_box_text.appendChild(
-                            document.createTextNode("A "),
+                            document.createTextNode(lang_alert_type.pre_shared),
                         );
 
                         const hype_train_shared =
                             document.createElement("span");
                         hype_train_shared.textContent = alert.is_shared
-                            ? "Shared "
+                            ? lang_alert_type.shared
                             : "";
-                        hype_train_shared.style.color = "#00FF00";
+                        hype_train_shared.style.color =
+                            alert.train_type === "treasure"
+                                ? "#3946c3"
+                                : alert.train_type === "golden_kappa"
+                                  ? "gold"
+                                  : alert.train_type === "mythic"
+                                    ? "orange" : "#00FF00";
 
                         alert_box_text.appendChild(hype_train_shared);
 
                         const hype_train_type = document.createElement("span");
-                        hype_train_type.textContent =
-                            alert.train_type === "treasure"
-                                ? "Treasure "
-                                : alert.train_type === "golden_kappa"
-                                  ? "Golden Kappa "
-                                  : alert.train_type === "mythic"
-                                    ? "Mythic "
-                                    : "";
+                        hype_train_type.textContent = lang_alert_type.type[alert.train_type];
                         hype_train_type.style.color =
                             alert.train_type === "treasure"
                                 ? "#3946c3"
-                                : alert.train_type === "golden_kappa" ||
-                                    alert.train_type === "mythic"
+                                : alert.train_type === "golden_kappa"
                                   ? "gold"
-                                  : "#00FF00";
+                                  : alert.train_type === "mythic"
+                                    ? "orange" : "#00FF00";
 
                         alert_box_text.appendChild(hype_train_type);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" Hype Train has started!"),
+                            document.createTextNode(lang_alert_type.post_type),
                         );
                     } else if (alert.type === "hype_train_level_up") {
                         alert_box_text.appendChild(
-                            document.createTextNode("The "),
+                            document.createTextNode(lang_alert_type.pre_shared),
                         );
 
                         const hype_train_shared =
                             document.createElement("span");
                         hype_train_shared.textContent = alert.is_shared
-                            ? "Shared "
+                            ? lang_alert_type.shared
                             : "";
-                        hype_train_shared.style.color = "#00FF00";
+                        hype_train_shared.style.color =
+                            alert.train_type === "treasure"
+                                ? "#3946c3"
+                                : alert.train_type === "golden_kappa"
+                                  ? "gold"
+                                  : alert.train_type === "mythic"
+                                    ? "orange" : "#00FF00";
 
                         alert_box_text.appendChild(hype_train_shared);
 
                         const hype_train_type = document.createElement("span");
-                        hype_train_type.textContent =
-                            alert.train_type === "treasure"
-                                ? "Treasure "
-                                : alert.train_type === "golden_kappa"
-                                  ? "Golden Kappa "
-                                  : alert.train_type === "mythic"
-                                    ? "Mythic "
-                                    : "";
+                        hype_train_type.textContent = lang_alert_type.type[alert.train_type];
                         hype_train_type.style.color =
                             alert.train_type === "treasure"
                                 ? "#3946c3"
-                                : alert.train_type === "golden_kappa" ||
-                                    alert.train_type === "mythic"
+                                : alert.train_type === "golden_kappa"
                                   ? "gold"
-                                  : "#00FF00";
+                                  : alert.train_type === "mythic"
+                                    ? "orange" : "#00FF00";
 
                         alert_box_text.appendChild(hype_train_type);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" Hype Train has reached "),
+                            document.createTextNode(lang_alert_type.pre_level),
                         );
 
                         const hype_train_level = document.createElement("span");
-                        hype_train_level.textContent = "level " + alert.level;
-                        hype_train_level.style.color = "#00FF00";
+                        hype_train_level.textContent = lang_alert_type.level + alert.level;
+                        hype_train_level.style.color =
+                            alert.train_type === "treasure"
+                                ? "#3946c3"
+                                : alert.train_type === "golden_kappa"
+                                  ? "gold"
+                                  : alert.train_type === "mythic"
+                                    ? "orange" : "#00FF00";
 
                         alert_box_text.appendChild(hype_train_level);
 
                         alert_box_text.appendChild(
-                            document.createTextNode("!"),
+                            document.createTextNode(lang_alert_type.end),
                         );
                     } else if (alert.type === "raid") {
                         alert_box_text.appendChild(
-                            document.createTextNode("Thank you "),
+                            document.createTextNode(lang_alert_type.pre_user),
                         );
 
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" for the raid of "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const viewers = document.createElement("span");
@@ -340,14 +353,14 @@
 
                         alert_box_text.appendChild(
                             document.createTextNode(
-                                ` viewer${alert.viewers > 1 ? "s" : ""}!`,
+                                alert.viewers > 1 ? lang_alert_type.amount.multiple : lang_alert_type.amount.one
                             ),
                         );
                     } else if (alert.type === "channel_points") {
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" redeemed "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const channel_points_reward_title =
@@ -360,7 +373,7 @@
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" redeemed "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const channel_points_reward_title =
@@ -373,7 +386,7 @@
                         alert_box_text.appendChild(user);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" reached a "),
+                            document.createTextNode(lang_alert_type.post_user),
                         );
 
                         const wacth_streak_amount =
@@ -384,7 +397,7 @@
                         alert_box_text.appendChild(wacth_streak_amount);
 
                         alert_box_text.appendChild(
-                            document.createTextNode(" streams streak!"),
+                            document.createTextNode(lang_alert_type.post_amount),
                         );
                     }
 
@@ -426,7 +439,7 @@
                         }
                     } else if (alert.type === "gift_sub") {
                         alert_box_chat_message.appendChild(
-                            document.createTextNode("They gifted "),
+                            document.createTextNode(lang_alert_type.message.pre_amount),
                         );
 
                         const gift_total = document.createElement("span");
@@ -437,16 +450,16 @@
 
                         alert_box_chat_message.appendChild(
                             document.createTextNode(
-                                " subs in total to the community!",
+                                alert.amount > 1 ? lang_alert_type.message.post_amount.multiple : lang_alert_type.message.post_amount.one
                             ),
                         );
                     } else if (alert.type === "raid") {
                         alert_box_chat_message.appendChild(
-                            document.createTextNode("Welcome to the stream!"),
+                            document.createTextNode(lang_alert_type.message),
                         );
                     }
 
-                    const time_for_alerts = alert.time_to_live  // Make the alert at least as long as the TTS message if there's one, otherwise 5s
+                    const time_for_alerts = alert.time_to_live ? alert.time_to_live : 5 // Make the alert at least as long as the TTS message if there's one, otherwise 5s
 
                     setTimeout(() => {
                         resetAlert();
@@ -456,11 +469,11 @@
                 const socket = io();
 
                 socket.on("message_send", (msg, cb) => {
-                    console.log("Got data: " + msg.message);
+                    console.log(lang_alerts.console.got_data + msg.message);
                 });
 
                 socket.on("new_alert", async (msg, cb) => {
-                    console.log("Got a new message: ");
+                    console.log(lang_alerts.console.got_message);
                     console.log(msg);
 
                     triggerAlert(msg);

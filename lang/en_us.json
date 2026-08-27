@@ -1,4 +1,108 @@
 {
+    "alerts": {
+        "channel_points": {
+            "post_user": " redeemed "
+        },
+        "cheer": {
+            "post_cheer": " bits!",
+            "post_user": " for the ",
+            "pre_user": "Thank you "
+        },
+        "console": {
+            "got_data": "Got data: ",
+            "got_message": "Got a new message: ",
+            "now_playing": "Now Playing: "
+        },
+        "first_sub": {
+            "post_sub": " sub!",
+            "post_user": " for the ",
+            "pre_user": "Thank you ",
+            "tier": "Tier "
+        },
+        "follow": {
+            "post_user": " for the follow!",
+            "pre_user": "Thank you "
+        },
+        "gift_sub": {
+            "message": {
+                "pre_amount": "They gifted ",
+                "post_amount": {
+                    "one": " sub in total to the community!",
+                    "multiple": " subs in total to the community!"
+                }
+            },
+            "post_user": " for the ",
+            "pre_user": "Thank you ",
+            "amount": {
+                "one": " sub-gift!",
+                "multiple": " sub-gifts!"
+            },
+            "tier": "Tier "
+        },
+        "hype_train_level_up": {
+            "end": "!",
+            "level": " level ",
+            "pre_level": " Hype Train has reached ",
+            "pre_shared": "The ",
+            "shared": "Shared ",
+            "type": {
+                "golden_kappa": "Golden Kappa",
+                "mythic": "Mythic",
+                "regular": "Regular",
+                "treasure": "Treasure"
+            }
+        },
+        "hype_train_start": {
+            "pre_shared": "A ",
+            "post_type": " Hype Train has started!",
+            "shared": "Shared ",
+            "type": {
+                "golden_kappa": "Golden Kappa",
+                "mythic": "Mythic",
+                "regular": "Regular",
+                "treasure": "Treasure"
+            }
+        },
+        "powerup": {
+            "post_user": " redeemed "
+        },
+        "raid": {
+            "amount": {
+                "one": " viewer!",
+                "multiple": " viewers!"
+            },
+            "message": "Welcome to the stream!",
+            "post_user": " for the raid of ",
+            "pre_user": "Thank you "
+        },
+        "resub": {
+            "time": " months of ",
+            "post_sub": " sub!",
+            "post_user": " for the ",
+            "pre_user": "Thank you ",
+            "tier": "Tier "
+        },
+        "watch_streak": {
+            "post_amount": " streams streak!",
+            "post_user": " reached a "
+        }
+    },
+    "chat": {
+        "console": {
+            "got_data": "Got data: ",
+            "got_message": "Got a new message: "
+        },
+        "pronouns": {
+            "He": "He",
+            "Him": "Him",
+            "She": "She",
+            "Her": "Her",
+            "They": "They",
+            "Them": "Them",
+            "Any": "Any",
+            "All": "All"
+        }
+    },
     "commands": {
         "ad": "This stream is not an ad :3",
         "age": "Fox is {0} old.",

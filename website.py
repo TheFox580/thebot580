@@ -1,4 +1,7 @@
-from flask import Flask, render_template
+import json
+from keys import LANG
+
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_socketio import SocketIO
 
 
@@ -15,13 +18,38 @@ class Website:
         def chat():
             return render_template("chat.html")
 
-        @self.app.route("/tts")
-        def tts():
-            return render_template("tts.html")
+        @self.app.route("/lang")
+        def get_lang():
+            return jsonify(lang = LANG)
+
+        @self.app.route("/lang/<path:filename>")
+        def lang_files(filename):
+            return send_from_directory("./lang/", filename)
 
         @self.app.route("/alert_box")
         def alert_box():
             return render_template("alert_box.html")
+
+        @self.app.route("/test/<type>", methods = ["POST"])
+        def test_endpoint(type):
+
+            if type not in ["alert_box", "chat"]:
+                return jsonify(
+                    succes = False,
+                    message = "This test endpoint does not exist."), 400
+
+            data = json.loads(request.get_data())
+
+            print(data)
+
+            if type == "alert_box":
+                self.socketio.emit("new_alert", data)
+            elif type == "chat":
+                self.socketio.emit("new_message_chat", data)
+
+            return jsonify(
+                succes = True,
+                message = f'Your test has been sent to: {type}'), 200
 
         @self.socketio.event
         def connect():
