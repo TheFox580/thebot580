@@ -72,12 +72,12 @@
         const fetch_lang_file = await fetch(`/lang/${lang}.json`);
         const lang_file = await fetch_lang_file.json();
 
-        const lang_chat = lang_file["chat"];
+        const lang_chat = lang_file.chat;
 
         const socket = io();
 
         socket.on("message_send", (payload, cb) => {
-          console.log(lang_chat.console.got_data + payload.message.text);
+          console.log(lang_chat.console.got_data + payload.message);
         });
 
         socket.on("new_message_chat", async (payload, cb) => {
@@ -172,7 +172,7 @@
             if (savedPronouns[payload.username] !== null){
               const correct_pronouns = savedPronouns[payload.username];
 
-                const pronoun1 = correct_pronouns[0].subject;
+                let pronoun1 = correct_pronouns[0].subject;
                 let pronoun2 = correct_pronouns[0].object;
 
                 if (correct_pronouns[1] !== undefined) pronoun2 = correct_pronouns[1].subject;
@@ -222,7 +222,7 @@
                 savedPronouns[payload.username] = correct_pronouns;
                 chatMessagePronouns = document.createElement("p");
 
-                const pronoun1 = correct_pronouns[0].subject;
+                let pronoun1 = correct_pronouns[0].subject;
                 let pronoun2 = correct_pronouns[0].object;
 
                 if (correct_pronouns[1] !== undefined) pronoun2 = correct_pronouns[1].subject;
