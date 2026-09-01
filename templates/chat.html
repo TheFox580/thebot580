@@ -338,35 +338,37 @@
               .split(/[\s-]/)
               .pop();
 
-          for (const word of splitMessages) {
-              if (Object.keys(payload.emotes).includes(word)) {
+          if (payload.gif != ""){
+              const chatMessageFragment =
+                  document.createElement("img");
+              chatMessageFragment.src = payload.gifs[gif_id];
+              chatMessageFragment.classList.add(
+                  "inline-grid",
+                  "mr-2",
+                  `h-[${emoteSize*4}px]`,
+                  "align-middle",
+              );
+              chatMessageContent.appendChild(chatMessageFragment);
+          } else {
+              for (const word of splitMessages) {
+                if (Object.keys(payload.emotes).includes(word)) {
                   const chatMessageFragment =
-                      document.createElement("img");
+                    document.createElement("img");
                   chatMessageFragment.src = payload.emotes[word];
                   chatMessageFragment.classList.add(
-                      "inline-grid",
-                      "mr-2",
-                      `h-[${emoteSize}px]`,
-                      "align-middle",
-                  );
-                  chatMessageContent.appendChild(chatMessageFragment);
-              } else if (Object.keys(payload.gifs).includes(word)){
-                const chatMessageFragment =
-                    document.createElement("img");
-                chatMessageFragment.src = payload.gifs[word];
-                chatMessageFragment.classList.add(
                     "inline-grid",
                     "mr-2",
-                    `h-[${emoteSize*4}px]`,
+                    `h-[${emoteSize}px]`,
                     "align-middle",
-                );
-                chatMessageContent.appendChild(chatMessageFragment);
-              } else {
-                  chatMessageContent.appendChild(
-                      document.createTextNode(
-                          word + (lastWord === word ? "" : " "),
-                      ),
                   );
+                  chatMessageContent.appendChild(chatMessageFragment);
+                } else {
+                  chatMessageContent.appendChild(
+                    document.createTextNode(
+                      word + (lastWord === word ? "" : " "),
+                    ),
+                  );
+                }
               }
           }
 

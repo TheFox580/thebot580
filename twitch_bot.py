@@ -895,7 +895,7 @@ class MyComponent(commands.Component):
 
             twitchChatMessage = ""
             emote_urls = {}
-            gif_urls = {}
+            gif_url = ""
 
             for messageFragment in payload.fragments:
                 if messageFragment.type == "emote":
@@ -909,10 +909,6 @@ class MyComponent(commands.Component):
 
                 elif messageFragment.type == "gif":
                     gif_url = messageFragment.gif.url
-                    gif_name = messageFragment.gif.qualified_name
-                    gif_urls[gif_name] =  gif_url
-
-                    twitchChatMessage += gif_url + " "
 
                 elif messageFragment.type == "text":
                     twitchChatMessage += messageFragment.text + " "
@@ -1004,7 +1000,7 @@ class MyComponent(commands.Component):
                     "chatter": payload.chatter.display_name,
                     "color": color,
                     "emotes": emote_urls,
-                    "gifs": gif_urls,
+                    "gif": gif_url,
                     "message": {
                         "text": twitchChatMessage,
                         "id": payload.id
