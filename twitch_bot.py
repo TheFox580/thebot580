@@ -1190,6 +1190,17 @@ class MyComponent(commands.Component):
     async def subtember(self, ctx: commands.Context):
        await ctx.send(translation("commands.subtember").format(self.format_time_since(datetime.fromtimestamp(1790874000), datetime.now()), ctx.broadcaster.name))
 
+    @commands.command()
+    async def gifs(self, ctx: commands.Context):
+        sub: twitchio.UserSubscription | None = await ctx.chatter.fetch_subscription(broadcaster=OWNER_ID)
+        if sub is not None:
+            if sub.tier != "1000":
+                await ctx.send(translation("commands.gifs.sub.success"))
+                return
+            await ctx.send(translation("commands.gifs.sub.fail"))
+            return
+        await ctx.send(translation("commands.gifs.not_sub"))
+
     @commands.command(aliases=["donate"])
     async def charity(self, ctx: commands.Context):
         await ctx.send_announcement(

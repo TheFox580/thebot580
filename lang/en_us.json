@@ -123,6 +123,13 @@
             "fail": "Sorry {0}, but you are not following the channel...",
             "success": "{0}, you've been following for {1}. (Followed on {2})"
         },
+        "gifs": {
+            "not_sub": "You are not subscribed to this channel. Only Tier 2+ subs can send GIFs.",
+            "sub": {
+                "fail": "You need to be (at least) a Tier 2 sub to sends GIFs.",
+                "success": "You can sends GIFs in this chat!"
+            }
+        },
         "hi": "Hello {0}!",
         "lurk": {
             "fail": "You were already lurking! But see you later {0}.",

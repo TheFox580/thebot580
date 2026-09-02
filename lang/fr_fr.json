@@ -123,6 +123,13 @@
             "fail": "Désolé {0}, mais tu ne suis pas la chaîne...",
             "success": "{0}, tu suis la chaîne depuis {1}. (Follow le {2})"
         },
+        "gifs": {
+            "not_sub": "Tu n'es pas abonné à la chaîne. Seulement les subs Tier 2+ peuvet evoyer des GIFs.",
+            "sub": {
+                "fail": "Tu dois être abonnné en Tier 2 (au moins) pour envoyer des GIFs.",
+                "success": "Tu peux envoyer des GIFs dans ce chat!"
+            }
+        },
         "hi": "Bienvenue {0} !",
         "lurk": {
             "fail": "Tu étais déjà en train de lurk ! Mais à bientôt {0}.",
