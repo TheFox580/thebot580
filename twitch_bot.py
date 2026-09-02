@@ -329,6 +329,7 @@ class MyComponent(commands.Component):
         self.message_sent: int = 0
         self.db: mongo.Database = mongo.Database(MONGODB_URL)
         self.streamer = None
+        self.colors: dict[str, str] = {}
         # self.db.update(
         #    "twitch_api",
         #    "messages",
@@ -500,6 +501,10 @@ class MyComponent(commands.Component):
         return badges
 
     def getChatterColor(self, user_id: str) -> str:
+
+        if user_id in self.colors.keys():
+            return self.colors[user_id]
+
         color: str = "#%06x" % random.randint(0, 0xFFFFFF)
 
         headers = {
@@ -514,13 +519,17 @@ class MyComponent(commands.Component):
         )
 
         if not req.ok:
+            self.color[user_id] = color
             return color
 
         res = req.json()
 
         for user in res["data"]:
-            return user["color"] if user["color"] != "" else color
+            color = user["color"] if user["color"] != "" else color
+            self.color[user_id] = color
+            return color
 
+        self.color[user_id] = color
         return color
 
     def getEmoteList(self) -> list[str]:
