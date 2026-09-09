@@ -1220,8 +1220,13 @@ class MyComponent(commands.Component):
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):
         await ctx.reply(
-            translation("commands.version"),
-            me=True,
+            translation("commands.version")
+        )
+
+    @commands.command(aliases=["chunk"])
+    async def mining(self, ctx: commands.Context):
+        await ctx.reply(
+            translation("commands.mining")
         )
 
     @commands.command(aliases=["music"])

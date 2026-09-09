@@ -138,12 +138,13 @@
         "mcci": {
             "fail": "Aucun joueur avec le nom \"{0}\" trouvé."
         },
+        "mining": "Cette commande n'existe pas...",
         "pb": "MCSR Ranked: {0}",
         "schedule": {
-            "fail": "Aucun stream prévu cette semaine, vous pouvez trouver l'emploi du temps complet ici : https://thewebsite580.vercel.app/schedule",
+            "fail": "Aucun stream prévu cette semaine, vous pouvez trouver l'emploi du temps complet ici : https://thefox580.me/schedule",
             "week": {
-                "fail": "Aucun autre stream prévu cette semaine, vous pouvez trouver l'emploi du temps complet ici : https://thewebsite580.vercel.app/schedule",
-                "success": "Prochain stream : {0}. Jeu : {1}. Heure : {2} {3} à {4}:{5} GMT+2. Retrouvez l'emploi du temps de la semaine ici : https://thewebsite580.vercel.app/schedule/week"
+                "fail": "Aucun autre stream prévu cette semaine, vous pouvez trouver l'emploi du temps complet ici : https://thefox580.me/schedule",
+                "success": "Prochain stream : {0}. Jeu : {1}. Heure : {2} {3} à {4}:{5} GMT+2. Retrouvez l'emploi du temps de la semaine ici : https://thefox580.me/schedule/week"
             }
         },
         "setgame": {

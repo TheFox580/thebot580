@@ -109,7 +109,7 @@
         "ai": "I don't use AI for anything, coding, art, ... I believe anyone can do anything with enough will, make whatever you want by yourself and have fun!",
         "archipelago": "Not playing an Archipelago randomizer.",
         "backseat": "No backseat will be allowed unless Fox asks. You will get timed out 10 minutes for backseating.",
-        "charity": "We're raising money for the Joyful Heart Foundation! Donate here: https://thewebsite580.vercel.app/donate",
+        "charity": "We're raising money for the Joyful Heart Foundation! Donate here: https://thefox580.me/donate",
         "color": {
             "fail": "Your color probably is: {0}",
             "success": "Your color is: {0}"
@@ -138,12 +138,13 @@
         "mcci": {
             "fail": "No player with the username \"{0}\" found."
         },
+        "mining": "I am trying to mine a full chunk... You can check my progress over at: https://thefox580.me/chunk",
         "pb": "MCSR Ranked: {0}",
         "schedule": {
-            "fail": "No streams scheduled this week, get the full schedule here: https://thewebsite580.vercel.app/schedule",
+            "fail": "No streams scheduled this week, get the full schedule here: https://thefox580.me/schedule",
             "week": {
-                "fail": "No other streams scheduled this week, get the full schedule here: https://thewebsite580.vercel.app/schedule",
-                "success": "Next stream: {0}. Game: {1}. Time: {2} {3} at {4}:{5} GMT+2. Get the full week schedule here: https://thewebsite580.vercel.app/schedule/week"
+                "fail": "No other streams scheduled this week, get the full schedule here: https://thefox580.me/schedule",
+                "success": "Next stream: {0}. Game: {1}. Time: {2} {3} at {4}:{5} GMT+2. Get the full week schedule here: https://thefox580.me/schedule/week"
             }
         },
         "setgame": {
