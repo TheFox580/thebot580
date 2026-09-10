@@ -377,8 +377,10 @@
         },
         "stream": {
             "offline": {
+                "fail": "Prochain stream: je sais pas vous verrez bien (check @thefox580 peut-être que je suis en live)",
                 "message": "Le stream viens de se terminer. {0} était en live pendant {1}",
-                "print": "Évènement recu : 'Fin d'un stream'"
+                "print": "Évènement recu : 'Fin d'un stream'",
+                "success": "Prochain stream: {0} - {1}"
             },
             "online": {
                 "message": "{0} viens de partir en live.",

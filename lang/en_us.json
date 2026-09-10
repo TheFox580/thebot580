@@ -377,8 +377,10 @@
         },
         "stream": {
             "offline": {
+                "fail": "Next stream: idk you'll see (check @thealt580 maybe i'm live)",
                 "message": "The stream is now offline. {0} has been live for the past {1}",
-                "print": "Received event: 'Stream Offline'"
+                "print": "Received event: 'Stream Offline'",
+                "success": "Next stream: {0} - {1} GMT+2"
             },
             "online": {
                 "message": "{0} is now live.",

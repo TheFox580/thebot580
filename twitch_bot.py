@@ -1254,7 +1254,7 @@ class MyComponent(commands.Component):
             total_time = math.floor(res["duration"] / 1000)
             current_time = math.floor(res["progress"] / 1000)
 
-            album = translation("commands.song.playing.album").format(res["album"]) if album in res.keys() else ""
+            album = translation("commands.song.playing.album").format(res["album"]) if "album" in res.keys() else ""
 
             await ctx.reply(translation("commands.song.playing.message").format(title, album, artists_str, math.floor(current_time/60), "0" if current_time % 60 < 10 else "", current_time % 60, math.floor(total_time/60), "0" if total_time % 60 < 10 else "", total_time%60))
 
@@ -1332,6 +1332,18 @@ class MyComponent(commands.Component):
             )
 
     @commands.command()
+    @commands.is_broadcaster()
+    async def test(self, ctx: commands.Context):
+        schedule = self.db.getData("twitch_api", "schedule", {"time" : { "$gt": datetime.now().timestamp() } })
+        schedule = list(sorted(filter(lambda x: (x["channel"].lower() == ctx.broadcaster.name), schedule), key=lambda stream: stream["time"]))
+
+        if len(schedule) > 0:
+            stream = schedule[0]
+            await ctx.broadcaster.modify_channel(title=f"Next stream: {stream["title"]} - {datetime.fromtimestamp(stream["time"]).strftime('%A %d at %H:%M')} GMT+2")
+        else:
+            await ctx.broadcaster.modify_channel(title=f"Next stream: idk you'll see (check @thealt580 maybe i'm live)")
+
+    @commands.command()
     async def backseat(self, ctx: commands.Context):
         await ctx.send_announcement(translation("commands.backseat"), color="green")
 
@@ -1341,15 +1353,18 @@ class MyComponent(commands.Component):
 
         if len(week_schedule) > 0:
             this_week = week_schedule[0]
-            streams = list(sorted(filter(lambda x: (x["time"] > datetime.now().timestamp()), this_week["days"]), key=lambda stream: stream["time"]))
+            streams = list(sorted(filter(lambda x: (x["time"] > datetime.now().timestamp() and x["channel"].lower() == ctx.broadcaster.name), this_week["days"]), key=lambda stream: stream["time"]))
+
             if len(streams) > 0:
                 next_stream = streams[0]
                 time = datetime.fromtimestamp(next_stream["time"])
                 await ctx.send(translation("commands.schedule.week.success").format(next_stream["title"], next_stream["category"], self.get_day(time.weekday()), time.day, f"0{time.hour}" if time.hour < 10 else time.hour, f"0{time.minute}" if time.minute < 10 else time.minute))
-            else:
-                await ctx.send(translation("commands.schedule.week.fail"))
-        else:
-            await ctx.send(translation("commands.schedule.fail"))
+                return
+
+            await ctx.send(translation("commands.schedule.week.fail"))
+            return
+
+        await ctx.send(translation("commands.schedule.fail"))
 
     @commands.command()
     async def pb(self, ctx: commands.Context):
@@ -1726,6 +1741,15 @@ class MyComponent(commands.Component):
             sender=BOT_ID,
             message=translation("event.stream.offline.message").format(payload.broadcaster.display_name, stream_time_diff),
         )
+
+        schedule = self.db.getData("twitch_api", "schedule", {"time" : { "$gt": datetime.now().timestamp() } })
+        schedule = list(sorted(filter(lambda x: (x["channel"].lower() == payload.broadcaster.name), schedule), key=lambda stream: stream["time"]))
+
+        if len(schedule) > 0:
+            stream = schedule[0]
+            await ctx.broadcaster.modify_channel(title=translation("event.stream.offline.success").format(stream["title"], datetime.fromtimestamp(stream["time"]).strftime('%A %d at %H:%M')))
+        else:
+            await ctx.broadcaster.modify_channel(title=translation("event.stream.offline.fail"))
 
     @commands.Component.listener("event_hype_train")
     async def event_hype_train(self, payload: twitchio.HypeTrainBegin) -> None:
