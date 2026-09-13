@@ -8,6 +8,11 @@
             "post_user": " pour les ",
             "pre_user": "Merci "
         },
+        "donation": {
+            "post_donation": " !",
+            "post_user": " pour les ",
+            "pre_user": "Merci "
+        },
         "console": {
             "got_data": "Data recue : ",
             "got_message": "Nouveau message recu : ",

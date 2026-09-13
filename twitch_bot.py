@@ -1216,12 +1216,25 @@ class MyComponent(commands.Component):
             return
         await ctx.send(translation("commands.gifs.not_sub"))
 
-    @commands.command(aliases=["donate"])
+    @commands.command()
     async def charity(self, ctx: commands.Context):
         await ctx.send_announcement(
             translation("commands.charity"),
             color="green",
         )
+
+    @commands.command()
+    async def donate(self, ctx: commands.Context):
+        if False: #Charity
+            await ctx.send_announcement(
+                translation("commands.charity"),
+                color="green",
+            )
+        else:
+            await ctx.send_announcement(
+                translation("commands.donate"),
+                color="green",
+            )
 
     @commands.command(aliases=["bot"])
     async def version(self, ctx: commands.Context):

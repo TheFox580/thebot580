@@ -119,6 +119,7 @@
             "fail": "Your color probably is: {0}",
             "success": "Your color is: {0}"
         },
+        "donate": "You can donate to support me here: https://thefox580.me/donate",
         "elo": {
             "fail": "No player with the username \"{0}\" found.",
             "success": "{0} | Elo: {1} (High/Low: {2}/{3}) | #{4} === Played {5} games | W/D/L {6}/{7}/{8} === PB: {9}:{10}.{11} === {12}% Forfeit Rate."
