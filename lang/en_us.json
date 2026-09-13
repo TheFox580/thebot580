@@ -13,6 +13,11 @@
             "got_message": "Got a new message: ",
             "now_playing": "Now Playing: "
         },
+        "donation": {
+            "post_donation": "!",
+            "post_user": " for the ",
+            "pre_user": "Thank you "
+        },
         "first_sub": {
             "post_sub": " sub!",
             "post_user": " for the ",
@@ -164,6 +169,7 @@
             }
         },
         "subtember": "For the next {0}, you can get up to 30% off your subscription thanks to this year's SUBtember! If you want to support me, you can do so by going to: https://www.twitch.tv/subs/{1}!",
+        "team": "Fox is in a team with Kyrocat, pinkfluffyseal & ghosttauk",
         "time": "It is currently {0} for Fox.",
         "trigger": "Sent custom trigger.",
         "tts": {

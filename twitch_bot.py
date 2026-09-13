@@ -5,6 +5,7 @@ import math
 import random
 import sqlite3
 import emoji
+import uuid
 from datetime import datetime, timezone
 from threading import Timer
 
@@ -25,6 +26,7 @@ from keys import (
     LANG,
     MONGODB_URL,
     OWNER_ID,
+    STREAMLABS_ACCESS_TOKEN,
     TWITCH_BOT_CLIENT_ID,
     TWITCH_BOT_CLIENT_SECRET,
     HTTP_PORT_MAIN
@@ -308,7 +310,7 @@ class MyComponent(commands.Component):
             self.getFFZEmotes(OWNER_ID),
             "Twitch": self.getTwitchEmotes(OWNER_ID),
         }
-        self.emotes_list = self.getEmoteList()
+        self.emotes_list: list[str] = self.getEmoteList()
 
         self.badges_dict: dict[str, dict[str, str]] = self.getTwitchBadges(OWNER_ID)
 
@@ -318,6 +320,7 @@ class MyComponent(commands.Component):
         ]  # Holds a list like : [str("Emote Name"), int(number of instance of this emote in a row)]
 
         self.shared_chat_users: list[user.PartialUser] = []
+        self.shared_chat: bool = False
         self.hype_train_level: int = -1
         self.hype_train_level_complete: float = 0
         self.start_time: datetime = datetime.now()
@@ -418,6 +421,18 @@ class MyComponent(commands.Component):
         res = req.json()
         self.access_token = res["access_token"]
 
+    def getStreamlabsSocketToken(self):
+        url = "https://streamlabs.com/api/v2.0/socket/token"
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {STREAMLABS_ACCESS_TOKEN}"
+        }
+
+        response = requests.get(url, headers=headers)
+
+        print(response.text)
+
     def getTwitchEmotes(self, broadcaster_id: str) -> dict[str, str]:
         emotes: dict[str, str] = {}
 
@@ -501,7 +516,6 @@ class MyComponent(commands.Component):
         return badges
 
     def getChatterColor(self, user_id: str) -> str:
-
         if user_id in self.colors.keys():
             return self.colors[user_id]
 
@@ -519,14 +533,14 @@ class MyComponent(commands.Component):
         )
 
         if not req.ok:
-            self.color[user_id] = color
+            self.colors[user_id] = color
             return color
 
         res = req.json()
 
         for user in res["data"]:
             color = user["color"] if user["color"] != "" else color
-            self.color[user_id] = color
+            self.colors[user_id] = color
             return color
 
         self.color[user_id] = color
@@ -1180,6 +1194,10 @@ class MyComponent(commands.Component):
         await ctx.reply(translation("commands.ai"))
 
     @commands.command()
+    async def team(self, ctx: commands.Context):
+        await ctx.reply(translation("commands.team"))
+
+    @commands.command()
     async def tts(self, ctx: commands.Context):
         if ctx.chatter.moderator or ctx.chatter.broadcaster: # type: ignore
             self.activate_tts = not self.activate_tts
@@ -1416,6 +1434,7 @@ class MyComponent(commands.Component):
 
         alert_message = {
             "type": "follow",
+            "id": str(uuid.uuid4()),
             "username": payload.user.display_name,
             "color": color,
             "time_to_live": 5,
@@ -1435,6 +1454,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "first_sub",
+                "id": str(uuid.uuid4()),
                 "username": payload.user.display_name,
                 "color": color,
                 "sub_type": sub_tier,
@@ -1483,6 +1503,7 @@ class MyComponent(commands.Component):
 
         alert_message = {
             "type": "resub",
+            "id": str(uuid.uuid4()),
             "username": payload.user.display_name,
             "message": payload.text,
             "amount": payload.months,
@@ -1523,6 +1544,7 @@ class MyComponent(commands.Component):
 
         alert_message = {
             "type": "gift_sub",
+            "id": str(uuid.uuid4()),
             "username": payload.user.display_name
             if payload.user is not None
             else "Anonymous",
@@ -1566,6 +1588,7 @@ class MyComponent(commands.Component):
 
         alert_message = {
             "type": "cheer",
+            "id": str(uuid.uuid4()),
             "username": payload.user.display_name
             if payload.user is not None
             else "Anonymous",
@@ -1747,9 +1770,9 @@ class MyComponent(commands.Component):
 
         if len(schedule) > 0:
             stream = schedule[0]
-            await ctx.broadcaster.modify_channel(title=translation("event.stream.offline.success").format(stream["title"], datetime.fromtimestamp(stream["time"]).strftime('%A %d at %H:%M')))
+            await payload.broadcaster.modify_channel(title=translation("event.stream.offline.success").format(stream["title"], datetime.fromtimestamp(stream["time"]).strftime('%A %d at %H:%M')))
         else:
-            await ctx.broadcaster.modify_channel(title=translation("event.stream.offline.fail"))
+            await payload.broadcaster.modify_channel(title=translation("event.stream.offline.fail"))
 
     @commands.Component.listener("event_hype_train")
     async def event_hype_train(self, payload: twitchio.HypeTrainBegin) -> None:
@@ -1777,6 +1800,7 @@ class MyComponent(commands.Component):
 
         alert_message = {
             "type": "hype_train_start",
+            "id": str(uuid.uuid4()),
             "is_shared": is_shared,
             "train_type": payload.type,
         }
@@ -1813,6 +1837,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "hype_train_level_up",
+                "id": str(uuid.uuid4()),
                 "is_shared": is_shared,
                 "train_type": payload.type,
                 "level": train_level,
@@ -1848,69 +1873,74 @@ class MyComponent(commands.Component):
         self, payload: twitchio.SharedChatSessionBegin
     ) -> None:
         print(translation("event.shared_chat.begin.print"))
-        channel = payload.broadcaster
-        host = payload.host
-        participants = payload.participants
-        participants_str = ""
-        for participant in participants:
-            if participant.id != host.id:
-                if participant not in self.shared_chat_users:
-                    self.shared_chat_users.append(participant)
-                participants_str += (
-                    f"{'' if len(participants_str) == 0 else ', '}{participant.display_name}"
-                )
-        await channel.send_message(
-            sender=BOT_ID,
-            message=translation("event.shared_chat.begin.message").format(host.display_name, participants_str),
-        )
+        self.shared_chat = True
+        if False:
+            channel = payload.broadcaster
+            host = payload.host
+            participants = payload.participants
+            participants_str = ""
+            for participant in participants:
+                if participant.id != host.id:
+                    if participant not in self.shared_chat_users:
+                        self.shared_chat_users.append(participant)
+                    participants_str += (
+                        f"{'' if len(participants_str) == 0 else ', '}{participant.display_name}"
+                    )
+            await channel.send_message(
+                sender=BOT_ID,
+                message=translation("event.shared_chat.begin.message").format(host.display_name, participants_str),
+            )
 
     @commands.Component.listener("event_shared_chat_update")
     async def event_shared_chat_update(
         self, payload: twitchio.SharedChatSessionUpdate
     ) -> None:
         print(translation("event.shared_chat.update.print"))
-        channel = payload.broadcaster
-        host = payload.host
-        participants = payload.participants
-        participants_str = ""
-        diff = len(self.shared_chat_users) - (len(participants) - 1)
-        if diff < 0:  # If a user was added
-            for participant in participants:
-                if participant.id != host.id:
-                    if participant not in self.shared_chat_users:
+        if False:
+            channel = payload.broadcaster
+            host = payload.host
+            participants = payload.participants
+            participants_str = ""
+            diff = len(self.shared_chat_users) - (len(participants) - 1)
+            if diff < 0:  # If a user was added
+                for participant in participants:
+                    if participant.id != host.id:
+                        if participant not in self.shared_chat_users:
+                            self.shared_chat_users.append(participant)
+                    participants_str += (
+                        f"{'' if len(participants_str) == 0 else ', '}{participant.display_name}"
+                    )
+                await channel.send_message(
+                    sender=BOT_ID,
+                    message=translation("event.shared_chat.update.message.added").format(host.display_name, abs(diff), participants_str),
+                )
+            else:  # If a user was removed
+                self.shared_chat_users = []
+                for participant in participants:
+                    if participant.id != host.id:
                         self.shared_chat_users.append(participant)
-                participants_str += (
-                    f"{'' if len(participants_str) == 0 else ', '}{participant.display_name}"
+                    participants_str += (
+                        f"{'' if len(participants_str) == 0 else ', '}{participant.display_name}"
+                    )
+                await channel.send_message(
+                    sender=BOT_ID,
+                    message=translation("event.shared_chat.update.message.removed").format(host.display_name, diff, participants_str),
                 )
-            await channel.send_message(
-                sender=BOT_ID,
-                message=translation("event.shared_chat.update.message.added").format(host.display_name, abs(diff), participants_str),
-            )
-        else:  # If a user was removed
-            self.shared_chat_users = []
-            for participant in participants:
-                if participant.id != host.id:
-                    self.shared_chat_users.append(participant)
-                participants_str += (
-                    f"{'' if len(participants_str) == 0 else ', '}{participant.display_name}"
-                )
-            await channel.send_message(
-                sender=BOT_ID,
-                message=translation("event.shared_chat.update.message.removed").format(host.display_name, diff, participants_str),
-            )
 
     @commands.Component.listener("event_shared_chat_end")
     async def event_shared_chat_end(
         self, payload: twitchio.SharedChatSessionEnd
     ) -> None:
         print(translation("event.shared_chat.end.print"))
-        channel = payload.broadcaster
-        host = payload.host
-        self.shared_chat_users = []
-        await channel.send_message(
-            sender=BOT_ID,
-            message=translation("event.shared_chat.end.message").format(host.display_name),
-        )
+        self.shared_chat = False
+        if False:
+            channel = payload.broadcaster
+            host = payload.host
+            self.shared_chat_users = []
+            await channel.send_message(
+                sender=BOT_ID,
+                message=translation("event.shared_chat.end.message").format(host.display_name),
+            )
 
     @commands.Component.listener()
     async def event_goal_begin(self, payload: twitchio.GoalBegin) -> None:
@@ -1993,6 +2023,7 @@ class MyComponent(commands.Component):
 
         alert_message = {
             "type": "raid",
+            "id": str(uuid.uuid4()),
             "color": self.getChatterColor(raider.id),
             "username": raider.display_name,
             "viewers": payload.viewer_count,
@@ -2135,6 +2166,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "channel_points",
+                "id": str(uuid.uuid4()),
                 "username": user.display_name,
                 "amount": reward_cost,
                 "message": "They are the 1st (frfr) to join the stream.",
@@ -2152,6 +2184,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "channel_points",
+                "id": str(uuid.uuid4()),
                 "username": user.display_name,
                 "amount": reward_cost,
                 "message": "It's time to drink some water!",
@@ -2286,6 +2319,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "channel_points",
+                "id": str(uuid.uuid4()),
                 "username": user.display_name,
                 "amount": reward_cost,
                 "title": reward_title,
@@ -2319,6 +2353,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "powerup",
+                "id": str(uuid.uuid4()),
                 "username": user.display_name,
                 "amount": powerup_cost,
                 "message": "They are the 1st (frfr) to join the stream.",
@@ -2337,6 +2372,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "powerup",
+                "id": str(uuid.uuid4()),
                 "username": user.display_name,
                 "amount": powerup_cost,
                 "message": user_input,
@@ -2355,6 +2391,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "powerup",
+                "id": str(uuid.uuid4()),
                 "username": user.display_name,
                 "amount": powerup_cost,
                 "message": "All of chat is allowed to backseat!",
@@ -2376,12 +2413,13 @@ class MyComponent(commands.Component):
         started_at = payload.started_at
         duration = self.roundToNNearest(payload.duration, 15)
 
-        if self.message_sent >= 5:
-            await channel.send_message(
-                sender=BOT_ID,
-                message=f"⚠️ A {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
-            )
-            self.message_sent = 0
+        if False:
+            if self.message_sent >= 5:
+                await channel.send_message(
+                    sender=BOT_ID,
+                    message=f"⚠️ A {self.format_time_since(datetime.fromtimestamp(started_at.timestamp() + duration), datetime.now())} ad break has started. ⚠️",
+                )
+                self.message_sent = 0
 
     @commands.Component.listener("event_chat_notification")
     async def event_chat_notification(self, payload: twitchio.ChatNotification) -> None:
@@ -2395,6 +2433,7 @@ class MyComponent(commands.Component):
 
             alert_message = {
                 "type": "watch_streak",
+                "id": str(uuid.uuid4()),
                 "username": user.display_name,
                 "amount": payload.watch_streak.streak,
                 "color": color,

@@ -19,6 +19,7 @@
             crossorigin="anonymous"
         ></script>
         <script src="{{ url_for('static', filename='string_format.js') }}"></script>
+        <script src="{{ url_for('static', filename='env.js') }}"></script>
         <script type="text/javascript" charset="utf-8">
 
             //based on month of sub
@@ -73,6 +74,7 @@
                 gift_sub:
                     "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_80112d39a08b4ee78d778cdb7500a617/default/dark/3.0", // thefox91StareSlide
                 cheer: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_3e45798a8d5846d0b8074faae196c128/default/dark/3.0", // thefox91Money
+                donation: "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_3e45798a8d5846d0b8074faae196c128/default/dark/3.0", // thefox91Money
                 hype_train_start:
                     "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_b122a699fc1e4343b33de09ba057e295/default/dark/3.0", // thefox91ChatArrive
                 hype_train_level_up:
@@ -118,6 +120,9 @@
 
                 let isAlertPlaying = false;
 
+                const alert_box_main =
+                    document.getElementById("alert_box");
+
                 const alert_box_text =
                     document.getElementById("alert_box_text");
 
@@ -127,18 +132,24 @@
 
                 const alert_box_img = document.getElementById("alert_box_img");
 
-                function resetAlert() {
+                function resetAlert(force, id) {
+                    if (!force){
+                        if (id !== alert_box_main.dataset.id) return;
+                    }
                     alert_box_img.src = "";
                     alert_box_text.textContent = "";
                     alert_box_chat_message.textContent = "";
+                    alert_box_main.dataset.id = ""
                 }
 
                 function triggerAlert(alert) {
 
-                    resetAlert();
+                    resetAlert(true, null);
 
                     console.log(lang_alerts.console.now_playing + alert.type);
                     console.log(alert);
+
+                    alert_box_main.dataset.id = alert.id;
 
                     const lang_alert_type = lang_alerts[alert.type]
 
@@ -257,6 +268,26 @@
 
                         alert_box_text.appendChild(
                             document.createTextNode(lang_alert_type.post_cheer),
+                        );
+                    } else if (alert.type === "donation") {
+                        alert_box_text.appendChild(
+                            document.createTextNode(lang_alert_type.pre_user),
+                        );
+
+                        alert_box_text.appendChild(user);
+
+                        alert_box_text.appendChild(
+                            document.createTextNode(lang_alert_type.post_user),
+                        );
+
+                        const donation_amount = document.createElement("span");
+                        donation_amount.textContent = alert.amount;
+                        donation_amount.style.color = alert.color;
+
+                        alert_box_text.appendChild(donation_amount);
+
+                        alert_box_text.appendChild(
+                            document.createTextNode(lang_alert_type.post_donation),
                         );
                     } else if (alert.type === "hype_train_start") {
                         alert_box_text.appendChild(
@@ -472,7 +503,7 @@
                     const time_for_alerts = alert.time_to_live ? alert.time_to_live : 5 // Make the alert at least as long as the TTS message if there's one, otherwise 5s
 
                     setTimeout(() => {
-                        resetAlert();
+                        resetAlert(false, alert.id);
                     }, time_for_alerts * 1000);
                 }
 
@@ -488,6 +519,25 @@
 
                     triggerAlert(msg);
                 });
+
+                const streamlabs = io(`https://sockets.streamlabs.com?token=${getSocketToken()}`, {transports: ['websocket']});
+
+                streamlabs.on('event', (eventData) => {
+                    if (eventData.for == "streamlabs" && eventData.type === 'donation') {
+
+                      const payload = eventData.message[0];
+                      const alert = {
+                          "type": "donation",
+                          "id": payload["_id"],
+                          "username": payload.from,
+                          "message": payload.message,
+                          "amount": "€" + payload.amount,
+                          "color": "#00ff00",
+                          "time_to_live": 3+Math.min(Math.round(payload.amount/2), 17)
+                      };
+                      triggerAlert(alert);
+                    }
+                  });
             });
         </script>
     </head>
