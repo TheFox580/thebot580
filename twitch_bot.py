@@ -421,18 +421,6 @@ class MyComponent(commands.Component):
         res = req.json()
         self.access_token = res["access_token"]
 
-    def getStreamlabsSocketToken(self):
-        url = "https://streamlabs.com/api/v2.0/socket/token"
-
-        headers = {
-            "accept": "application/json",
-            "Authorization": f"Bearer {STREAMLABS_ACCESS_TOKEN}"
-        }
-
-        response = requests.get(url, headers=headers)
-
-        print(response.text)
-
     def getTwitchEmotes(self, broadcaster_id: str) -> dict[str, str]:
         emotes: dict[str, str] = {}
 
