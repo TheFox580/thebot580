@@ -522,27 +522,6 @@
 
                     triggerAlert(msg);
                 });
-
-                const streamlabs = io(`https://sockets.streamlabs.com?token=${getSocketToken()}`, {transports: ['websocket']});
-
-                streamlabs.on('event', (eventData) => {
-                    if (eventData.for == "streamlabs" && eventData.type === 'donation') {
-                        const payload = eventData.message[0];
-
-                        console.log(payload);
-                        const alert = {
-                            "type": "donation",
-                            "id": payload["_id"],
-                            "username": payload.from,
-                            "message": payload.message,
-                            "amount": payload.amount,
-                            "currency": payload.formattedAmount.split(/\d/)[0],
-                            "color": "#00ff00",
-                            "time_to_live": Math.max(3, Math.min(Math.round(payload.amount/2), 10))
-                        };
-                        triggerAlert(alert);
-                    }
-                });
             });
         </script>
     </head>

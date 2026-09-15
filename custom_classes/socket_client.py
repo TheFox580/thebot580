@@ -6,10 +6,15 @@ class SocketClient:
 
         @self.client.event
         def connect():
-            print("Sucessfully connected")
+            print(f"Sucessfully connected to {self.url}")
 
-    def connect(self):
-        self.client.connect("http://localhost:5000")
+    def connect(self, url: str, transports: list[str] = []):
+        self.url = url
+        print(f"Connecting to {self.url}")
+        if (len(transports) > 0):
+            self.client.connect(url=url, transports=transports)
+        else:
+            self.client.connect(url=url)
 
     def send(self, room: str, data: dict):
         if not self.client.connected:

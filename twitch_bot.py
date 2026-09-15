@@ -15,9 +15,10 @@ import twitchio
 from twitchio import eventsub, user, web
 from twitchio.ext import commands
 
-import mcci
-import mongo
-import socket_client
+from custom_classes.donation_payload import DonationPayload
+import custom_classes.mcci as mcci
+import custom_classes.mongo as mongo
+import custom_classes.socket_client as socket_client
 from audio_player import AudioManager
 from keys import (
     AZURE_TTS_VOICE,
@@ -26,13 +27,13 @@ from keys import (
     LANG,
     MONGODB_URL,
     OWNER_ID,
-    STREAMLABS_ACCESS_TOKEN,
+    STREAMLABS_SOCKET_TOKEN,
     TWITCH_BOT_CLIENT_ID,
     TWITCH_BOT_CLIENT_SECRET,
     HTTP_PORT_MAIN
 )
-from obs_websockets import OBSWebsocketsManager
-from tts import TTSManager
+from custom_classes.obs_websockets import OBSWebsocketsManager
+from custom_classes.tts import TTSManager
 from banned_words import getBannedWords
 
 tts_manager = TTSManager(AZURE_TTS_VOICE)
@@ -295,8 +296,6 @@ class MyComponent(commands.Component):
         self.banned_words = getBannedWords()
         self.bot = bot
 
-        self.socket = socket_client.SocketClient()
-
         self.getAccessToken()
 
         self.emotes_dict: dict[
@@ -340,7 +339,12 @@ class MyComponent(commands.Component):
         #    {"$set": {"user_id": OWNER_ID, "messages": []}},
         # )
 
-        self.socket.send("start", {"Bot": True})
+        self.overlay_socket = socket_client.SocketClient()
+        self.overlay_socket.connect("http://localhost:5000")
+
+        self.setup_streamlabs()
+
+        self.overlay_socket.send("start", {"Bot": True})
 
     async def getStreamerUser(self):
         self.streamer = await self.bot.fetch_user(id=OWNER_ID)
@@ -534,6 +538,35 @@ class MyComponent(commands.Component):
         self.color[user_id] = color
         return color
 
+    def setup_streamlabs(self):
+
+        self.streamlabs_socket = socket_client.SocketClient()
+        self.streamlabs_socket.connect(f"https://sockets.streamlabs.com?token={STREAMLABS_SOCKET_TOKEN}", transports=["websocket"])
+
+        @self.streamlabs_socket.client.on("event")
+        def event(data):
+            if data["type"] == "donation":
+                payload: DonationPayload = DonationPayload(data["message"][0])
+
+                message = payload.message
+
+                alert_message = {
+                    "type": payload.type,
+                    "id": payload.id,
+                    "username": payload.name,
+                    "message": payload.message,
+                    "amount": payload.amount,
+                    "currency": payload.currency,
+                    "color": payload.color,
+                    "time_to_live": payload.time_to_live,
+                }
+
+                self.alerts_queue.append((message, alert_message))
+
+                if not self.currently_playing_tts:
+                    self.play_tts_queue(obswebsockets_manager.is_connected() if payload.receiver == "thefox580" else False)
+
+
     def getEmoteList(self) -> list[str]:
         emotes_list: list[str] = []
         for emotes in self.emotes_dict.values():
@@ -701,7 +734,8 @@ class MyComponent(commands.Component):
                     obswebsockets_manager.set_source_visibility("Bots", "TTS Queue", True)
 
             alert_message: tuple[str, dict] = self.alerts_queue.pop(0)
-            obswebsockets_manager.set_text("TTS Queue", translation("functions.play_tts_queue.tts_queue").format(self.getTTSQueueLength()))
+            if obswebsockets_manager.connected:
+                obswebsockets_manager.set_text("TTS Queue", translation("functions.play_tts_queue.tts_queue").format(self.getTTSQueueLength()))
 
             tts_message = alert_message[0]
             socket_message = alert_message[1]
@@ -714,7 +748,7 @@ class MyComponent(commands.Component):
 
             socket_message["time_to_live"] = tts_length
 
-            self.socket.send("new_alert_bot", socket_message)
+            self.overlay_socket.send("new_alert_bot", socket_message)
 
             print(translation("functions.play_tts_queue.playing_message").format(tts_message))
             audio_manager.play_audio(tts_file, sleep_during_playback=False, play_using_music=True)
@@ -744,7 +778,8 @@ class MyComponent(commands.Component):
                     obswebsockets_manager.set_source_visibility("Bots", "TTS Queue", True)
 
             tts_message = self.tts_queue.pop(0)
-            obswebsockets_manager.set_text("TTS Queue", translation("functions.play_tts_queue.tts_queue").format(self.getTTSQueueLength()))
+            if obswebsockets_manager.connected:
+                obswebsockets_manager.set_text("TTS Queue", translation("functions.play_tts_queue.tts_queue").format(self.getTTSQueueLength()))
 
             # Send Twitch message to Azure to turn into cool audio
             tts_file = tts_manager.text_to_speech(tts_message)
@@ -752,7 +787,7 @@ class MyComponent(commands.Component):
 
             tts_length = audio_manager.get_audio_length(tts_file)
 
-            # self.socket.send("new_tts_bot", {
+            # self.overlay_socket.send("new_tts_bot", {
             #     "tts_loc": tts_file,
             #     "text": tts_message,
             #     "duration": tts_length,
@@ -1020,7 +1055,7 @@ class MyComponent(commands.Component):
                     "shared_chat_pfp": source_broadcaster_pfp_url,
                 }
 
-                self.socket.send("new_message_bot", message)
+                self.overlay_socket.send("new_message_bot", message)
 
         if banned_message:
             await self.ban_user(user=payload.chatter, reason=translation("event.message.ban"))
@@ -1329,12 +1364,12 @@ class MyComponent(commands.Component):
     @commands.is_broadcaster()
     async def trigger(self, ctx: commands.Context, *, content: str):
         # !trigger alert {"type": "follow", "username": "thefox580"}
-        # self.socket.send("alert", {"type": "follow", "username": "thefox580"})
+        # self.overlay_socket.send("alert", {"type": "follow", "username": "thefox580"})
 
         channel = content.split()[0]
         message = content.split(channel + " ")[1]
 
-        self.socket.send(channel, json.loads(message))
+        self.overlay_socket.send(channel, json.loads(message))
 
         await ctx.reply("Sent custom trigger")
 
@@ -1441,7 +1476,7 @@ class MyComponent(commands.Component):
             "time_to_live": 5,
         }
 
-        self.socket.send("new_alert_bot", alert_message)
+        self.overlay_socket.send("new_alert_bot", alert_message)
 
     @commands.Component.listener("event_subscription")
     async def event_subscription(self, payload: twitchio.ChannelSubscribe) -> None:
@@ -2031,7 +2066,7 @@ class MyComponent(commands.Component):
             "time_to_live": 10,
         }
 
-        self.socket.send("new_alert_bot", alert_message)
+        self.overlay_socket.send("new_alert_bot", alert_message)
 
     @commands.Component.listener("event_channel_update")
     async def event_channel_update(self, payload: twitchio.ChannelUpdate) -> None:
@@ -2178,7 +2213,7 @@ class MyComponent(commands.Component):
                 "time_to_live": 5,
             }
 
-            self.socket.send("new_alert_bot", alert_message)
+            self.overlay_socket.send("new_alert_bot", alert_message)
 
         elif reward_title == "Water":
             color = self.getChatterColor(user.id)
@@ -2194,7 +2229,7 @@ class MyComponent(commands.Component):
                 "time_to_live": 5,
             }
 
-            self.socket.send("new_alert_bot", alert_message)
+            self.overlay_socket.send("new_alert_bot", alert_message)
 
         elif reward_title == "Change Message Text Color":
             if self.checkHTMLColor(user_input) != "":
@@ -2328,7 +2363,7 @@ class MyComponent(commands.Component):
                 "time_to_live": 3,
             }
 
-            self.socket.send("new_alert_bot", alert_message)
+            self.overlay_socket.send("new_alert_bot", alert_message)
 
     @commands.Component.listener("event_custom_power_up_redemption_add")
     async def event_custom_power_up_redemption_add(self, payload: twitchio.CustomPowerupRedemptionAdd) -> None:
