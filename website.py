@@ -30,6 +30,10 @@ class Website:
         def alert_box():
             return render_template("alert_box.html")
 
+        @self.app.route("/info")
+        def info():
+            return render_template("info.html")
+
         @self.app.route("/test/<type>", methods = ["POST"])
         def test_endpoint(type):
 
@@ -72,6 +76,14 @@ class Website:
             for key, value in data.items():
                 if value is True:
                     print(f"{key} has started")
+
+        @self.socketio.on("sub_info")
+        def sub_info_req(data):
+            self.socketio.emit("sub_info_bot", data)
+
+        @self.socketio.on("sub_info_overlay")
+        def sub_info_res(data):
+            self.socketio.emit("sub_info_receive", data)
 
         @self.socketio.on("*")
         def any_event(event, data):
