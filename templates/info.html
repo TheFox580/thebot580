@@ -4,39 +4,66 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <script
           src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
           integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
           crossorigin="anonymous"
         ></script>
         <script type="text/javascript" charset="utf-8">
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+
+          const fetch_lang = await fetch("/lang");
+          const lang = (await fetch_lang.json())["lang"];
+
+          const fetch_lang_file = await fetch(`/lang/${lang}.json`);
+          const lang_file = await fetch_lang_file.json();
+
+          const lang_chat = lang_file.chat;
+
+          const switch_interval = 10;
+
+          const title = document.getElementById("title");
+          title.textContent = await (await fetch(`/static/infos.txt`)).text();
 
           const socket = io();
 
+          let sub_info = {};
+
           socket.on("message_send", (payload, cb) => {
-            //console.log(lang_chat.console.got_data + payload.message);
+            console.log(lang_chat.console.got_data + payload.message);
           });
 
           socket.on("sub_info_receive", (payload, cb) => {
-            //console.log(lang_chat.console.got_data + payload.message);
+            console.log(lang_chat.console.got_data + "Received sub info");
+            sub_info = payload;
           });
-
-          socket.emit("sub_info", {});
 
           let mode = "title";
 
         setInterval(() => {
 
-          const isNewMinute = new Date().getSeconds() === 0
+          const time_to_switch = new Date().getSeconds() % switch_interval == 0;
+          socket.emit("sub_info", {});
 
-          if (isNewMinute){
+          if (time_to_switch){
+
+            title.style.left = -window.innerWidth + "px";
+
             if (mode === "title") {
-              document.getElementById("title").textContent = "Subgoal: 3/10";
               mode = "subgoal";
+
+              setTimeout(() => {
+                  title.textContent = `Subgoal: ${sub_info.sub_count ?? 0}/${sub_info.total_sub_count ?? 0}`;
+                  title.style.left = 0;
+              }, 1000);
             } else {
-              document.getElementById("title").textContent = "Some random infos";
               mode = "title";
+
+              setTimeout(async () => {
+                  title.textContent = await (await fetch(`/static/infos.txt`)).text();
+                  title.style.left = 0;
+              }, 1000);
             }
           }
 
@@ -46,6 +73,12 @@
     </head>
 
     <body>
-        <span id="title">Some random infos</span>
+        <div class="text-white text-6xl font-bold">
+            <span
+                class="fixed"
+                id="title"
+                style="-webkit-text-stroke: 6px black; transition: 1s; left: 0;">Initializing
+            </span>
+        </div>
     </body>
 </html>

@@ -541,19 +541,13 @@ class MyComponent(commands.Component):
         @self.overlay_socket.client.on("sub_info_bot")
         def sub_info(data):
 
-            headers = {
-                "Authorization": f"Bearer {self.access_token}",
-                "Client-Id": TWITCH_BOT_CLIENT_ID,
-            }
+            with open("C:/Users/ash\Documents/Streamlabels/total_subscriber_count.txt", "r") as sub_count_file:
+                subgoal = sub_count_file.readline()
+                sub_count_file.close()
 
-            req = requests.get(f"https://api.twitch.tv/helix/subscriptions?broadcaster_id={OWNER_ID}", headers=headers)
+            subgoal = subgoal.split(" ")[1]
 
-            if req.ok:
-                print(req.json())
-            else:
-                print(req.reason)
-
-            self.overlay_socket.send("sub_info_overlay", {"sub_count": 3})
+            self.overlay_socket.send("sub_info_overlay", {"sub_count": subgoal.split("/")[0], "total_sub_count": subgoal.split("/")[1]})
 
 
         self.overlay_socket.send("start", {"Bot": True})
