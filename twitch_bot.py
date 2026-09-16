@@ -580,10 +580,12 @@ class MyComponent(commands.Component):
         return time*n
 
     def treat_message(self, message: str, cheer: bool = False) -> str:
-        final_message = ""
+        if len(word.replace(">", "")) == 0:
+            return ""
         if not cheer:
             if "Cheer" in message:  # If the message is being treated as a non cheer message and has "Cheer" in it, just don't read it
                 return ""
+        final_message = ""
         messageList = message.split()
         for word in messageList:
             word = word.replace("_", " ")
