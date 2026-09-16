@@ -36,7 +36,7 @@ from custom_classes.obs_websockets import OBSWebsocketsManager
 from custom_classes.tts import TTSManager
 from banned_words import getBannedWords
 
-tts_manager = TTSManager(AZURE_TTS_VOICE)
+#tts_manager = TTSManager(AZURE_TTS_VOICE)
 audio_manager = AudioManager()
 obswebsockets_manager = OBSWebsocketsManager()
 
@@ -329,7 +329,7 @@ class MyComponent(commands.Component):
         self.alerts_queue: list[tuple[str, dict]] = []
         self.currently_playing_tts: bool = False
         self.message_sent: int = 0
-        self.db: mongo.Database = mongo.Database(MONGODB_URL)
+        #self.db: mongo.Database = mongo.Database(MONGODB_URL)
         self.streamer = None
         self.colors: dict[str, str] = {}
         # self.db.update(
@@ -339,12 +339,8 @@ class MyComponent(commands.Component):
         #    {"$set": {"user_id": OWNER_ID, "messages": []}},
         # )
 
-        self.overlay_socket = socket_client.SocketClient()
-        self.overlay_socket.connect("http://localhost:5000")
-
+        self.setup_website()
         self.setup_streamlabs()
-
-        self.overlay_socket.send("start", {"Bot": True})
 
     async def getStreamerUser(self):
         self.streamer = await self.bot.fetch_user(id=OWNER_ID)
@@ -537,6 +533,30 @@ class MyComponent(commands.Component):
 
         self.color[user_id] = color
         return color
+
+    def setup_website(self):
+        self.overlay_socket = socket_client.SocketClient()
+        self.overlay_socket.connect("http://localhost:5000")
+
+        @self.overlay_socket.client.on("sub_info_bot")
+        def sub_info(data):
+
+            headers = {
+                "Authorization": f"Bearer {self.access_token}",
+                "Client-Id": TWITCH_BOT_CLIENT_ID,
+            }
+
+            req = requests.get(f"https://api.twitch.tv/helix/subscriptions?broadcaster_id={OWNER_ID}", headers=headers)
+
+            if req.ok:
+                print(req.json())
+            else:
+                print(req.reason)
+
+            self.overlay_socket.send("sub_info_overlay", {"sub_count": 3})
+
+
+        self.overlay_socket.send("start", {"Bot": True})
 
     def setup_streamlabs(self):
 
