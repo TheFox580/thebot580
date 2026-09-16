@@ -13,6 +13,15 @@
       .bigChatMessage {
           background-color: rgba(0, 0, 0, 1);
       }
+
+      .transition {
+          top: 0;
+          transition: 1s;
+      }
+
+      .transition.active {
+          top: 0;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
@@ -61,7 +70,7 @@
       const emoteSize = 36;
 
       const hideChat = true;
-      const hideChatAfter = 30;
+      const hideChatAfter = 10*60;
 
       document.addEventListener("DOMContentLoaded", async () => {
         const all_pronouns = await getPronouns();
@@ -75,6 +84,10 @@
         const lang_chat = lang_file.chat;
 
         const socket = io();
+
+        const chatbox = document.getElementById("chatbox");
+        const hidden_chatbox = document.getElementById("hidden_chatbox");
+        const transition_chatbox = document.getElementById("transition_chatbox");
 
         socket.on("message_send", (payload, cb) => {
           console.log(lang_chat.console.got_data + payload.message);
@@ -101,8 +114,6 @@
           }
 
           console.log(payload);
-
-          const chatbox = document.getElementById("chatbox");
 
           //Max 20 message
 
@@ -322,6 +333,8 @@
           chatMessageContent.classList.add(
               "text-white",
               "text-center",
+              "text-wrap",
+              "wrap-anywhere",
               "mr-1",
               bottomSize,
           );
@@ -376,12 +389,33 @@
 
           chatMessage.appendChild(chatMessagetText);
 
-          chatbox.appendChild(chatMessage);
+          hidden_chatbox.appendChild(chatMessage);
+
+          transition_chatbox.style.transition = `0s`;
+
+          setTimeout(() => {
+            const bottom = window.innerHeight*2;
+            let rect = chatMessage.getBoundingClientRect();
+
+            const size = bottom - rect.top;
+
+            transition_chatbox.style.top = `${size}px`;
+
+            chatbox.appendChild(chatMessage);
+
+          }, 1);
+
+          setTimeout(() => {
+              transition_chatbox.style.transition = `0.5s`;
+              transition_chatbox.style.top = `0`;
+          }, 20);
 
           if (hideChat){
 
             setTimeout(() => {
               let transparancy = 1;
+
+              console.log("After :" + chatMessage.offsetHeight);
               const transparent = setInterval(() => {
 
                   if (transparancy <= 0){
@@ -428,10 +462,16 @@
   });
   </script>
   </head>
-  <body class="w-screen h-screen items-center justify-center">
-    <div
-      class="w-full h-full flex flex-col items-center justify-end"
-      id="chatbox"
-    ></div>
+  <body class="w-screen h-screen items-center justify-center overflow-hidden">
+    <div style="transition: 1s;"class="fixed w-full h-full" id="transition_chatbox">
+        <div
+          class="w-full h-full flex flex-col items-center justify-end"
+          id="chatbox"
+        ></div>
+        <div
+          class="h-full flex flex-col items-center justify-end"
+          id="hidden_chatbox"
+        ></div>
+    </div>
   </body>
 </html>
